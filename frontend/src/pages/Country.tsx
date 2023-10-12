@@ -15,7 +15,7 @@ interface IState {
 const Country: React.FC = () => {
   const [user, setUser] = useState<IState[]>([])
   const [modalStates, setModalStates] = useState({update: false, show: false, countryInfo: ''})
-  const [option, set_option] = useState({sizePerPage: 3, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
+  const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
 
   const columns = [
     {

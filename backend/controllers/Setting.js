@@ -8,8 +8,8 @@ exports.getSettingData = asyncHandler(async (req, res, next) => {
 });
 
 exports.updateSettingApp = asyncHandler(async (req, res, next) => {
- const { app_name, default_diamond, amount_per_diamond, currency, min_threshold, min_diamonds_charge_for_going_live, watch_ad_diamond, user_message_charge, host_message_charge, host_call_charge, host_live_Percentage, minimumMinuts, chargeForLive, max_live_time, max_live_private_time, agora_app_id, agora_app_cert, _id, match_call_coin, match_call_second, max_fake_live_hosts, fake_host_vidoe_from } = req.body;
- const result = await App.updateOne({ _id }, { $set: { app_name, default_diamond, amount_per_diamond, currency, min_threshold, min_diamonds_charge_for_going_live, watch_ad_diamond, user_message_charge, agora_app_id, agora_app_cert, host_message_charge, host_call_charge, host_live_Percentage, minimumMinuts, chargeForLive, max_live_time, max_live_private_time, match_call_coin, match_call_second, max_fake_live_hosts, fake_host_vidoe_from } });
+ const { app_name, default_diamond, amount_per_diamond, currency, min_threshold, min_diamonds_charge_for_going_live, watch_ad_diamond, user_message_charge, host_message_charge, host_call_charge, host_live_Percentage, minimumMinuts, chargeForLive, max_live_time, max_live_private_time, agora_app_id, agora_app_cert, _id, match_call_coin, match_call_second, max_fake_live_hosts, fake_host_vidoe_from, liveSwitch } = req.body;
+ const result = await App.updateOne({ _id }, { $set: { app_name, default_diamond, amount_per_diamond, currency, min_threshold, min_diamonds_charge_for_going_live, watch_ad_diamond, user_message_charge, agora_app_id, agora_app_cert, host_message_charge, host_call_charge, host_live_Percentage, minimumMinuts, chargeForLive, max_live_time, max_live_private_time, match_call_coin, match_call_second, max_fake_live_hosts, fake_host_vidoe_from, liveSwitch } });
  return giveresponse(res, 200, true, "settings updated");
 });
 

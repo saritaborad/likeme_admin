@@ -1,5 +1,4 @@
 import {useEffect, useState} from 'react'
-import RtdDatatable from '../Common/DataTable/DataTable'
 import {completeRedeem, fetchAllRedeems, rejectRedeem} from '../ApiService/_requests'
 import {useAllAgent} from '../hooks/customHook'
 import moment from 'moment'

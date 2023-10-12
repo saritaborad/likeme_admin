@@ -57,7 +57,22 @@
 
 .table-custom-info tbody tr:hover {
 	background-color: #fafafb;
-	
+}
+
+.table-custom-info tbody td:first-child {
+	padding-left: 15px;
+}
+
+.table-custom-info  th:first-child {
+	padding-left: 15px;
+}
+
+.table-custom-info tbody td:last-child {
+	padding-right: 15px;
+}
+
+.table-custom-info  th:last-child {
+	padding-right: 15px;
 }
 
 .custom-select-label {
@@ -219,11 +234,11 @@
 }
 
 .table-custom-info thead th:last-child {
-	text-align: center;
+	text-align: left;
 }
 
 .table-custom-info tbody td:last-child {
-	text-align: center;
+	text-align: left;
 }
 
 .cust-drop-down .btn {

@@ -76,14 +76,14 @@ const AddFakeUser: React.FC = () => {
                   initialValues={{
                     fullName: '',
                     age: '',
-                    country: '',
+                    country_id: '',
                     bio: '',
                     about: '',
                   }}
                   validationSchema={Yup.object({
                     fullName: Yup.string().required('required.'),
                     age: Yup.number().required('required.'),
-                    country: Yup.string().required('required.'),
+                    country_id: Yup.string().required('required.'),
                     bio: Yup.string().required('required.'),
                     about: Yup.string().required('required.'),
                   })}
@@ -107,7 +107,7 @@ const AddFakeUser: React.FC = () => {
                         </div>
                         <div className='form-group col-md-4'>
                           <label htmlFor='contry'> Country</label>
-                          <select className='form-control mt-2' name='country' id='agent-contry_add' {...formAttr(runform, 'country')}>
+                          <select className='form-control mt-2' name='country_id' id='agent-contry_add' {...formAttr(runform, 'country_id')}>
                             <option value='' disabled>
                               select country
                             </option>
@@ -120,7 +120,7 @@ const AddFakeUser: React.FC = () => {
                                 )
                               })}
                           </select>
-                          {errorContainer(runform, 'country')}
+                          {errorContainer(runform, 'country_id')}
                         </div>
                       </div>
                       <div className='row mt-6'>

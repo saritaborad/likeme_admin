@@ -10,6 +10,7 @@ interface IPROPS {
 
 const FakeMsg: React.FC<IPROPS> = ({submitFormData, appModalClose}) => {
   const [show, setShow] = useState(false)
+  const [imgUrl, setImgUrl] = useState<any>()
 
   return (
     <div>
@@ -62,9 +63,21 @@ const FakeMsg: React.FC<IPROPS> = ({submitFormData, appModalClose}) => {
                     <div className='d-flex flex-column mt-5' id='img-add-messag'>
                       <label>Select Images Only</label>
                       <label htmlFor='imagefile_message'>
-                        <img height={120} width={120} className='MessageCheatFile mt-2' id='MessageCheatFile' src={'https://likeme.live/assets/img/default.png'} />
+                        <img height={120} width={120} className='MessageCheatFile mt-2' id='MessageCheatFile' src={imgUrl ? URL.createObjectURL(imgUrl) : 'https://likeme.live/assets/img/default.png'} />
                       </label>
-                      <input type='file' name='title' required id='imagefile_message' className='imagefile_message ' accept='image/x-png,image/jpeg,application/pdf' hidden />
+                      <input
+                        type='file'
+                        name='title'
+                        required
+                        id='imagefile_message'
+                        className='imagefile_message '
+                        accept='image/x-png,image/jpeg,application/pdf'
+                        hidden
+                        onChangeCapture={(e: React.ChangeEvent<HTMLInputElement>) => {
+                          setImgUrl(e.target.files?.[0] || null)
+                          runform.setFieldValue('title', e.target.files?.[0])
+                        }}
+                      />
                     </div>
                   )}
                 </div>

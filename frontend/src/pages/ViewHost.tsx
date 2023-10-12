@@ -1,7 +1,6 @@
 import React, {useState, useEffect} from 'react'
-import RtdDatatable from '../Common/DataTable/DataTable'
-import {blockUnblockHost, deleteImageById, deleteVideoById, fetchHostImages, fetchHostVideos, hostById, hostUpdate} from '../ApiService/_requests'
-import {useLocation} from 'react-router-dom'
+import {RejectHost, blockUnblockHost, deleteImageById, deleteVideoById, fetchHostImages, fetchHostVideos, hostById, hostUpdate, makeHost} from '../ApiService/_requests'
+import {useLocation, useNavigate} from 'react-router-dom'
 import {ImgUrl} from '../const'
 import {Modal} from 'react-bootstrap'
 import AddImage from '../Modals/AddImage'
@@ -12,6 +11,7 @@ import * as Yup from 'yup'
 import {errorContainer, formAttr} from '../commonFun'
 import {useAllAgent, useAllCountry} from '../hooks/customHook'
 import AddVideo from '../Modals/AddVideo'
+import RtdDatatableNew from '../Common/DataTable/DataTableNew'
 
 const ViewHost: React.FC = () => {
   const [user, setUser] = useState([])
@@ -26,17 +26,10 @@ const ViewHost: React.FC = () => {
   const {state}: any = useLocation()
   const agents = useAllAgent()
   const country = useAllCountry()
+  const navigate = useNavigate()
 
-  const [option, set_option] = useState({
-    sizePerPage: 10,
-    totalRecord: 10,
-    page: 1,
-    sort: 'createdAt',
-    order: 'ASC',
-    entries: true,
-    showSearch: false,
-    checkbox: false,
-  })
+  const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'desc'})
+  const [option2, set_option2] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'desc'})
 
   const columns = [
     {
@@ -81,20 +74,22 @@ const ViewHost: React.FC = () => {
 
   useEffect(() => {
     if (state) {
-      getAllImage(state.hostData._id)
-      getAllVideo(state.hostData._id)
+      getAllImage(option, state.hostData._id)
+      getAllVideo(option, state.hostData._id)
       getHost(state.hostData._id)
     }
   }, [state.hostData._id])
 
-  const getAllImage = async (_id: string) => {
-    const {data} = await fetchHostImages(_id)
+  const getAllImage = async (option?: any, _id?: string) => {
+    const {data} = await fetchHostImages({options: option, _id: _id})
     setImages(data.data)
+    set_option({...option, totalRecord: data.totalRecord})
   }
 
-  const getAllVideo = async (_id: string) => {
-    const {data} = await fetchHostVideos(_id)
+  const getAllVideo = async (option?: any, _id?: string) => {
+    const {data} = await fetchHostVideos({options: option, _id: _id})
     setVideos(data.data)
+    set_option2({...option, totalRecord: data.totalRecord})
   }
 
   const getHost = async (_id: string) => {
@@ -105,13 +100,25 @@ const ViewHost: React.FC = () => {
   const deleteImage = async (_id: string) => {
     const {data} = await deleteImageById(_id)
     data.status === 200 ? toast.success(data.message) : toast.error(data.message)
-    getAllImage(state.hostData._id)
+    getAllImage(option, state.hostData._id)
   }
 
   const deleteVideo = async (_id: string) => {
     const {data} = await deleteVideoById(_id)
     data.status === 200 ? toast.success(data.message) : toast.error(data.message)
-    getAllVideo(state.hostData._id)
+    getAllVideo(option, state.hostData._id)
+  }
+
+  const makeHostById = async () => {
+    const {data} = await makeHost(hostData?._id)
+    data.status == 200 ? toast.success(data.message) : toast.error(data.message)
+    navigate('/hostapps')
+  }
+
+  const RejectHostApp = async () => {
+    const {data} = await RejectHost(hostData?._id)
+    data.status == 200 ? toast.success(data.message) : toast.error(data.message)
+    navigate('/hostapps')
   }
 
   const handleBlockUnblock = async () => {
@@ -130,6 +137,12 @@ const ViewHost: React.FC = () => {
 
   const tableCallBack = (option: any) => {
     set_option(option)
+    getAllImage(option)
+  }
+
+  const tableCallBack2 = (option: any) => {
+    set_option2(option)
+    getAllVideo(option)
   }
 
   const handleDrop = (updatedData: any) => {
@@ -143,11 +156,25 @@ const ViewHost: React.FC = () => {
         <div className='card-shadow mt-8'>
           <div className='card'>
             <div className='card-header d-flex align-items-center'>
-              <h4>{hostData?.fullName}</h4>
-              <span className='badge badge-pill badge-success badge-shadow'>{hostData?.is_fake == 1 ? 'Fake' : 'Real'}</span>
-              <button id='unblock' className={`${hostData?.is_block == 1 ? 'btn btn-success' : 'btn btn-danger'} text-white`} onClick={handleBlockUnblock}>
-                {hostData?.is_block == 1 ? 'Unblock' : 'Block'}
-              </button>
+              <div className='d-flex align-items-center '>
+                <h4 className='mt-2'>{hostData?.fullName}</h4>
+                <span className='badge badge-success ms-4'>{hostData?.is_fake == 1 ? 'Fake' : 'Real'}</span>
+              </div>
+              <div>
+                {state?.show && (
+                  <>
+                    <button className='badge badge-success text-white me-2 p-3' onClick={makeHostById}>
+                      Make Host
+                    </button>
+                    <button className='badge badge-danger text-white me-2 p-3' onClick={RejectHostApp}>
+                      Reject
+                    </button>
+                  </>
+                )}
+                <button className={`${hostData?.is_block == 1 ? 'badge badge-success' : 'badge badge-danger'} text-white p-3`} onClick={handleBlockUnblock}>
+                  {hostData?.is_block == 1 ? 'Unblock' : 'Block'}
+                </button>
+              </div>
             </div>
 
             <Formik
@@ -160,10 +187,10 @@ const ViewHost: React.FC = () => {
                 intrests: hostData?.intrests?.toString() || '',
                 age: hostData?.age || '',
                 bio: hostData?.bio == 0 ? 0 : 1 || '',
-                billingAddress: hostData?.billingAddress || 0,
-                about: hostData?.about || 0,
-                country_id: hostData?.country_id || 0,
-                email: hostData?.email || 0,
+                billingAddress: hostData?.billingAddress || '',
+                about: hostData?.about || '',
+                country_id: hostData?.country_id || '',
+                email: hostData?.email || '',
                 diamond_per_min: hostData?.diamond_per_min || 0,
               }}
               validationSchema={Yup.object({
@@ -200,6 +227,9 @@ const ViewHost: React.FC = () => {
                       <div className='form-group col-md-6'>
                         <label>Assign Agent</label>
                         <select className='form-control mt-2' name='agent_id' id='all-agent_id' {...formAttr(runform, 'agent_id')}>
+                          <option value='' disabled>
+                            Select agent
+                          </option>
                           {agents?.length &&
                             agents.map((item: any, i) => (
                               <option value={item._id} key={i}>
@@ -291,29 +321,29 @@ const ViewHost: React.FC = () => {
         </div>
         <div className='row cutome-g g-5 mt-8 '>
           <div className='col-12 col-md-6'>
-            <div className='table-custom-info card-shadow'>
+            <div className='white-box-table  card-shadow'>
               <div className='row'>
-                <div className='col-12 d-flex align-items-center mt-4'>
+                <div className='col-12 d-flex align-items-center my-4'>
                   <h2>Images</h2>
                   <button className='btn-comn-submit ms-auto me-2' onClick={() => setShow(true)}>
                     Add Image
                   </button>
                 </div>
               </div>
-              <RtdDatatable data={images} columns={columns} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
+              <RtdDatatableNew data={images} columns={columns} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
             </div>
           </div>
           <div className='col-12 col-md-6'>
-            <div className='table-custom-info card-shadow'>
+            <div className='white-box-table  card-shadow'>
               <div className='row'>
-                <div className='col-12 d-flex align-items-center mt-4'>
+                <div className='col-12 d-flex align-items-center my-4'>
                   <h2>Videos</h2>
                   <button className='btn-comn-submit ms-auto me-2' onClick={() => setShowVid(true)}>
                     Add Video
                   </button>
                 </div>
               </div>
-              <RtdDatatable data={videos} columns={columns} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
+              <RtdDatatableNew data={videos} columns={columns} option={option2} tableCallBack={tableCallBack2} onDrop={handleDrop} />
             </div>
           </div>
         </div>

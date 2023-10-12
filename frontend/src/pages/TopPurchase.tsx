@@ -1,25 +1,16 @@
 import React, {useState, useEffect} from 'react'
-import RtdDatatable from '../Common/DataTable/DataTable'
 import {fetchAllSortPurchased, notiSortPurchased} from '../ApiService/_requests'
 import {Modal} from 'react-bootstrap'
 import SendMessage from '../Modals/sendMessage'
 import {toast} from 'react-toastify'
+import RtdDatatableNew from '../Common/DataTable/DataTableNew'
 
 const TopPurchase = () => {
   const [purchase, setPurchase] = useState()
   const [show, setShow] = useState(false)
   const [userId, setUserId] = useState('')
 
-  const [option, set_option] = useState({
-    sizePerPage: 10,
-    totalRecord: 10,
-    page: 1,
-    sort: 'createdAt',
-    order: 'ASC',
-    entries: true,
-    showSearch: true,
-    checkbox: false,
-  })
+  const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
 
   const columns = [
     {
@@ -116,20 +107,23 @@ const TopPurchase = () => {
 
   const appModalClose = () => setShow(false)
 
+  const handleDrop = () => {}
+
   return (
     <div className='container-fluid'>
-      <div className='row'>
-        <div className='col-12 d-flex'>
-          <div className='mb-3'>
-            <h1>Most Purchases User</h1>
-          </div>
-        </div>
-      </div>
       <div className='col-12'>
-        <div className='table-custom-info'>
-          <RtdDatatable data={purchase} columns={columns} option={option} tableCallBack={tableCallBack} />
+        <div className='white-box-table  card-shadow'>
+          <div className='row'>
+            <div className='col-12 d-flex align-items-center my-4'>
+              <div className=' '>
+                <h1>Most Purchases User</h1>
+              </div>
+            </div>
+          </div>
+          <RtdDatatableNew data={purchase} columns={columns} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
         </div>
       </div>
+
       <Modal show={show} onHide={() => appModalClose()} size='lg' className='cust-comn-modal' centered>
         <SendMessage submitFormData={submitFormData} appModalClose={appModalClose} />
       </Modal>

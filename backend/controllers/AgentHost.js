@@ -78,7 +78,7 @@ exports.getAgentHosts = asyncHandler(async (req, res, next) => {
 
 exports.fetchAllStreamHistory = asyncHandler(async (req, res, next) => {
  const { _id } = req.body;
- const apiFeature = new ApiFeatures(HostLiveStreamTrack.find({ host_id: _id }), req.body).search().sort().pagination();
+ const apiFeature = new ApiFeatures(HostLiveStreamTrack.find({ host_id: _id }), req.body?.options).search().sort().pagination();
  const history = await apiFeature.query;
  apiFeature.totalRecord = await HostLiveStreamTrack.countDocuments({ host_id: _id });
  const streamTracks = await HostLiveStreamTrack.aggregate([{ $match: { host_id: new ObjectId(_id) } }, { $group: { _id: "$host_id", session_time: { $sum: { $divide: [{ $subtract: ["$end", "$start"] }, 1000] } } } }, { $project: { _id: 0, session_time: 1 } }]);
@@ -126,7 +126,7 @@ exports.fetchAllHostHistory = asyncHandler(async (req, res, next) => {
  let totalPaid = 0;
  let totalUnPaid = 0;
 
- const apiFeature = new ApiFeatures(UserSpendTransactionHistory.find({ received_by: _id }).populate({ path: "user host", select: "fullName" }), req.body).search().sort().pagination();
+ const apiFeature = new ApiFeatures(UserSpendTransactionHistory.find({ received_by: _id }).populate({ path: "user host", select: "fullName" }), req.body?.options).search().sort().pagination();
  const history = await apiFeature.query;
  apiFeature.totalRecord = await UserSpendTransactionHistory.countDocuments({ received_by: _id });
  const data = await UserSpendTransactionHistory.find({ received_by: _id });

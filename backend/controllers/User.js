@@ -57,7 +57,7 @@ exports.logOut = asyncHandler(async (req, res, next) => {
 });
 
 exports.fetchAllUser = asyncHandler(async (req, res, next) => {
- const apiFeature = new ApiFeatures(User.find().select("fullName identity is_fake _id is_block profileimages diamond"), req.body?.options).search().sort().pagination();
+ const apiFeature = new ApiFeatures(User.find().populate("images").select("fullName identity is_fake _id is_block profileimages diamond"), req.body?.options).search().sort().pagination();
  const users = await apiFeature.query;
  apiFeature.totalRecord = await User.countDocuments();
  return giveresponse(res, 200, true, "All User get success.", { totalRecord: apiFeature.totalRecord, totalPage: apiFeature.totalPage, users });

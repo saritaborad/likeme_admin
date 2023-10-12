@@ -18,6 +18,7 @@ const Setting: React.FC = () => {
   const settingData = async () => {
     const {data} = await getSettingData()
     setSettingInfo(data)
+    setLiveStream(data?.liveSwitch)
   }
 
   const getAdmobData = async (type?: any) => {
@@ -76,7 +77,6 @@ const Setting: React.FC = () => {
             >
               {(runform) => (
                 <form onSubmit={runform.handleSubmit}>
-                  <input type='hidden' name='_token' defaultValue='7g2ETyfzgFyhJxwuYSAx3519NJ6eTka72A8J3y60' />{' '}
                   <div className='card-header d-flex align-items-center'>
                     <h2 className='text-secondery'>App Setting</h2>
                   </div>
@@ -123,7 +123,7 @@ const Setting: React.FC = () => {
                         {errorContainer(runform, 'user_message_charge')}
                       </div>
                     </div>
-                    <input type='hidden' name='id' className='form-control mt-2' id='id-android-app' defaultValue={1} />
+
                     <button type='submit' className='btn-comn-submit mt-8'>
                       Submit
                     </button>
@@ -152,7 +152,6 @@ const Setting: React.FC = () => {
             >
               {(runform) => (
                 <form onSubmit={runform.handleSubmit}>
-                  <input type='hidden' name='_token' defaultValue='DHABN9R9DWP9QKL2Ajh9kcg9ohGCSQPkI97CoVcM' />{' '}
                   <div className='card-header d-flex align-items-center'>
                     <h2 className='text-secondery'>Agora Settings</h2>
                   </div>
@@ -212,11 +211,10 @@ const Setting: React.FC = () => {
               <div className='tab-content my-4' id='myTabContent2'>
                 <div className='tab-pane fade show active' id='home3' role='tabpanel' aria-labelledby='home-tab3'>
                   <form onSubmit={updateAdmobData}>
-                    <input type='hidden' name='_token' defaultValue='DHABN9R9DWP9QKL2Ajh9kcg9ohGCSQPkI97CoVcM' /> <input type='hidden' name='id' className='form-control' id='id-android-ads' />
                     <div className='form-row'>
                       <div className='form-group col-md-6 mt-7'>
                         <label htmlFor='ReWarded'>Admob Rewarded Ad Unit</label>
-                        <input type='text' defaultValue='ca-app-pub-3940256099942544/5224354917' name='rewarded_id' onChange={handleChange} value={rewarded.rewarded_id} className='form-control mt-2' id='ReWarded-android' />
+                        <input type='text' name='rewarded_id' onChange={handleChange} value={rewarded.rewarded_id} className='form-control mt-2' id='ReWarded-android' />
                       </div>
                     </div>
                     <button type='submit' className='btn-comn-submit mt-8'>
@@ -247,6 +245,8 @@ const Setting: React.FC = () => {
                     max_fake_live_hosts: settingInfo?.max_fake_live_hosts || 0,
                     match_call_second: settingInfo?.match_call_second || 0,
                     match_call_coin: settingInfo?.match_call_coin || 0,
+                    fake_host_vidoe_from: settingInfo?.fake_host_vidoe_from || 0,
+                    liveSwitch: settingInfo?.liveSwitch || 0,
                   }}
                   validationSchema={Yup.object({
                     host_message_charge: Yup.number().required('required.'),
@@ -266,7 +266,6 @@ const Setting: React.FC = () => {
                 >
                   {(runform) => (
                     <form onSubmit={runform.handleSubmit}>
-                      <input type='hidden' name='_token' defaultValue='DHABN9R9DWP9QKL2Ajh9kcg9ohGCSQPkI97CoVcM' />{' '}
                       <div className='card-header d-flex align-items-center'>
                         <h2 className='text-secondery'>Host Settings</h2>
                       </div>
@@ -308,9 +307,13 @@ const Setting: React.FC = () => {
                             <input
                               className='form-check-input ms-0'
                               type='checkbox'
+                              name='liveSwitch'
                               // id={`mode${i}`}
-                              // defaultChecked={data[i]?.enable === 1 ? true : false}
-                              onChange={(e) => setLiveStream(!liveStream)}
+                              onChangeCapture={(e: any) => {
+                                runform?.setFieldValue('liveSwitch', e.target.checked ? 1 : 0)
+                                setLiveStream(!liveStream)
+                              }}
+                              checked={runform?.values?.liveSwitch == 1 ? true : false}
                             />
                           </div>
                           <div className='form-group col-md-6 mt-7'>
@@ -324,14 +327,16 @@ const Setting: React.FC = () => {
                             {errorContainer(runform, 'max_live_private_time')}
                           </div>
                           <div className='form-group form-check form-switch col-md-6 ps-2 mt-7'>
-                            <label htmlFor='max_live_time' className='mt-2 d-block'>
+                            <label htmlFor='fake_host_vidoe_from' className='mt-2 d-block'>
                               Fake Host Video (on=link/off=url)
                             </label>
                             <br />
                             <input
                               className='form-check-input ms-0'
                               type='checkbox'
-                              {...formAttr(runform, 'is_fake_host_vidoe_from')}
+                              name='fake_host_vidoe_from'
+                              onChangeCapture={(e: any) => runform?.setFieldValue('fake_host_vidoe_from', e.target.checked ? 1 : 0)}
+                              checked={runform?.values?.fake_host_vidoe_from == 1 ? true : false}
                               // id={`mode${i}`}
                               // defaultChecked={data[i]?.enable === 1 ? true : false}
                             />

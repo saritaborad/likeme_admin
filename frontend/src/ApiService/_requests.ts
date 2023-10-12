@@ -69,12 +69,12 @@ export function featureUpdate(_id: string, is_feature: number) {
   return axios.post(API_PATH.featureUpdate, {_id, is_feature}).then((res) => res)
 }
 
-export function fetchHostVideos(_id: string) {
-  return axios.post(API_PATH.fetchHostVideos, {_id}).then((res) => res.data)
+export function fetchHostVideos(option?: any) {
+  return axios.post(API_PATH.fetchHostVideos, option).then((res) => res.data)
 }
 
-export function fetchHostImages(_id: string) {
-  return axios.post(API_PATH.fetchHostImages, {_id}).then((res) => res.data)
+export function fetchHostImages(option?: any) {
+  return axios.post(API_PATH.fetchHostImages, option).then((res) => res.data)
 }
 
 export function deleteImageById(_id: string) {
@@ -149,16 +149,16 @@ export function addAgent(formData: any) {
   return axios.post(API_PATH.addAgent, formData).then((res) => res)
 }
 
-export function fetchAllHostHistory(_id: string, option?: any) {
-  return axios.post(API_PATH.fetchAllHostHistory, {_id, ...option}).then((res) => res.data)
+export function fetchAllHostHistory(option?: any) {
+  return axios.post(API_PATH.fetchAllHostHistory, option).then((res) => res.data)
 }
 
 export function getAgentHosts(_id: string) {
   return axios.post(API_PATH.getAgentHosts, {_id}).then((res) => res.data)
 }
 
-export function fetchAllStreamHistory(_id: string, option?: any) {
-  return axios.post(API_PATH.fetchAllStreamHistory, {_id, ...option}).then((res) => res.data)
+export function fetchAllStreamHistory(option?: any) {
+  return axios.post(API_PATH.fetchAllStreamHistory, option).then((res) => res.data)
 }
 
 export function fetchStreamHistoryDayWise(formData?: any) {
@@ -384,7 +384,7 @@ export function updateSettingApp(formData: any) {
 }
 
 export function updateAdmob(formData: any) {
-  return axios.post(API_PATH.updateAdmob, formData).then((res) => res.data)
+  return axios.post(API_PATH.updateAdmob, formData).then((res) => res)
 }
 
 export function getAdmob(formData: any) {

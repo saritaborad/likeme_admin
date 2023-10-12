@@ -1,6 +1,5 @@
 import {useEffect, useState} from 'react'
-import RtdDatatable from '../Common/DataTable/DataTable'
-import {useNavigate} from 'react-router-dom'
+import {Link} from 'react-router-dom'
 import {toast} from 'react-toastify'
 import {RejectHost, fetchHostApplications, makeHost} from '../ApiService/_requests'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
@@ -14,7 +13,6 @@ interface IState {
 
 const HostApplication: React.FC = () => {
   const [hostApp, setHostApp] = useState<IState[]>([])
-  const navigate = useNavigate()
 
   const [option, set_option] = useState({sizePerPage: 3, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
 
@@ -76,9 +74,9 @@ const HostApplication: React.FC = () => {
         customBodyRender: (data: any, i: number) => {
           return (
             <div>
-              <button className='btn-comn-info me-2' onClick={() => {}}>
+              <Link className='btn-comn-info me-2' to='/viewHost' state={{hostData: data[i], show: true}}>
                 View
-              </button>
+              </Link>
               <button className='btn-comn-submit me-2' onClick={() => makeHostById(data[i]?._id)}>
                 Make Host
               </button>
@@ -133,7 +131,7 @@ const HostApplication: React.FC = () => {
             </div>
           </div>
         </div>
-        <div className='col-12 '>
+        <div className='col-12'>
           <div className='white-box-table  card-shadow'>
             <RtdDatatableNew data={hostApp} columns={columns} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
           </div>

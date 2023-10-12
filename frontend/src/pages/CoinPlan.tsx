@@ -1,5 +1,4 @@
 import {useEffect, useState} from 'react'
-import RtdDatatable from '../Common/DataTable/DataTable'
 import {toast} from 'react-toastify'
 import {addSubcription, default_flag, deleteSubcriptionById, fetchAllCoinPlans, updateSubcription} from '../ApiService/_requests'
 import {Modal} from 'react-bootstrap'

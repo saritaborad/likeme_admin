@@ -32,7 +32,7 @@ exports.deleteImageById = asyncHandler(async (req, res, next) => {
 });
 
 exports.fetchHostImages = asyncHandler(async (req, res, next) => {
- const apiFeature = new ApiFeatures(Image.find({ user_id: req.body._id }), req.body).search().sort().pagination();
+ const apiFeature = new ApiFeatures(Image.find({ user_id: req.body._id }), req.body?.options).search().sort().pagination();
  const images = await apiFeature.query;
  apiFeature.totalRecord = await Image.countDocuments({ user_id: req.body._id });
  return giveresponse(res, 200, true, "Images get successfully!", { totalRecord: apiFeature.totalRecord, totalPage: apiFeature.totalPage, data: images });

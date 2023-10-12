@@ -1,5 +1,4 @@
 import {useEffect, useState} from 'react'
-import RtdDatatable from '../Common/DataTable/DataTable'
 import {Link, useLocation} from 'react-router-dom'
 import {toast} from 'react-toastify'
 import {blockUnblockHost, deleteHostById, featureUpdate, fetchHosts} from '../ApiService/_requests'
@@ -12,7 +11,7 @@ const HostList: React.FC = () => {
   const [selectedItem, setSelectedItem] = useState<any>({is_fake: 0, is_block: state?.is_block})
   const agents = useAllAgent()
 
-  const [option, set_option] = useState({sizePerPage: 3, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
+  const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
 
   const column1 = [
     {
@@ -129,7 +128,7 @@ const HostList: React.FC = () => {
         filter: false,
         sort: false,
         customBodyRender: (data: any, i: number) => {
-          return <img src={`http://localhost:5000/${data[i]?.profileimages}`} className='profile-img' alt='' />
+          return <img src={data[i]?.profileimages ? `http://localhost:5000/${data[i]?.profileimages}` : `http://localhost:5000/${data[i]?.images?.image}`} className='profile-img' alt='' />
         },
       },
     },
@@ -164,7 +163,7 @@ const HostList: React.FC = () => {
         customBodyRender: (data: any, i: number) => {
           return (
             <>
-              <Link className='btn-comn-info me-2' to='/viewHost' state={{hostData: data[i]}}>
+              <Link className='btn-comn-info me-2' to='/viewHost' state={{hostData: data[i], show: false}}>
                 View
               </Link>
               <button className='btn-comn-danger me-2' onClick={() => deleteHost(data[i]?._id)}>
@@ -238,7 +237,7 @@ const HostList: React.FC = () => {
         <div className='col-12  mt-5'>
           <div className='white-box-table  card-shadow'>
             <div className='row'>
-              <div className='col-12 d-flex mt-8'>
+              <div className='col-12 d-flex mt-5'>
                 <div className='ms-3'>
                   <h1>Hosts</h1>
                 </div>

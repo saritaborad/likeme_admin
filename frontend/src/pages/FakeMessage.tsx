@@ -1,6 +1,4 @@
 import {useEffect, useState} from 'react'
-import RtdDatatable from '../Common/DataTable/DataTable'
-import {useNavigate} from 'react-router-dom'
 import {toast} from 'react-toastify'
 import {addMessage, deleteMessageById, fetchAllMessages} from '../ApiService/_requests'
 import {Modal} from 'react-bootstrap'
@@ -19,7 +17,7 @@ const FakeMessage: React.FC = () => {
   const [messageList, setMessageList] = useState<IState[]>([])
   const [modalStates, setModalStates] = useState({update: false, show: false, messageInfo: ''})
 
-  const [option, set_option] = useState({sizePerPage: 3, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
+  const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
 
   const columns = [
     {
@@ -57,6 +55,7 @@ const FakeMessage: React.FC = () => {
     const {data} = await fetchAllMessages({options: option})
     setMessageList(data.data)
     set_option({...option, totalRecord: data.totalRecord})
+    setModalStates({update: false, show: false, messageInfo: ''})
   }
 
   const deleteMessage = async (_id: string) => {
@@ -66,7 +65,11 @@ const FakeMessage: React.FC = () => {
   }
 
   const submitFormData = async (formData: any) => {
-    const {data} = await addMessage(formData)
+    const form = new FormData()
+    form.append('title', formData.title)
+
+    const {data} = await addMessage(form)
+
     if (data.status === 200) {
       toast.success(data.message)
       getMessages(option)

@@ -25,9 +25,9 @@ exports.videoById = asyncHandler(async (req, res, next) => {
 });
 
 exports.fetchHostVideos = asyncHandler(async (req, res, next) => {
- const apiFeature = new ApiFeatures(Video.find({ user_id: req.body._id }), req.body).search().sort().pagination();
+ const apiFeature = new ApiFeatures(Video.find({ user_id: req.body._id }), req.body?.options).search().sort().pagination();
  const videos = await apiFeature.query;
- apiFeature.totalRecord = await Video.countDocuments();
+ apiFeature.totalRecord = await Video.countDocuments({ user_id: req.body._id });
  return giveresponse(res, 200, true, "Video get successfully!", { totalRecord: apiFeature.totalRecord, totalPage: apiFeature.totalPage, data: videos });
 });
 

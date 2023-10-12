@@ -4,7 +4,7 @@ const { uploadImage } = require("../middleware/upload");
 const router = express.Router();
 
 router.post("/fetchAllMessages", fetchAllMessages);
-router.post("/addMessage", uploadImage.single("image"), addMessage);
+router.post("/addMessage", uploadImage.single("title"), addMessage);
 router.post("/fakeMessagesList", fakeMessagesList);
 router.post("/deleteMessageById", deleteMessageById);
 router.post("/updateMessage", updateMessage);

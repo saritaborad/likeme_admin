@@ -1,9 +1,9 @@
 import React, {useEffect, useState} from 'react'
-import RtdDatatable from '../Common/DataTable/DataTable'
 import {fetchAllHostHistory} from '../ApiService/_requests'
 import {Link, useLocation} from 'react-router-dom'
 import {ImgUrl} from '../const'
 import moment from 'moment'
+import RtdDatatableNew from '../Common/DataTable/DataTableNew'
 
 const HostHistory = () => {
   const {state}: any = useLocation()
@@ -11,16 +11,7 @@ const HostHistory = () => {
   const [history, setHistory] = useState<any>()
   const [hostInfo, setHostInfo] = useState<any>()
 
-  const [option, set_option] = useState({
-    sizePerPage: 10,
-    totalRecord: 10,
-    page: 1,
-    sort: 'createdAt',
-    order: 'ASC',
-    entries: true,
-    showSearch: true,
-    checkbox: false,
-  })
+  const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
 
   const columns = [
     {
@@ -101,8 +92,9 @@ const HostHistory = () => {
   }, [state?.hostInfo, state?.agentInfo])
 
   const getHistoryData = async (option?: any) => {
-    const {data} = await fetchAllHostHistory(state?.hostInfo?._id, option)
+    const {data} = await fetchAllHostHistory({options: option, _id: state?.hostInfo?._id})
     setHistory(data)
+    set_option({...option, totalRecord: data.totalRecord})
   }
 
   const tableCallBack = (option: any) => {
@@ -112,10 +104,10 @@ const HostHistory = () => {
 
   return (
     <div>
-      <div className='col-12 card-shadow'>
-        <div className='table-custom-info'>
+      <div className='col-12 '>
+        <div className='white-box-table  card-shadow'>
           <div className='row'>
-            <div className='col-12 d-flex align-items-center mt-10 mb-10'>
+            <div className='col-12 d-flex align-items-center mt-5 mb-10'>
               <img src={ImgUrl + hostInfo?.profileimages} alt='' className='profile-img me-3' />
 
               <h3>
@@ -136,7 +128,7 @@ const HostHistory = () => {
             </div>
           </div>
 
-          <RtdDatatable data={history?.history} columns={columns} option={option} tableCallBack={tableCallBack} />
+          <RtdDatatableNew data={history?.history} columns={columns} option={option} tableCallBack={tableCallBack} />
         </div>
       </div>
     </div>

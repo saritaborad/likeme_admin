@@ -1,5 +1,4 @@
 import {useEffect, useState} from 'react'
-import RtdDatatable from '../Common/DataTable/DataTable'
 import {toast} from 'react-toastify'
 import {addNotiCredent, deleteNotiCredent, getNotiCredent, updateNotiCredent} from '../ApiService/_requests'
 import {Modal} from 'react-bootstrap'

@@ -1,5 +1,4 @@
 import {useEffect, useState} from 'react'
-import RtdDatatable from '../Common/DataTable/DataTable'
 import {Link} from 'react-router-dom'
 import {fetchAllPurchaseHistory, getPackageName} from '../ApiService/_requests'
 import moment from 'moment'
@@ -78,6 +77,7 @@ const UserPurchase: React.FC = () => {
       options: {
         filter: false,
         sort: false,
+        search: true,
         customBodyRender: (data: any, i: number) => {
           return <div>{moment(data[i]?.createdAt).format('DD-MM-YYYY hh:mm:ss')}</div>
         },

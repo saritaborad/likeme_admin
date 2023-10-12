@@ -1,8 +1,8 @@
 import React, {useState, useEffect} from 'react'
 import {Link, useLocation} from 'react-router-dom'
-import RtdDatatable from '../Common/DataTable/DataTable'
 import {getAgentHosts} from '../ApiService/_requests'
 import {ImgUrl} from '../const'
+import RtdDatatableNew from '../Common/DataTable/DataTableNew'
 
 const AgentHost = () => {
   const {state}: any = useLocation()
@@ -139,10 +139,10 @@ const AgentHost = () => {
 
   return (
     <div className='container-fluid'>
-      <div className='col-12 card-shadow'>
-        <div className='table-custom-info'>
+      <div className='col-12 '>
+        <div className='white-box-table  card-shadow'>
           <div className='row'>
-            <div className='col-12 d-flex align-items-center mt-10 mb-10'>
+            <div className='col-12 d-flex align-items-center mt-7 mb-10'>
               <img src={ImgUrl + agentInfo?.images} alt='' className='profile-img me-3' />
 
               <h3>
@@ -157,7 +157,7 @@ const AgentHost = () => {
             </div>
           </div>
           <button className='btn-comn-submit mb-6 py-3'>Pending Payments</button>
-          <RtdDatatable data={hosts?.agentHost} columns={columns} option={option} tableCallBack={tableCallBack} />
+          <RtdDatatableNew data={hosts?.agentHost} columns={columns} option={option} tableCallBack={tableCallBack} />
         </div>
       </div>
     </div>

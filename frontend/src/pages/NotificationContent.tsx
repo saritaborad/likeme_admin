@@ -1,6 +1,4 @@
 import {useEffect, useState} from 'react'
-import RtdDatatable from '../Common/DataTable/DataTable'
-import {useNavigate} from 'react-router-dom'
 import {toast} from 'react-toastify'
 import {Modal} from 'react-bootstrap'
 import NotiContent from '../Modals/NotiContent'

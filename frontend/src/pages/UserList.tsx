@@ -1,5 +1,4 @@
 import {useEffect, useState} from 'react'
-import RtdDatatable from '../Common/DataTable/DataTable'
 import {getAllUser, userblock, AddUserCoin} from '../ApiService/_requests'
 import {toast} from 'react-toastify'
 import {ImgUrl} from '../const'
@@ -28,7 +27,7 @@ const UserList: React.FC = () => {
         filter: false,
         sort: false,
         customBodyRender: (data: any, i: number) => {
-          return <img src={`${ImgUrl + data[i]?.profileimages}`} className='profile-img' alt='' />
+          return <img src={data[i]?.profileimages ? `${ImgUrl + data[i]?.profileimages}` : `${ImgUrl + data[i]?.images?.image}`} className='profile-img' alt='' />
         },
       },
     },

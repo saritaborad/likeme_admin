@@ -2,11 +2,12 @@ import {useEffect, useState} from 'react'
 import {toast} from 'react-toastify'
 import {deleteReport, fetchReports, hostblock} from '../ApiService/_requests'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
+import {ImgUrl} from '../const'
 
 const Report: React.FC = () => {
   const [reports, setReport] = useState<any>([])
 
-  const [option, set_option] = useState({sizePerPage: 3, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
+  const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
 
   const columns = [
     {
@@ -16,12 +17,12 @@ const Report: React.FC = () => {
         filter: false,
         sort: false,
         customBodyRender: (data: any, i: number) => {
-          return <img src={`http://localhost:5000/${data[i]?.user?.profileimages}`} className='profile-img' alt='' />
+          return <img src={`${ImgUrl + data[i]?.user?.profileimages}`} className='profile-img' alt='' />
         },
       },
     },
     {
-      value: 'user.identity',
+      value: 'identity',
       label: 'Identity',
       options: {
         filter: false,
@@ -32,7 +33,7 @@ const Report: React.FC = () => {
       },
     },
     {
-      value: 'user.fullName',
+      value: 'fullName',
       label: 'Full Name',
       options: {
         filter: false,
@@ -59,6 +60,7 @@ const Report: React.FC = () => {
       options: {
         filter: false,
         sort: false,
+        search: true,
         customBodyRender: (data: any, i: number) => {
           return <div className=''>{data[i]?.reason}</div>
         },
@@ -70,8 +72,8 @@ const Report: React.FC = () => {
       options: {
         filter: false,
         sort: false,
+        search: true,
         customBodyRender: (data: any, i: number) => {
-          console.log(data[i])
           return <div>{data[i]?.description}</div>
         },
       },
@@ -85,15 +87,15 @@ const Report: React.FC = () => {
         customBodyRender: (data: any, i: number) => {
           return (
             <div>
-              <button
+              {/* <button
                 className='btn-comn-info me-2'
                 onClick={() => {
                   // setNotificationData(data[i])
                   // setShow(true)
                 }}
               >
-                View
-              </button>
+                View  
+              </button> */}
               <button
                 className='btn-comn-submit me-2'
                 onClick={() => {

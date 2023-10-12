@@ -16,7 +16,7 @@ exports.addMessage = asyncHandler(async (req, res, next) => {
  const addMessage = new Messages();
 
  if (req.file) {
-  addMessage.title = req.file.filename;
+  addMessage.title = req.file.path;
   addMessage.type = 1;
  } else {
   addMessage.title = req.body.title;

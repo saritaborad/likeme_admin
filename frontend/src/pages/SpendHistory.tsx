@@ -1,22 +1,13 @@
 import React, {useState, useEffect} from 'react'
-import RtdDatatable from '../Common/DataTable/DataTable'
 import {useLocation} from 'react-router-dom'
 import {fetchAllSpendHistory} from '../ApiService/_requests'
+import RtdDatatableNew from '../Common/DataTable/DataTableNew'
 
 const SpendHistory: React.FC = () => {
   const [spendHistory, setSpendHistory] = useState<any>()
   const {state}: any = useLocation()
 
-  const [option, set_option] = useState({
-    sizePerPage: 10,
-    totalRecord: 10,
-    page: 1,
-    sort: 'createdAt',
-    order: 'ASC',
-    entries: true,
-    showSearch: true,
-    checkbox: false,
-  })
+  const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
 
   const columns = [
     {
@@ -115,10 +106,10 @@ const SpendHistory: React.FC = () => {
 
   return (
     <div>
-      <div className='col-12 card-shadow'>
-        <div className='table-custom-info'>
+      <div className='col-12'>
+        <div className='white-box-table  card-shadow'>
           <div className='row'>
-            <ul className='d-flex my-8' id='pills-tab' role='tablist'>
+            <ul className='d-flex my-5' id='pills-tab' role='tablist'>
               <h1 className='ms-4'>User spend</h1>
               <li className='badge badge-submit px-8 me-3 fs-5 ms-auto'>Total Purchase : {spendHistory?.total_purchase}</li>
               <li className='badge badge-success px-8 me-3 fs-5'>Total Gain Coin : {spendHistory?.total_gain} </li>
@@ -126,7 +117,8 @@ const SpendHistory: React.FC = () => {
               <li className='badge badge-warning px-8 me-3 fs-5'>Available Balance : {spendHistory?.avail_bal} </li>
             </ul>
           </div>
-          <RtdDatatable option={option} data={spendHistory?.data} columns={columns} tableCallBack={tableCallBack} />
+
+          <RtdDatatableNew data={spendHistory?.data} columns={columns} option={option} tableCallBack={tableCallBack} />
         </div>
       </div>
     </div>

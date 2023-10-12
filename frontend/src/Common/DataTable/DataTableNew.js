@@ -212,7 +212,7 @@ export default function RtdDatatableNew(props) {
               ) : (
                 <tr className='p-md-5 p-3 m-md-5 text-center'>
                   <td colSpan={columns.length}>
-                    <p>Sorry, no matching records found</p>
+                    <p className='text-center'>Sorry, no matching records found</p>
                   </td>
                 </tr>
               )}

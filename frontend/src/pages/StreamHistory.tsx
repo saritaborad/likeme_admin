@@ -1,9 +1,9 @@
 import React, {useState, useEffect} from 'react'
-import RtdDatatable from '../Common/DataTable/DataTable'
 import {useLocation} from 'react-router-dom'
 import {ImgUrl} from '../const'
 import {fetchAllStreamHistory, fetchStreamHistoryDayWise} from '../ApiService/_requests'
 import moment from 'moment'
+import RtdDatatableNew from '../Common/DataTable/DataTableNew'
 
 const StreamHistory = () => {
   const [hostInfo, setHostInfo] = useState<any>()
@@ -12,15 +12,7 @@ const StreamHistory = () => {
   const {state}: any = useLocation()
   const [date, setDate] = useState<any>({from: '', to: '', _id: state?.hostInfo?._id})
 
-  const [option, set_option] = useState({
-    sizePerPage: 10,
-    totalRecord: 10,
-    page: 1,
-    sort: 'createdAt',
-    order: 'ASC',
-    entries: true,
-    checkbox: false,
-  })
+  const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
 
   const columns = [
     {
@@ -91,6 +83,7 @@ const StreamHistory = () => {
       options: {
         filter: false,
         sort: false,
+
         customBodyRender: (data: any, i: number) => {
           return <div>{moment(data[i]?.start).format('DD-MM-YYYY HH:mm:ss')}</div>
         },
@@ -102,6 +95,7 @@ const StreamHistory = () => {
       options: {
         filter: false,
         sort: false,
+
         customBodyRender: (data: any, i: number) => {
           return <div>{moment(data[i]?.end).format('DD-MM-YYYY HH:mm:ss')}</div>
         },
@@ -133,8 +127,9 @@ const StreamHistory = () => {
   }, [state?.hostInfo])
 
   const getStreamHistory = async (option?: any) => {
-    const {data} = await fetchAllStreamHistory(state?.hostInfo?._id, option)
+    const {data} = await fetchAllStreamHistory({options: option, _id: state?.hostInfo?._id})
     setStreamHistory(data)
+    set_option({...option, totalRecord: data.totalRecord})
   }
 
   const getStreamHistoryDaywise = async (filtered?: any) => {
@@ -157,8 +152,8 @@ const StreamHistory = () => {
   return (
     <div className='row'>
       <div className='col-6'>
-        <div className='col-12 card-shadow mt-6'>
-          <div className='table-custom-info'>
+        <div className='col-12  mt-6'>
+          <div className='white-box-table  card-shadow'>
             <div className='row'>
               <div className='d-flex my-10 '>
                 <div className='d-flex align-items-center '>
@@ -180,13 +175,13 @@ const StreamHistory = () => {
               </div>
             </div>
 
-            <RtdDatatable data={dayWise} columns={columns} option={{}} tableCallBack={tableCallBack} />
+            <RtdDatatableNew data={dayWise} columns={columns} option={{}} tableCallBack={tableCallBack} />
           </div>
         </div>
       </div>
       <div className='col-6'>
-        <div className='col-12 card-shadow mt-6'>
-          <div className='table-custom-info'>
+        <div className='col-12  mt-6'>
+          <div className='white-box-table  card-shadow'>
             <div className='row'>
               <div className='col-12 d-flex align-items-center mt-10 mb-10 ms-4'>
                 <img src={ImgUrl + hostInfo?.profileimages} alt='' className='profile-img me-3' />
@@ -205,7 +200,7 @@ const StreamHistory = () => {
                 </div>
               </div>
             </div>
-            <RtdDatatable data={streamHistory?.data} columns={columns1} option={option} tableCallBack={tableCallBack} />
+            <RtdDatatableNew data={streamHistory?.data} columns={columns1} option={option} tableCallBack={tableCallBack} />
           </div>
         </div>
       </div>

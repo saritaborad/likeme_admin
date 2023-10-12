@@ -30,7 +30,7 @@ export function Login() {
       const {data: user} = await getUserByToken(auth.data.authtoken)
       setCurrentUser(user)
     } catch (error: any) {
-      toast.error(error.message)
+      toast.error('Invalid Credential')
       saveAuth(undefined)
       setLoading(false)
     }
@@ -64,7 +64,7 @@ export function Login() {
                     User Type
                   </label>
 
-                  <select className='form-select input-style' {...formAttr(runform, 'user_type')}>
+                  <select className='form-select input-style' name='user_type' {...formAttr(runform, 'user_type')}>
                     <option value='admin'>admin</option>
                     <option value='agent'>agent</option>
                   </select>
@@ -88,7 +88,7 @@ export function Login() {
                 <div className='col-6 my-4'>
                   <div className='custom-checkbox'>
                     <label className='custom-lbl-part d-flex'>
-                      <input type='checkbox' id='is_remember' className='me-2' checked={rememberme?.is_remember} {...formAttr(runform, 'is_remember')} />
+                      <input type='checkbox' id='is_remember' className='me-2' defaultChecked={rememberme?.is_remember ? true : false} {...formAttr(runform, 'is_remember')} />
                       <span className='custom-checkbox-class'></span>
                       Remember Me
                     </label>
