@@ -7,10 +7,12 @@ import {Formik} from 'formik'
 import * as Yup from 'yup'
 import {addPageData, getPageData} from '../ApiService/_requests'
 import {toast} from 'react-toastify'
+import {useAuth} from '../app/modules/auth'
 
 const TermsCondition: React.FC = () => {
   const [description, setDescription] = useState('')
   const termsRef: any = useRef()
+  const {currentUser} = useAuth()
 
   useEffect(() => {
     getPage()
@@ -42,7 +44,6 @@ const TermsCondition: React.FC = () => {
             <Formik innerRef={termsRef} enableReinitialize initialValues={{description: description || '', type: 0}} validationSchema={Yup.object({description: Yup.string().required('Description is required.')})} onSubmit={(formData, {resetForm}) => submitForm(formData)}>
               {(runform) => (
                 <form onSubmit={runform.handleSubmit}>
-                  <input type='hidden' name='_token' defaultValue='KWznUCpRW0PExa08gOtytrOUs5NdYiy989FkD7KS' />{' '}
                   <div className='form-group'>
                     <CKEditor
                       id='inputText'
@@ -58,9 +59,11 @@ const TermsCondition: React.FC = () => {
                     />
                     {errorContainer(runform, 'description')}
                   </div>
-                  <button type='submit' className='btn-comn-submit mt-5'>
-                    Submit
-                  </button>
+                  {!currentUser?.is_tester && (
+                    <button type='submit' className='btn-comn-submit mt-5'>
+                      Submit
+                    </button>
+                  )}
                 </form>
               )}
             </Formik>

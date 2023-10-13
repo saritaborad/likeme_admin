@@ -7,12 +7,14 @@ import {Formik} from 'formik'
 import * as Yup from 'yup'
 import {errorContainer, formAttr} from '../commonFun'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
+import {useAuth} from '../app/modules/auth'
 
 const Notification: React.FC = () => {
   const [notification, setNotification] = useState<any>([])
   const [notificationData, setNotificationData] = useState()
   const [show, setShow] = useState(false)
   const [update, setUpdate] = useState(false)
+  const {currentUser} = useAuth()
 
   const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
 
@@ -51,18 +53,22 @@ const Notification: React.FC = () => {
         customBodyRender: (data: any, i: number) => {
           return (
             <div>
-              <button
-                className='btn-comn-submit me-2'
-                onClick={() => {
-                  setNotificationData(data[i])
-                  setShow(true)
-                }}
-              >
-                Edit
-              </button>
-              <button className='btn-comn-danger me-2' onClick={() => deleteNotification(data[i]?._id)}>
-                Delete
-              </button>
+              {!currentUser?.is_tester && (
+                <>
+                  <button
+                    className='btn-comn-submit me-2'
+                    onClick={() => {
+                      setNotificationData(data[i])
+                      setShow(true)
+                    }}
+                  >
+                    Edit
+                  </button>
+                  <button className='btn-comn-danger me-2' onClick={() => deleteNotification(data[i]?._id)}>
+                    Delete
+                  </button>
+                </>
+              )}
             </div>
           )
         },
@@ -154,9 +160,11 @@ const Notification: React.FC = () => {
                       <textarea className='form-control mt-2' name='description' id='Description' {...formAttr(runform, 'description')} />
                       {errorContainer(runform, 'description')}
                     </div>
-                    <button type='submit' className='btn-comn-submit mt-4'>
-                      Send Notification
-                    </button>
+                    {!currentUser?.is_tester && (
+                      <button type='submit' className='btn-comn-submit mt-4'>
+                        Send Notification
+                      </button>
+                    )}
                   </form>
                 )}
               </Formik>

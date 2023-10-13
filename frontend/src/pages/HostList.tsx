@@ -4,12 +4,14 @@ import {toast} from 'react-toastify'
 import {blockUnblockHost, deleteHostById, featureUpdate, fetchHosts} from '../ApiService/_requests'
 import {useAllAgent} from '../hooks/customHook'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
+import {useAuth} from '../app/modules/auth'
 
 const HostList: React.FC = () => {
   const [hosts, setHosts] = useState([])
   const {state}: any = useLocation()
   const [selectedItem, setSelectedItem] = useState<any>({is_fake: 0, is_block: state?.is_block})
   const agents = useAllAgent()
+  const {currentUser} = useAuth()
 
   const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
 
@@ -166,9 +168,11 @@ const HostList: React.FC = () => {
               <Link className='btn-comn-info me-2' to='/viewHost' state={{hostData: data[i], show: false}}>
                 View
               </Link>
-              <button className='btn-comn-danger me-2' onClick={() => deleteHost(data[i]?._id)}>
-                Delete
-              </button>
+              {!currentUser?.is_tester && (
+                <button className='btn-comn-danger me-2' onClick={() => deleteHost(data[i]?._id)}>
+                  Delete
+                </button>
+              )}
             </>
           )
         },
@@ -241,11 +245,13 @@ const HostList: React.FC = () => {
                 <div className='ms-3'>
                   <h1>Hosts</h1>
                 </div>
-                <div className='ms-auto me-4'>
-                  <Link className='btn-comn-submit' to='/addFakeUser'>
-                    Add Fake Host
-                  </Link>
-                </div>
+                {!currentUser?.is_tester && (
+                  <div className='ms-auto me-4'>
+                    <Link className='btn-comn-submit' to='/addFakeUser'>
+                      Add Fake Host
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
             <div className='row d-flex'>

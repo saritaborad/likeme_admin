@@ -4,10 +4,12 @@ import {addReportReson, deleteReportReson, fetchAllReportReson, updateReportReso
 import {Modal} from 'react-bootstrap'
 import ReportReasonModal from '../Modals/ReportReason'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
+import {useAuth} from '../app/modules/auth'
 
 const ReportReason: React.FC = () => {
   const [reportReason, setReportReason] = useState([])
   const [modalStates, setModalStates] = useState({update: false, show: false, reasonInfo: ''})
+  const {currentUser} = useAuth()
 
   const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
 
@@ -25,24 +27,37 @@ const ReportReason: React.FC = () => {
       },
     },
     {
-      value: 'action',
-      label: 'Action',
-      options: {
-        filter: false,
-        sort: false,
-        customBodyRender: (data: any, i: number) => {
-          return (
-            <div>
-              <button className='btn-comn-submit me-2' onClick={() => setModalStates({update: true, show: true, reasonInfo: data[i]})}>
-                Edit
-              </button>
-              <button className='btn-comn-danger me-2' onClick={() => deleteReason(data[i]?._id)}>
-                Delete
-              </button>
-            </div>
-          )
-        },
-      },
+      ...(!currentUser?.is_tester
+        ? {
+            value: 'action',
+            label: 'Action',
+            options: {
+              filter: false,
+              sort: false,
+              customBodyRender: (data: any, i: number) => {
+                return (
+                  <div>
+                    {!currentUser?.is_tester && (
+                      <button className='btn-comn-submit me-2' onClick={() => setModalStates({update: true, show: true, reasonInfo: data[i]})}>
+                        Edit
+                      </button>
+                    )}
+                    {!currentUser?.is_tester && (
+                      <button className='btn-comn-danger me-2' onClick={() => deleteReason(data[i]?._id)}>
+                        Delete
+                      </button>
+                    )}
+                  </div>
+                )
+              },
+            },
+          }
+        : {
+            options: {
+              filter: false,
+              sort: false,
+            },
+          }),
     },
   ]
 
@@ -102,9 +117,11 @@ const ReportReason: React.FC = () => {
                   <h1>Report Reasons</h1>
                 </div>
                 <div className='ms-auto'>
-                  <button className='btn-comn-submit me-2' onClick={() => setModalStates({...modalStates, show: true})}>
-                    Add Report Reasons
-                  </button>
+                  {!currentUser?.is_tester && (
+                    <button className='btn-comn-submit me-2' onClick={() => setModalStates({...modalStates, show: true})}>
+                      Add Report Reasons
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

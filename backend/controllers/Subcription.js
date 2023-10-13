@@ -29,9 +29,8 @@ exports.deleteSubcriptionById = asyncHandler(async (req, res) => {
 });
 
 exports.default_flag = asyncHandler(async (req, res) => {
- const result = await Subscription.findOne({ _id: req.body._id });
- result.default_flag = result.default_flag == 1 ? 0 : 1;
- await result.save();
+ const result = await Subscription.findOneAndUpdate({ default_flag: 1 }, { $set: { default_flag: 0 } });
+ const result1 = await Subscription.findOneAndUpdate({ _id: req.body._id }, { $set: { default_flag: 1 } });
  return giveresponse(res, 200, true, "default subcription is updated");
 });
 

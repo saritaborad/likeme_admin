@@ -8,7 +8,7 @@ exports.login = asyncHandler(async (req, res) => {
  const { user_type, username, password, rememberme } = req.body;
  const cookieValue = `${user_type}|${username}|${password}|${rememberme}`;
 
- let user, agent;
+ let user, agent, tester;
 
  if (user_type === "admin") {
   user = await AdminUser.findOne({ username });
@@ -23,13 +23,14 @@ exports.login = asyncHandler(async (req, res) => {
   return giveresponse(res, 400, false, "Invalid credentials");
  }
 
+ !agent && user?.type == 1 ? (tester = true) : (tester = false);
  req.session.username = user.username;
  req.session.password = user.password;
  req.session.type = user.type;
  req.session.user_type = user_type;
 
  if (rememberme) res.cookie("rememberme", cookieValue, { maxAge: 30 * 24 * 60 * 60 * 1000 });
- const authtoken = jwt.sign({ id: user._id, is_agent: agent }, process.env.JWT_SECRET, { expiresIn: Date.now() + 5 * 24 * 60 * 60 * 1000 });
+ const authtoken = jwt.sign({ id: user._id, is_agent: agent, is_tester: tester }, process.env.JWT_SECRET, { expiresIn: Date.now() + 5 * 24 * 60 * 60 * 1000 });
  return giveresponse(res, 200, true, "Login success.", { authtoken });
 });
 

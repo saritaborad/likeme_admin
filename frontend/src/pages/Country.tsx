@@ -4,6 +4,7 @@ import {addCountryData, deleteCountryData, editCountryData, fetchAllCountry} fro
 import {Modal} from 'react-bootstrap'
 import AddCountry from '../Modals/AddCountry'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
+import {useAuth} from '../app/modules/auth'
 
 interface IState {
   fullname?: string
@@ -16,6 +17,7 @@ const Country: React.FC = () => {
   const [user, setUser] = useState<IState[]>([])
   const [modalStates, setModalStates] = useState({update: false, show: false, countryInfo: ''})
   const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
+  const {currentUser} = useAuth()
 
   const columns = [
     {
@@ -39,12 +41,16 @@ const Country: React.FC = () => {
         customBodyRender: (data: any, i: number) => {
           return (
             <div>
-              <button className='btn-comn-submit me-2' onClick={() => setModalStates({update: true, show: true, countryInfo: data[i]})}>
-                Edit
-              </button>
-              <button className='btn-comn-danger me-2' onClick={() => deleteCountry(data[i]?._id)}>
-                Delete
-              </button>
+              {!currentUser?.is_tester && (
+                <>
+                  <button className='btn-comn-submit me-2' onClick={() => setModalStates({update: true, show: true, countryInfo: data[i]})}>
+                    Edit
+                  </button>
+                  <button className='btn-comn-danger me-2' onClick={() => deleteCountry(data[i]?._id)}>
+                    Delete
+                  </button>
+                </>
+              )}
             </div>
           )
         },
@@ -131,9 +137,11 @@ const Country: React.FC = () => {
                   <h1>Country List</h1>
                 </div>
                 <div className='ms-auto'>
-                  <button className='btn-comn-submit me-2' onClick={() => setModalStates({...modalStates, show: true})}>
-                    Add Country
-                  </button>
+                  {!currentUser?.is_tester && (
+                    <button className='btn-comn-submit me-2' onClick={() => setModalStates({...modalStates, show: true})}>
+                      Add Country
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

@@ -3,6 +3,7 @@ import {Link} from 'react-router-dom'
 import {toast} from 'react-toastify'
 import {RejectHost, fetchHostApplications, makeHost} from '../ApiService/_requests'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
+import {useAuth} from '../app/modules/auth'
 
 interface IState {
   fullname?: string
@@ -13,6 +14,7 @@ interface IState {
 
 const HostApplication: React.FC = () => {
   const [hostApp, setHostApp] = useState<IState[]>([])
+  const {currentUser} = useAuth()
 
   const [option, set_option] = useState({sizePerPage: 3, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
 
@@ -77,12 +79,16 @@ const HostApplication: React.FC = () => {
               <Link className='btn-comn-info me-2' to='/viewHost' state={{hostData: data[i], show: true}}>
                 View
               </Link>
-              <button className='btn-comn-submit me-2' onClick={() => makeHostById(data[i]?._id)}>
-                Make Host
-              </button>
-              <button className='btn-comn-danger me-2' onClick={() => RejectHostApp(data[i]?._id)}>
-                Reject
-              </button>
+              {!currentUser?.is_tester && (
+                <>
+                  <button className='btn-comn-submit me-2' onClick={() => makeHostById(data[i]?._id)}>
+                    Make Host
+                  </button>
+                  <button className='btn-comn-danger me-2' onClick={() => RejectHostApp(data[i]?._id)}>
+                    Reject
+                  </button>
+                </>
+              )}
             </div>
           )
         },
@@ -103,6 +109,7 @@ const HostApplication: React.FC = () => {
   const getAllHostApp = async (option?: any) => {
     const {data} = await fetchHostApplications({options: option})
     setHostApp(data.hostApp)
+    set_option({...option, totalRecord: data.totalRecord})
   }
 
   const RejectHostApp = async (_id: string) => {

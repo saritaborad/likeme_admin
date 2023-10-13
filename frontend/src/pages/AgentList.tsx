@@ -5,6 +5,7 @@ import {Modal} from 'react-bootstrap'
 import AddAgentModal from '../Modals/AddAgent'
 import {Link} from 'react-router-dom'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
+import {useAuth} from '../app/modules/auth'
 
 interface IState {
   fullname?: string
@@ -19,6 +20,7 @@ const AgentList: React.FC = () => {
   const [update, setUpdate] = useState(false)
   const [agentDetail, setAgentDetail] = useState('')
   const [selectedItem, setSelectedItem] = useState('All')
+  const {currentUser} = useAuth()
 
   const [option, set_option] = useState({sizePerPage: 3, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
 
@@ -112,19 +114,23 @@ const AgentList: React.FC = () => {
         customBodyRender: (data: any, i: number) => {
           return (
             <div>
-              <button
-                className='btn-comn-submit me-2'
-                onClick={() => {
-                  setShow(true)
-                  setUpdate(true)
-                  setAgentDetail(data[i])
-                }}
-              >
-                Edit
-              </button>
-              <button className='btn-comn-danger me-2' onClick={() => deleteAgentById(data[i]?._id)}>
-                Delete
-              </button>
+              {!currentUser?.is_tester && (
+                <>
+                  <button
+                    className='btn-comn-submit me-2'
+                    onClick={() => {
+                      setShow(true)
+                      setUpdate(true)
+                      setAgentDetail(data[i])
+                    }}
+                  >
+                    Edit
+                  </button>
+                  <button className='btn-comn-danger me-2' onClick={() => deleteAgentById(data[i]?._id)}>
+                    Delete
+                  </button>
+                </>
+              )}
               <Link to='/agentHost' state={{agentInfo: data[i]}} className='btn-comn-warning me-2'>
                 Hosts
               </Link>
@@ -198,9 +204,11 @@ const AgentList: React.FC = () => {
                   <h1>Agent List</h1>
                 </div>
                 <div className='ms-auto mb-2 me-2 mt-5'>
-                  <button className='btn-comn-submit me-2' onClick={() => setShow(true)}>
-                    Add Agent
-                  </button>
+                  {!currentUser?.is_tester && (
+                    <button className='btn-comn-submit me-2' onClick={() => setShow(true)}>
+                      Add Agent
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

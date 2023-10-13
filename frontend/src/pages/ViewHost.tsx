@@ -12,6 +12,7 @@ import {errorContainer, formAttr} from '../commonFun'
 import {useAllAgent, useAllCountry} from '../hooks/customHook'
 import AddVideo from '../Modals/AddVideo'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
+import {useAuth} from '../app/modules/auth'
 
 const ViewHost: React.FC = () => {
   const [user, setUser] = useState([])
@@ -30,6 +31,7 @@ const ViewHost: React.FC = () => {
 
   const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'desc'})
   const [option2, set_option2] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'desc'})
+  const {currentUser} = useAuth()
 
   const columns = [
     {
@@ -62,9 +64,11 @@ const ViewHost: React.FC = () => {
               >
                 View
               </button>
-              <button className='btn-comn-danger me-2' onClick={() => (data[i]?.image ? deleteImage(data[i]?._id) : deleteVideo(data[i]?._id))}>
-                Delete
-              </button>
+              {!currentUser?.is_tester && (
+                <button className='btn-comn-danger me-2' onClick={() => (data[i]?.image ? deleteImage(data[i]?._id) : deleteVideo(data[i]?._id))}>
+                  Delete
+                </button>
+              )}
             </div>
           )
         },
@@ -161,7 +165,7 @@ const ViewHost: React.FC = () => {
                 <span className='badge badge-success ms-4'>{hostData?.is_fake == 1 ? 'Fake' : 'Real'}</span>
               </div>
               <div>
-                {state?.show && (
+                {!currentUser?.is_tester && state?.show && (
                   <>
                     <button className='badge badge-success text-white me-2 p-3' onClick={makeHostById}>
                       Make Host
@@ -171,9 +175,11 @@ const ViewHost: React.FC = () => {
                     </button>
                   </>
                 )}
-                <button className={`${hostData?.is_block == 1 ? 'badge badge-success' : 'badge badge-danger'} text-white p-3`} onClick={handleBlockUnblock}>
-                  {hostData?.is_block == 1 ? 'Unblock' : 'Block'}
-                </button>
+                {!currentUser?.is_tester && (
+                  <button className={`${hostData?.is_block == 1 ? 'badge badge-success' : 'badge badge-danger'} text-white p-3`} onClick={handleBlockUnblock}>
+                    {hostData?.is_block == 1 ? 'Unblock' : 'Block'}
+                  </button>
+                )}
               </div>
             </div>
 
@@ -310,9 +316,11 @@ const ViewHost: React.FC = () => {
                       </div>
                     </div>
 
-                    <button type='submit' className='btn-comn-submit mt-8'>
-                      Submit
-                    </button>
+                    {!currentUser?.is_tester && (
+                      <button type='submit' className='btn-comn-submit mt-8'>
+                        Submit
+                      </button>
+                    )}
                   </div>
                 </form>
               )}
@@ -325,9 +333,11 @@ const ViewHost: React.FC = () => {
               <div className='row'>
                 <div className='col-12 d-flex align-items-center my-4'>
                   <h2>Images</h2>
-                  <button className='btn-comn-submit ms-auto me-2' onClick={() => setShow(true)}>
-                    Add Image
-                  </button>
+                  {!currentUser?.is_tester && (
+                    <button className='btn-comn-submit ms-auto me-2' onClick={() => setShow(true)}>
+                      Add Image
+                    </button>
+                  )}
                 </div>
               </div>
               <RtdDatatableNew data={images} columns={columns} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
@@ -338,9 +348,11 @@ const ViewHost: React.FC = () => {
               <div className='row'>
                 <div className='col-12 d-flex align-items-center my-4'>
                   <h2>Videos</h2>
-                  <button className='btn-comn-submit ms-auto me-2' onClick={() => setShowVid(true)}>
-                    Add Video
-                  </button>
+                  {!currentUser?.is_tester && (
+                    <button className='btn-comn-submit ms-auto me-2' onClick={() => setShowVid(true)}>
+                      Add Video
+                    </button>
+                  )}
                 </div>
               </div>
               <RtdDatatableNew data={videos} columns={columns} option={option2} tableCallBack={tableCallBack2} onDrop={handleDrop} />

@@ -2,9 +2,11 @@ import React, {useEffect, useState} from 'react'
 import {acceptVideoReview, fetchAllVideoReview, rejectVideoReview} from '../ApiService/_requests'
 import {ImgUrl} from '../const'
 import {toast} from 'react-toastify'
+import {useAuth} from '../app/modules/auth'
 
 const ReviewVideo = () => {
   const [videos, setVideo] = useState([])
+  const {currentUser} = useAuth()
 
   useEffect(() => {
     getAllVideo()
@@ -44,12 +46,16 @@ const ReviewVideo = () => {
                       <source src={ImgUrl + item.video} />
                     </video>
                     <div className='row d-flex px-3 mt-5  justify-content-between'>
-                      <button className='col-5 btn-comn-success text-white px-3' onClick={() => handleAccept(item._id)}>
-                        Accept
-                      </button>
-                      <button className='col-6 btn-comn-danger text-white px-3' onClick={() => handleReject(item._id)}>
-                        Reject
-                      </button>
+                      {!currentUser?.is_tester && (
+                        <>
+                          <button className='col-5 btn-comn-success text-white px-3' onClick={() => handleAccept(item._id)}>
+                            Accept
+                          </button>
+                          <button className='col-6 btn-comn-danger text-white px-3' onClick={() => handleReject(item._id)}>
+                            Reject
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>

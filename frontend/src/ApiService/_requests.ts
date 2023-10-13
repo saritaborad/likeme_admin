@@ -1,7 +1,6 @@
 import axios from 'axios'
 import {API_PATH} from '../const'
 import {AuthModel, UserModel} from '../app/modules/auth'
-import {AnyMessageParams} from 'yup/lib/types'
 
 // --------------------- Auth Api Routes ----------------------
 
@@ -157,8 +156,12 @@ export function fetchAllHostHistory(option?: any) {
   return axios.post(API_PATH.fetchAllHostHistory, option).then((res) => res.data)
 }
 
-export function getAgentHosts(_id: string) {
-  return axios.post(API_PATH.getAgentHosts, {_id}).then((res) => res.data)
+export function getAgentHosts(option?: any) {
+  return axios.post(API_PATH.getAgentHosts, option).then((res) => res.data)
+}
+
+export function getHostAgents(option?: any) {
+  return axios.post(API_PATH.getHostAgents, option).then((res) => res.data)
 }
 
 export function fetchAllStreamHistory(option?: any) {
@@ -423,4 +426,8 @@ export function getPageData(formData: any) {
 
 export function fetchDashboardCount() {
   return axios.post(API_PATH.fetchDashboardCount).then((res) => res.data)
+}
+
+export function fetchAgentDashboard(_id: string) {
+  return axios.post(API_PATH.fetchAgentDashboard, {_id}).then((res) => res.data)
 }

@@ -1,16 +1,18 @@
 import React, {useEffect, useState} from 'react'
 import {Link} from 'react-router-dom'
-import {fetchDashboardCount} from '../ApiService/_requests'
+import {fetchAgentDashboard, fetchDashboardCount} from '../ApiService/_requests'
+import {useAuth} from '../app/modules/auth'
 
 const Dashboard = () => {
   const [allCount, setCount] = useState<any>()
+  const {currentUser} = useAuth()
 
   useEffect(() => {
     getDashboardCount()
   }, [])
 
   const getDashboardCount = async () => {
-    const {data} = await fetchDashboardCount()
+    const {data} = currentUser?.is_agent ? await fetchAgentDashboard(currentUser?.user) : await fetchDashboardCount()
     setCount(data)
   }
 
@@ -34,32 +36,65 @@ const Dashboard = () => {
         <div className='col-12'>
           <ul className='row  dash-box-main gap-6'>
             {arr.map((item, i) => (
-              <li className='fix-col mb-3 mb-xxl-0' key={i}>
-                <div className='white-bx-info'>
-                  <div className='align-items-center justify-content-between'>
-                    <div className='row align-items-center'>
-                      <div className='col-lg-7 col-md-7 col-sm-7 col-xs-7'>
-                        <div className='card-content'>
-                          <h3 className='fs-3'>{item?.name}</h3>
-                          <h3 className='mb-3'>{item?.count}</h3>
-                          <Link to={item?.link} state={item.state} className='badge badge-dark text-light text-capitalize bg-dark'>
-                            View
-                          </Link>
+              <>
+                {currentUser?.is_agent ? (
+                  (item?.name == 'Host' || item?.name == 'Host Applications') && (
+                    <li className='fix-col mb-3 mb-xxl-0' key={i}>
+                      <div className='white-bx-info'>
+                        <div className='align-items-center justify-content-between'>
+                          <div className='row align-items-center'>
+                            <div className='col-lg-7 col-md-7 col-sm-7 col-xs-7'>
+                              <div className='card-content'>
+                                <h3 className='fs-3'>{item?.name}</h3>
+                                <h3 className='mb-3'>{item?.count}</h3>
+                                {/* <Link to={item?.link} state={item.state} className='badge badge-dark text-light text-capitalize bg-dark'>
+                                  View
+                                </Link> */}
+                              </div>
+                            </div>
+                            <div className='col-lg-5 col-md-5 col-sm-5 col-xs-5'>
+                              <div className='d-flex justify-content-center'>
+                                <div className='way_icon'>
+                                  <div className='card-icon2 mainbg d-flex align-items-center justify-content-center'>
+                                    <i className={item?.logo} style={{color: 'black'}} />
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                      <div className='col-lg-5 col-md-5 col-sm-5 col-xs-5'>
-                        <div className='d-flex justify-content-center'>
-                          <div className='way_icon'>
-                            <div className='card-icon2 mainbg d-flex align-items-center justify-content-center'>
-                              <i className={item?.logo} style={{color: 'black'}} />
+                    </li>
+                  )
+                ) : (
+                  <li className='fix-col mb-3 mb-xxl-0' key={i}>
+                    <div className='white-bx-info'>
+                      <div className='align-items-center justify-content-between'>
+                        <div className='row align-items-center'>
+                          <div className='col-lg-7 col-md-7 col-sm-7 col-xs-7'>
+                            <div className='card-content'>
+                              <h3 className='fs-3'>{item?.name}</h3>
+                              <h3 className='mb-3'>{item?.count}</h3>
+                              <Link to={item?.link} state={item.state} className='badge badge-dark text-light text-capitalize bg-dark'>
+                                View
+                              </Link>
+                            </div>
+                          </div>
+                          <div className='col-lg-5 col-md-5 col-sm-5 col-xs-5'>
+                            <div className='d-flex justify-content-center'>
+                              <div className='way_icon'>
+                                <div className='card-icon2 mainbg d-flex align-items-center justify-content-center'>
+                                  <i className={item?.logo} style={{color: 'black'}} />
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-              </li>
+                  </li>
+                )}
+              </>
             ))}
           </ul>
         </div>

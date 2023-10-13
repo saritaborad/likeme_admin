@@ -3,11 +3,12 @@ import {toast} from 'react-toastify'
 import {deleteReport, fetchReports, hostblock} from '../ApiService/_requests'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
 import {ImgUrl} from '../const'
+import {useAuth} from '../app/modules/auth'
 
 const Report: React.FC = () => {
   const [reports, setReport] = useState<any>([])
-
   const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
+  const {currentUser} = useAuth()
 
   const columns = [
     {
@@ -96,18 +97,22 @@ const Report: React.FC = () => {
               >
                 View  
               </button> */}
-              <button
-                className='btn-comn-submit me-2'
-                onClick={() => {
-                  blockHost(data[i]?.user?._id)
-                  // setShow(true)
-                }}
-              >
-                Block
-              </button>
-              <button className='btn-comn-danger me-2' onClick={() => deleteReportData(data[i]?._id)}>
-                Delete Report
-              </button>
+              {!currentUser?.is_tester && (
+                <>
+                  <button
+                    className='btn-comn-submit me-2'
+                    onClick={() => {
+                      blockHost(data[i]?.user?._id)
+                      // setShow(true)
+                    }}
+                  >
+                    Block
+                  </button>
+                  <button className='btn-comn-danger me-2' onClick={() => deleteReportData(data[i]?._id)}>
+                    Delete Report
+                  </button>
+                </>
+              )}
             </div>
           )
         },

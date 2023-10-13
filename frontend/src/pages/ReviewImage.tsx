@@ -1,9 +1,11 @@
 import React, {useEffect, useState} from 'react'
 import {fetchAllImageReview} from '../ApiService/_requests'
 import {ImgUrl} from '../const'
+import {useAuth} from '../app/modules/auth'
 
 const ReviewImage = () => {
   const [images, setImages] = useState([])
+  const {currentUser} = useAuth()
 
   useEffect(() => {
     getAllImages()
@@ -28,8 +30,12 @@ const ReviewImage = () => {
                   <div className='card col-12'>
                     <img alt='images' src={ImgUrl + item.image} />
                     <div className='row d-flex px-3 mt-5  justify-content-between'>
-                      <button className='col-5 btn-comn-success text-white px-3'>Accept</button>
-                      <button className='col-6 btn-comn-danger text-white px-3'>Reject</button>
+                      {!currentUser?.is_tester && (
+                        <>
+                          <button className='col-5 btn-comn-success text-white px-3'>Accept</button>
+                          <button className='col-6 btn-comn-danger text-white px-3'>Reject</button>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>

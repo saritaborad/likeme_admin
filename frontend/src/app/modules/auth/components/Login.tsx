@@ -7,11 +7,10 @@ import Cookies from 'js-cookie'
 import {toast} from 'react-toastify'
 import {Formik} from 'formik'
 import {errorContainer, formAttr} from '../../../../commonFun'
-import {getAgent} from '../../../../ApiService/_requests'
 
 export function Login() {
   const [loading, setLoading] = useState(false)
-  const {saveAuth, setCurrentUser, setAgent} = useAuth()
+  const {saveAuth, setCurrentUser} = useAuth()
   const [rememberme, setRememberme] = useState<any>()
 
   useEffect(() => {
@@ -30,8 +29,6 @@ export function Login() {
       }
       const {data: user} = await getUserByToken(auth.data.authtoken)
       setCurrentUser(user)
-      const {data: agent} = await getAgent(user?.user)
-      setAgent(agent)
     } catch (error: any) {
       toast.error('Invalid Credential')
       saveAuth(undefined)

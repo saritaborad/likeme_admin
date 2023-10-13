@@ -5,6 +5,7 @@ import {Modal} from 'react-bootstrap'
 import CoinPlanModal from '../Modals/CoinPlanModal'
 import {usePackageName} from '../hooks/customHook'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
+import {useAuth} from '../app/modules/auth'
 
 interface IState {
   fullname?: string
@@ -17,6 +18,7 @@ const CoinPlan: React.FC = () => {
   const [coinPlanList, setCoinPlanList] = useState<IState[]>([])
   const [modalStates, setModalStates] = useState({update: false, show: false, coinPlan: ''})
   const [selectedItem, setSelectedItem] = useState<any>({package_name: 'com.videocall.randomcallapps'})
+  const {currentUser} = useAuth()
 
   const packageName = usePackageName()
 
@@ -143,17 +145,21 @@ const CoinPlan: React.FC = () => {
         customBodyRender: (data: any, i: number) => {
           return (
             <div>
-              <button
-                className='btn-comn-submit me-2'
-                onClick={() => {
-                  setModalStates({show: true, update: true, coinPlan: data[i]})
-                }}
-              >
-                Edit
-              </button>
-              <button className='btn-comn-danger me-2' onClick={() => deleteCoinPlan(data[i]?._id)}>
-                Delete
-              </button>
+              {!currentUser?.is_tester && (
+                <>
+                  <button
+                    className='btn-comn-submit me-2'
+                    onClick={() => {
+                      setModalStates({show: true, update: true, coinPlan: data[i]})
+                    }}
+                  >
+                    Edit
+                  </button>
+                  <button className='btn-comn-danger me-2' onClick={() => deleteCoinPlan(data[i]?._id)}>
+                    Delete
+                  </button>
+                </>
+              )}
             </div>
           )
         },
@@ -168,7 +174,7 @@ const CoinPlan: React.FC = () => {
   const changeSelect = async (id: string) => {
     const {data} = await default_flag(id)
     data.status == 200 ? toast.success(data.message) : toast.error(data.message)
-    getAllCoinPlan(option)
+    getAllCoinPlan(option, selectedItem)
   }
 
   const getAllCoinPlan = async (option?: any, filter?: any) => {
@@ -181,7 +187,7 @@ const CoinPlan: React.FC = () => {
   const deleteCoinPlan = async (id: string) => {
     const {data} = await deleteSubcriptionById(id)
     data.status == 200 ? toast.success(data.message) : toast.error(data.message)
-    getAllCoinPlan(option)
+    getAllCoinPlan(option, selectedItem)
   }
 
   const submitFormData = async (formData: any) => {
@@ -189,7 +195,7 @@ const CoinPlan: React.FC = () => {
 
     if (data.status === 200) {
       toast.success(data.message)
-      getAllCoinPlan(option)
+      getAllCoinPlan(option, selectedItem)
     }
   }
 
@@ -198,13 +204,13 @@ const CoinPlan: React.FC = () => {
 
     if (data.status === 200) {
       toast.success(data.message)
-      getAllCoinPlan(option)
+      getAllCoinPlan(option, selectedItem)
     }
   }
 
   const tableCallBack = (option: any) => {
     set_option(option)
-    getAllCoinPlan(option)
+    getAllCoinPlan(option, selectedItem)
   }
 
   const handleDrop = (updatedData: any) => {
@@ -231,9 +237,11 @@ const CoinPlan: React.FC = () => {
                 </div>
 
                 <div className='ms-auto me-2'>
-                  <button className='btn-comn-submit' onClick={() => setModalStates({...modalStates, show: true})}>
-                    Add Coin Plan
-                  </button>
+                  {!currentUser?.is_tester && (
+                    <button className='btn-comn-submit' onClick={() => setModalStates({...modalStates, show: true})}>
+                      Add Coin Plan
+                    </button>
+                  )}
                 </div>
               </div>
               <div className='col-3'>

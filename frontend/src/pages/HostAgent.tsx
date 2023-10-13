@@ -1,13 +1,13 @@
 import React, {useState, useEffect} from 'react'
-import {Link, useLocation} from 'react-router-dom'
-import {getAgentHosts} from '../ApiService/_requests'
+import {Link} from 'react-router-dom'
+import {getHostAgents} from '../ApiService/_requests'
 import {ImgUrl} from '../const'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
+import {useAuth} from '../app/modules/auth'
 
-const AgentHost = () => {
-  const {state}: any = useLocation()
+const HostAgent = () => {
   const [hosts, setHosts] = useState<any>()
-  const [agentInfo, setAgentInfo] = useState<any>()
+  const {currentUser} = useAuth()
 
   const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
 
@@ -25,7 +25,7 @@ const AgentHost = () => {
     },
     {
       value: 'fullName',
-      label: 'Host Name',
+      label: 'Full Name',
       options: {
         filter: false,
         sort: false,
@@ -35,18 +35,7 @@ const AgentHost = () => {
         },
       },
     },
-    {
-      value: 'version',
-      label: 'Version',
-      options: {
-        filter: false,
-        sort: false,
-        search: true,
-        customBodyRender: (data: any, i: number) => {
-          return <div>{data[i]?.version}</div>
-        },
-      },
-    },
+
     {
       value: 'identity',
       label: 'Identity',
@@ -56,6 +45,17 @@ const AgentHost = () => {
         search: true,
         customBodyRender: (data: any, i: number) => {
           return <div>{data[i]?.identity}</div>
+        },
+      },
+    },
+    {
+      value: 'is_block',
+      label: 'Status',
+      options: {
+        filter: false,
+        sort: false,
+        customBodyRender: (data: any, i: number) => {
+          return <div className={`${data[i]?.is_block == 1 ? 'badge badge-danger' : 'badge badge-success'}`}>{data[i]?.is_block == 1 ? 'Blocked' : 'Allowed'}</div>
         },
       },
     },
@@ -81,21 +81,7 @@ const AgentHost = () => {
         },
       },
     },
-    {
-      value: 'total_time',
-      label: 'Time',
-      options: {
-        filter: false,
-        sort: false,
-        customBodyRender: (data: any, i: number) => {
-          return (
-            <div>
-              {Math.floor(data[i]?.total_time / 60)} : {data[i]?.total_time % 60}
-            </div>
-          )
-        },
-      },
-    },
+
     {
       value: 'action',
       label: 'View History',
@@ -111,9 +97,6 @@ const AgentHost = () => {
               <Link className='btn-comn-warning me-2' to='/hostHistory' state={{hostInfo: data[i]}}>
                 Diamond
               </Link>
-              <Link className='btn-comn-warning me-2' to='/streamHistory' state={{hostInfo: data[i]}}>
-                Stream
-              </Link>
             </div>
           )
         },
@@ -122,19 +105,18 @@ const AgentHost = () => {
   ]
 
   useEffect(() => {
-    setAgentInfo(state?.agentInfo)
-    getAgentHost(option)
+    getHostAgent(option)
   }, [])
 
-  const getAgentHost = async (option?: any) => {
-    const {data} = await getAgentHosts({options: option, _id: state?.agentInfo?._id})
-    set_option({...option, totalRecord: data.totalRecord})
+  const getHostAgent = async (option?: any) => {
+    const {data} = await getHostAgents({options: option, _id: currentUser?.user})
     setHosts(data)
+    set_option({...option, totalRecord: data.totalRecord})
   }
 
   const tableCallBack = (option: any) => {
     set_option(option)
-    getAgentHost(option)
+    getHostAgent(option)
   }
 
   return (
@@ -142,12 +124,8 @@ const AgentHost = () => {
       <div className='col-12 '>
         <div className='white-box-table  card-shadow'>
           <div className='row'>
-            <div className='col-12 d-flex align-items-center mt-7 mb-10'>
-              <img src={ImgUrl + agentInfo?.images} alt='' className='profile-img me-3' />
-
-              <h3>
-                <i> {agentInfo?.name}</i> - Agent host list
-              </h3>
+            <div className='col-12 d-flex align-items-center mt-7 mb-4'>
+              <h1>Hosts</h1>
 
               <div className='ms-auto mb-2 me-4'>
                 <div className='me-2 px-12 py-1 fw-bold' style={{borderRadius: '25px', backgroundColor: '#ffa426'}}>
@@ -156,7 +134,7 @@ const AgentHost = () => {
               </div>
             </div>
           </div>
-          <button className='btn-comn-submit mb-6 py-3'>Pending Payments</button>
+          <button className='btn-comn-submit mb-6 py-3'>Real Hosts</button>
           <RtdDatatableNew data={hosts?.agentHost} columns={columns} option={option} tableCallBack={tableCallBack} />
         </div>
       </div>
@@ -164,4 +142,4 @@ const AgentHost = () => {
   )
 }
 
-export default AgentHost
+export default HostAgent

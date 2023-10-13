@@ -4,6 +4,7 @@ import {Modal} from 'react-bootstrap'
 import NotiContent from '../Modals/NotiContent'
 import {addNotiContent, deleteNotiContent, getNotiContent, updateNotiContent} from '../ApiService/_requests'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
+import {useAuth} from '../app/modules/auth'
 
 interface IState {
   fullname?: string
@@ -15,6 +16,7 @@ interface IState {
 const NotificationContent: React.FC = () => {
   const [notiContentList, setNotiContentList] = useState<IState[]>([])
   const [modalStates, setModalStates] = useState({update: false, show: false, notiInfo: ''})
+  const {currentUser} = useAuth()
 
   const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
 
@@ -52,12 +54,16 @@ const NotificationContent: React.FC = () => {
         customBodyRender: (data: any, i: number) => {
           return (
             <div>
-              <button className='btn-comn-submit me-2' onClick={() => setModalStates({update: true, show: true, notiInfo: data[i]})}>
-                Edit
-              </button>
-              <button className='btn-comn-danger me-2' onClick={() => delNotiContentData(data[i]?._id)}>
-                Delete
-              </button>
+              {!currentUser?.is_tester && (
+                <>
+                  <button className='btn-comn-submit me-2' onClick={() => setModalStates({update: true, show: true, notiInfo: data[i]})}>
+                    Edit
+                  </button>
+                  <button className='btn-comn-danger me-2' onClick={() => delNotiContentData(data[i]?._id)}>
+                    Delete
+                  </button>
+                </>
+              )}
             </div>
           )
         },
@@ -121,9 +127,11 @@ const NotificationContent: React.FC = () => {
                   <h1>Notification Content</h1>
                 </div>
                 <div className='ms-auto'>
-                  <button className='btn-comn-submit me-2' onClick={() => setModalStates({...modalStates, show: true})}>
-                    Add Notification Content
-                  </button>
+                  {!currentUser?.is_tester && (
+                    <button className='btn-comn-submit me-2' onClick={() => setModalStates({...modalStates, show: true})}>
+                      Add Notification Content
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

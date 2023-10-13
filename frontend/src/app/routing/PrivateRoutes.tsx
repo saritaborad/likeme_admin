@@ -37,6 +37,7 @@ import HostHistory from '../../pages/HostHistory'
 import SpendHistory from '../../pages/SpendHistory'
 import TopPurchase from '../../pages/TopPurchase'
 import Dashboard from '../../pages/Dashboard'
+import HostAgent from '../../pages/HostAgent'
 
 const PrivateRoutes = () => {
   const ProfilePage = lazy(() => import('../modules/profile/ProfilePage'))
@@ -81,6 +82,7 @@ const PrivateRoutes = () => {
         <Route path='reviewImage' element={<ReviewImage />} />
         <Route path='reviewVideo' element={<ReviewVideo />} />
         <Route path='topPurchaser' element={<TopPurchase />} />
+        <Route path='hostAgent' element={<HostAgent />} />
 
         <Route path='builder' element={<BuilderPageWrapper />} />
         <Route path='menu-test' element={<MenuTestPage />} />

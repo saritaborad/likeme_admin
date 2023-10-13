@@ -5,6 +5,7 @@ import {Modal} from 'react-bootstrap'
 import NotiCredent from '../Modals/NotiCredent'
 import moment from 'moment'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
+import {useAuth} from '../app/modules/auth'
 
 interface IState {
   fullname?: string
@@ -16,6 +17,7 @@ interface IState {
 const NotificationCredential: React.FC = () => {
   const [notiCredList, setNotiCredList] = useState<IState[]>([])
   const [modalStates, setModalStates] = useState({update: false, show: false, notiInfo: ''})
+  const {currentUser} = useAuth()
 
   const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
 
@@ -78,12 +80,16 @@ const NotificationCredential: React.FC = () => {
         customBodyRender: (data: any, i: number) => {
           return (
             <div>
-              <button className='btn-comn-submit me-2' onClick={() => setModalStates({show: true, update: true, notiInfo: data[i]})}>
-                Edit
-              </button>
-              <button className='btn-comn-danger me-2' onClick={() => deleteNotiCred(data[i]?._id)}>
-                Delete
-              </button>
+              {!currentUser?.is_tester && (
+                <>
+                  <button className='btn-comn-submit me-2' onClick={() => setModalStates({show: true, update: true, notiInfo: data[i]})}>
+                    Edit
+                  </button>
+                  <button className='btn-comn-danger me-2' onClick={() => deleteNotiCred(data[i]?._id)}>
+                    Delete
+                  </button>
+                </>
+              )}
             </div>
           )
         },
@@ -163,9 +169,11 @@ const NotificationCredential: React.FC = () => {
                   <h1>Notification Credentials</h1>
                 </div>
                 <div className='ms-auto'>
-                  <button className='btn-comn-submit me-2' onClick={() => setModalStates({...modalStates, show: true})}>
-                    Add Notification Credentials
-                  </button>
+                  {!currentUser?.is_tester && (
+                    <button className='btn-comn-submit me-2' onClick={() => setModalStates({...modalStates, show: true})}>
+                      Add Notification Credentials
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

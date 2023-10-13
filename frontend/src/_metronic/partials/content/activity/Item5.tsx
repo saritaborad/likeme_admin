@@ -9,10 +9,7 @@ const Item5: FC = () => {
 
       <div className='timeline-icon symbol symbol-circle symbol-40px'>
         <div className='symbol-label bg-light'>
-          <KTSVG
-            path='/media/icons/duotune/art/art005.svg'
-            className='svg-icon-2 svg-icon-gray-500'
-          />
+          <KTSVG path='/media/icons/duotune/art/art005.svg' className='svg-icon-2 svg-icon-gray-500' />
         </div>
       </div>
 
@@ -23,13 +20,7 @@ const Item5: FC = () => {
           <div className='d-flex align-items-center mt-1 fs-6'>
             <div className='text-muted me-2 fs-7'>Created at 4:23 PM by</div>
 
-            <div
-              className='symbol symbol-circle symbol-25px'
-              data-bs-toggle='tooltip'
-              data-bs-boundary='window'
-              data-bs-placement='top'
-              title='Marcus Dotson'
-            >
+            <div className='symbol symbol-circle symbol-25px' data-bs-toggle='tooltip' data-bs-boundary='window' data-bs-placement='top' title='Marcus Dotson'>
               <img src={toAbsoluteUrl('/media/avatars/300-2.jpg')} alt='img' />
             </div>
           </div>
@@ -39,11 +30,7 @@ const Item5: FC = () => {
           <div className='d-flex align-items-center border border-dashed border-gray-300 rounded min-w-700px p-7'>
             <div className='overlay me-10'>
               <div className='overlay-wrapper'>
-                <img
-                  alt='img'
-                  className='rounded w-200px'
-                  src={toAbsoluteUrl('/media/demos/demo1.png')}
-                />
+                <img alt='img' className='rounded w-200px' src={toAbsoluteUrl('/media/demos/demo1.png')} />
               </div>
 
               <div className='overlay-layer bg-dark bg-opacity-10 rounded'>
@@ -55,11 +42,7 @@ const Item5: FC = () => {
 
             <div className='overlay me-10'>
               <div className='overlay-wrapper'>
-                <img
-                  alt='img'
-                  className='rounded w-200px'
-                  src={toAbsoluteUrl('/media/demos/demo2.png')}
-                />
+                <img alt='img' className='rounded w-200px' src={toAbsoluteUrl('/media/demos/demo2.png')} />
               </div>
 
               <div className='overlay-layer bg-dark bg-opacity-10 rounded'>
@@ -71,11 +54,7 @@ const Item5: FC = () => {
 
             <div className='overlay'>
               <div className='overlay-wrapper'>
-                <img
-                  alt='img'
-                  className='rounded w-200px'
-                  src={toAbsoluteUrl('/media/demos/demo3.png')}
-                />
+                <img alt='img' className='rounded w-200px' src={toAbsoluteUrl('/media/demos/demo3.png')} />
               </div>
 
               <div className='overlay-layer bg-dark bg-opacity-10 rounded'>

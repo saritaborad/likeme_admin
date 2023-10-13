@@ -4,11 +4,13 @@ import {getAdmob, getSettingData, updateAdmob, updateSettingApp} from '../ApiSer
 import {Formik} from 'formik'
 import {errorContainer, formAttr} from '../commonFun'
 import * as Yup from 'yup'
+import {useAuth} from '../app/modules/auth'
 
 const Setting: React.FC = () => {
   const [settingInfo, setSettingInfo] = useState<any>()
   const [liveStream, setLiveStream] = useState(false)
   const [rewarded, setRewarded] = useState({type: 1, rewarded_id: ''})
+  const {currentUser} = useAuth()
 
   useEffect(() => {
     settingData()
@@ -124,9 +126,11 @@ const Setting: React.FC = () => {
                       </div>
                     </div>
 
-                    <button type='submit' className='btn-comn-submit mt-8'>
-                      Submit
-                    </button>
+                    {!currentUser?.is_tester && (
+                      <button type='submit' className='btn-comn-submit mt-8'>
+                        Submit
+                      </button>
+                    )}
                   </div>
                 </form>
               )}
@@ -169,9 +173,11 @@ const Setting: React.FC = () => {
                       </div>
                     </div>
                     <input type='hidden' name='id' className='form-control' id='id-app-agora-app' />
-                    <button type='submit' className='btn-comn-submit mt-8'>
-                      Submit
-                    </button>
+                    {!currentUser?.is_tester && (
+                      <button type='submit' className='btn-comn-submit mt-8'>
+                        Submit
+                      </button>
+                    )}
                   </div>
                 </form>
               )}
@@ -217,9 +223,11 @@ const Setting: React.FC = () => {
                         <input type='text' name='rewarded_id' onChange={handleChange} value={rewarded.rewarded_id} className='form-control mt-2' id='ReWarded-android' />
                       </div>
                     </div>
-                    <button type='submit' className='btn-comn-submit mt-8'>
-                      Submit
-                    </button>
+                    {!currentUser?.is_tester && (
+                      <button type='submit' className='btn-comn-submit mt-8'>
+                        Submit
+                      </button>
+                    )}
                   </form>
                 </div>
               </div>
@@ -298,7 +306,6 @@ const Setting: React.FC = () => {
                             <input type='number' name='minimumMinuts' disabled={!liveStream} required className='form-control' id='min-host-minuts' {...formAttr(runform, 'minimumMinuts')} />
                             {errorContainer(runform, 'minimumMinuts')}
                           </div>
-
                           <div className='form-group form-check form-switch col-md-6 ps-2 mt-7'>
                             <label htmlFor='Switch' className='mt-2 d-block'>
                               On/Off Livestream Timeout
@@ -359,9 +366,11 @@ const Setting: React.FC = () => {
                         </div>
 
                         <input type='hidden' name='id' className='form-control id-get-charg-app' />
-                        <button type='submit' className='btn-comn-submit mt-8'>
-                          Submit
-                        </button>
+                        {!currentUser?.is_tester && (
+                          <button type='submit' className='btn-comn-submit mt-8'>
+                            Submit
+                          </button>
+                        )}
                       </div>
                     </form>
                   )}

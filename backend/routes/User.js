@@ -1,5 +1,5 @@
 const express = require("express");
-const { login, register, verifyToken, getAllUser, updateUser, onOff_video_call, save_profile, delete_profile, userProfileUpdate, getUserProfile, get_saved_profile, fetchBlockList, remove_from_save, diamondMinus, diamondPlus, multiUser, userblock, updateUserCallStatus, fetchAllUser, logOut, AddCoin, fetchDashboardCount } = require("../controllers/User");
+const { login, register, verifyToken, onOff_video_call, save_profile, delete_profile, userProfileUpdate, getUserProfile, get_saved_profile, fetchBlockList, remove_from_save, diamondMinus, diamondPlus, multiUser, userblock, updateUserCallStatus, fetchAllUser, logOut, AddCoin, fetchDashboardCount, fetchAgentDashboard } = require("../controllers/User");
 
 const router = express.Router();
 
@@ -27,5 +27,6 @@ router.post("/onOff_video_call", onOff_video_call);
 
 //  dashborad api
 router.post("/fetchDashboardCount", fetchDashboardCount);
+router.post("/fetchAgentDashboard", fetchAgentDashboard);
 
 module.exports = router;

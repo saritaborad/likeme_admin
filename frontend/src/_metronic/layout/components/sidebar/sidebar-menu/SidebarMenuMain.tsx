@@ -5,7 +5,7 @@ import {useAuth} from '../../../../../app/modules/auth'
 
 const SidebarMenuMain = () => {
   const intl = useIntl()
-  const {currentUser, agent} = useAuth()
+  const {currentUser} = useAuth()
 
   return (
     <>
@@ -60,7 +60,7 @@ const SidebarMenuMain = () => {
       {currentUser?.is_agent ? (
         <>
           <SidebarMenuItem to='/dashboard' icon='/media/icons/duotune/general/gen051.svg' title='Dashboard' fontIcon='bi-layers' />
-          <SidebarMenuItem to='/agentHost' state={agent} icon='/media/icons/duotune/general/gen051.svg' title='Host List' fontIcon='bi-layers' />
+          <SidebarMenuItem to='/hostAgent' icon='/media/icons/duotune/general/gen051.svg' title='Host List' fontIcon='bi-layers' />
         </>
       ) : (
         <>

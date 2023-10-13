@@ -5,25 +5,22 @@ const Gift = require("../models/Gift");
 const CoinPlan = require("../models/Subscription");
 const Redeem = require("../models/Redeem");
 const Message = require("../models/Message");
-
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const sendToken = require("../utils/jwtToken");
-const ApiFeatures = require("../utils/ApiFeatures");
-const { deleteFile } = require("../utils/commonFunc");
-const { giveresponse, asyncHandler } = require("../utils/res_help");
 const Video = require("../models/Video");
 const Images = require("../models/Image");
 const Report = require("../models/Report");
 const App = require("../models/App");
 const UserGainTransactionHistory = require("../models/UserGainTransactionHistory");
 const UserSpendTransactionHistory = require("../models/UserSpendTransactionHistory");
-const Image = require("../models/Image");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const sendToken = require("../utils/jwtToken");
+const ApiFeatures = require("../utils/ApiFeatures");
+const { giveresponse, asyncHandler } = require("../utils/res_help");
 
 exports.verifyToken = asyncHandler(async (req, res) => {
  const { authtoken } = req.body;
  const user = jwt.verify(authtoken, process.env.JWT_SECRET);
- return giveresponse(res, 200, true, "token verified", { user: user.id, is_agent: user.is_agent });
+ return giveresponse(res, 200, true, "token verified", { user: user.id, is_agent: user.is_agent, is_tester: user.is_tester });
 });
 
 exports.register = asyncHandler(async (req, res, next) => {
@@ -73,13 +70,6 @@ exports.userblock = asyncHandler(async (req, res, next) => {
  await User.updateOne({ _id: req.body._id }, { $set: { is_block: req.body.is_block } });
  return giveresponse(res, 200, true, `User ${req.body.is_block == 1 ? "block" : "unblock"} success`);
 });
-
-// exports.getAllUser = asyncHandler(async (req, res) => {
-//  const apiFeature = new ApiFeatures(User.find()).search().sort().pagination();
-//  let result = await apiFeature.query;
-//  apiFeature.totalRecord = await User.countDocuments();
-//  return giveresponse(res, 200, true, "All user get success.", { result, totalRecord: apiFeature.totalRecord, totalPage: apiFeature.totalPage });
-// });
 
 exports.updateUserCallStatus = asyncHandler(async (req, res, next) => {
  const { my_user_id, call_status, to_user_id } = req.body;
@@ -330,27 +320,9 @@ exports.fetchDashboardCount = asyncHandler(async (req, res) => {
  return giveresponse(res, 200, true, "dashboard count get success!", { users, hostApps, blockHost, hosts, reports, countries, redeem, gatway, fakeMsg, coinPlans, gifts });
 });
 
-// exports.login = asyncHandler(async (req, res) => {
-//  const { email, password } = req.body;
-//  const user = await User.findOne({ email }).select("+password");
-//  if (!user) return giveresponse(res, 400, false, "User does not exists");
-//  const isMatch = await user.comparePassword(password);
-//  if (!isMatch) return giveresponse(res, 400, false, "Invalid credentials");
-//  return sendToken(user, 201, res, (message = "Login success"));
-// });
-
-// exports.register = asyncHandler(async (req, res) => {
-//  const { email, firstname, lastname, password } = req.body;
-//  const userExist = await User.findOne({ email });
-//  if (userExist) return giveresponse(res, 400, false, "User already exists");
-//  const hashPass = await bcrypt.hash(password, 10);
-//  const user = User({ email, password: hashPass, firstname, lastname });
-//  await user.save();
-//  return sendToken(user, 200, res, (message = "User created successfully!"));
-// });
-
-// exports.updateUser = asyncHandler(async (req, res) => {
-//  const { data } = req.body;
-//  console.log(data);
-//  return res.status(200).json({ message: "Data" });
-// });
+exports.fetchAgentDashboard = asyncHandler(async (req, res) => {
+ const allUsers = await User.find({ agent_id: req.body?._id }).select("is_host is_block is_fake");
+ const hosts = allUsers.filter((item) => item.is_host == 2 && item.is_fake == 0)?.length;
+ const hostApps = allUsers.filter((item) => item.is_host == 1 && item.is_block == 0)?.length;
+ return giveresponse(res, 200, true, "agent dashboard get success!", { hosts, hostApps });
+});

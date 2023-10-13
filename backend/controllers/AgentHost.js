@@ -23,7 +23,9 @@ exports.getAgentHosts = asyncHandler(async (req, res, next) => {
   pendingRedeemV[item._id] = item.total;
  });
 
- const agent_hosts = await User.find({ agent_id: _id, is_block: 0 }).select("fullName profileimages version identity");
+ const apiFeature = new ApiFeatures(User.find({ agent_id: _id, is_block: 0 }).select("fullName profileimages version identity"), req.body?.options).search().sort().pagination();
+ const agent_hosts = await apiFeature.query;
+ apiFeature.totalRecord = await User.countDocuments({ agent_id: _id, is_block: 0 });
 
  const hostIds = agent_hosts.map((host) => host._id);
 
@@ -73,7 +75,7 @@ exports.getAgentHosts = asyncHandler(async (req, res, next) => {
   })
  );
 
- return giveresponse(res, 200, true, "agent host get", { agentHost, subtotal });
+ return giveresponse(res, 200, true, "agent host get", { agentHost, subtotal, totalRecord: apiFeature.totalRecord, totalPage: apiFeature.totalPage });
 });
 
 exports.fetchAllStreamHistory = asyncHandler(async (req, res, next) => {
@@ -164,4 +166,65 @@ exports.fetchHostSummary = asyncHandler(async (req, res, next) => {
  const data = { gift: typeTotals[1], call: typeTotals[2], stream: typeTotals[3], chat: typeTotals[4], match: typeTotals[5], total: grandTotal, streaming_time: streaming_time?.length == 0 ? 0 : streaming_time?.[0]?.total_time, public_streams: public_streams };
 
  return giveresponse(res, 200, true, "Host History get success.", data);
+});
+
+exports.getHostAgents = asyncHandler(async (req, res, next) => {
+ const { _id } = req.body;
+ let query = { agent_id: _id, is_host: 2, is_fake: 0 };
+
+ const apiFeature = new ApiFeatures(User.find(query).populate("images").select("fullName identity profileimages is_block diamond"), req.body?.options).search().sort().pagination();
+ const users = await apiFeature.query;
+ apiFeature.totalRecord = await User.countDocuments(query);
+
+ const dateTime = moment().tz("Asia/Kolkata").add(1, "days").toDate();
+
+ const pendingRedeemV = {};
+ let subtotal = 0;
+
+ const pendingRedeem = await UserSpendTransactionHistory.aggregate([{ $match: { host_paided: 1, createdAt: { $lte: dateTime } } }, { $group: { _id: "$received_by", total: { $sum: "$diamond" } } }]);
+
+ pendingRedeem.forEach((item) => {
+  pendingRedeemV[item._id] = item.total;
+ });
+
+ const agent = await Agent.findOne({ _id: _id });
+ const stream_minits = agent?.stream_minits;
+
+ let currentDate = moment();
+ let redeemLastDate = await Redeem.findOne().sort({ createdAt: -1 });
+ const lastRedeemDate = moment(redeemLastDate.createdAt);
+ const diff = currentDate.diff(lastRedeemDate, "days");
+ const DaysAgo = moment().subtract(diff, "days");
+
+ const agentHost = await Promise.all(
+  users.map(async (user) => {
+   if (pendingRedeemV[user._id]) subtotal += pendingRedeemV[user._id];
+
+   const streamTracks = await HostLiveStreamTrack.aggregate([
+    {
+     $match: {
+      host_id: user._id,
+      start: { $gte: DaysAgo.toDate() },
+     },
+    },
+    {
+     $group: {
+      _id: { host_id: "$host_id", date: { $dateToString: { format: "%Y-%m-%d", date: "$start" } } },
+      count: { $sum: 1 },
+      date: { $first: { $dateToString: { format: "%Y-%m-%d", date: "$start" } } },
+      time_diff: { $sum: { $divide: [{ $subtract: ["$end", "$start"] }, 1000] } }, // convert difference in seconds
+     },
+    },
+    {
+     $match: {
+      time_diff: { $gt: stream_minits * 60 },
+     },
+    },
+   ]);
+
+   const updatedAgentHost = { ...user?._doc, count: streamTracks.length || 0, diamond: pendingRedeemV[user._id] || 0 };
+   return updatedAgentHost;
+  })
+ );
+ return giveresponse(res, 200, true, "agent host get", { agentHost, subtotal, totalRecord: apiFeature.totalRecord, totalPage: apiFeature.totalPage });
 });

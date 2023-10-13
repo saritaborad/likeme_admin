@@ -5,6 +5,7 @@ import {Modal} from 'react-bootstrap'
 import FakeMsg from '../Modals/FakeMsg'
 import {ImgUrl} from '../const'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
+import {useAuth} from '../app/modules/auth'
 
 interface IState {
   fullname?: string
@@ -16,6 +17,7 @@ interface IState {
 const FakeMessage: React.FC = () => {
   const [messageList, setMessageList] = useState<IState[]>([])
   const [modalStates, setModalStates] = useState({update: false, show: false, messageInfo: ''})
+  const {currentUser} = useAuth()
 
   const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
 
@@ -38,9 +40,11 @@ const FakeMessage: React.FC = () => {
         sort: false,
         customBodyRender: (data: any, i: number) => {
           return (
-            <button className='btn-comn-danger' onClick={() => deleteMessage(data[i]._id)}>
-              Delete
-            </button>
+            !currentUser?.is_tester && (
+              <button className='btn-comn-danger' onClick={() => deleteMessage(data[i]._id)}>
+                Delete
+              </button>
+            )
           )
         },
       },
@@ -99,9 +103,11 @@ const FakeMessage: React.FC = () => {
                   <h1>Messages</h1>
                 </div>
                 <div className='ms-auto'>
-                  <button className='btn-comn-submit me-2' onClick={() => setModalStates({...modalStates, show: true})}>
-                    Add Message
-                  </button>
+                  {!currentUser?.is_tester && (
+                    <button className='btn-comn-submit me-2' onClick={() => setModalStates({...modalStates, show: true})}>
+                      Add Message
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

@@ -4,11 +4,13 @@ import {Modal} from 'react-bootstrap'
 import {addPayment, deletePaymentById, fetchAllPayment, updatePayment} from '../ApiService/_requests'
 import AddPaymentGateway from '../Modals/AddPaymentGateway'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
+import {useAuth} from '../app/modules/auth'
 
 const PaymentGateway: React.FC = () => {
   const [gatewayList, setGatewayList] = useState([])
   const [modalStates, setModalStates] = useState({update: false, show: false, gatewayInfo: ''})
-  const [option, set_option] = useState({sizePerPage: 3, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
+  const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
+  const {currentUser} = useAuth()
 
   const columns = [
     {
@@ -32,12 +34,16 @@ const PaymentGateway: React.FC = () => {
         customBodyRender: (data: any, i: number) => {
           return (
             <div>
-              <button className='btn-comn-submit me-2' onClick={() => setModalStates({update: true, show: true, gatewayInfo: data[i]})}>
-                Edit
-              </button>
-              <button className='btn-comn-danger me-2' onClick={() => deleteGateway(data[i]?._id)}>
-                Delete
-              </button>
+              {!currentUser?.is_tester && (
+                <>
+                  <button className='btn-comn-submit me-2' onClick={() => setModalStates({update: true, show: true, gatewayInfo: data[i]})}>
+                    Edit
+                  </button>
+                  <button className='btn-comn-danger me-2' onClick={() => deleteGateway(data[i]?._id)}>
+                    Delete
+                  </button>
+                </>
+              )}
             </div>
           )
         },
@@ -103,9 +109,11 @@ const PaymentGateway: React.FC = () => {
                   <h1>Payment Gateways</h1>
                 </div>
                 <div className='ms-auto'>
-                  <button className='btn-comn-submit me-2' onClick={() => setModalStates({...modalStates, show: true})}>
-                    Add Gateway
-                  </button>
+                  {!currentUser?.is_tester && (
+                    <button className='btn-comn-submit me-2' onClick={() => setModalStates({...modalStates, show: true})}>
+                      Add Gateway
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

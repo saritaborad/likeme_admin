@@ -4,11 +4,13 @@ import {useAllAgent} from '../hooks/customHook'
 import moment from 'moment'
 import {toast} from 'react-toastify'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
+import {useAuth} from '../app/modules/auth'
 
 const RedeemRequest: React.FC = () => {
   const [redeems, setRedeems] = useState([])
   const agents: any = useAllAgent()
   const [selectedItem, setSelectedItem] = useState<any>({request_status: 0, agent_id: ''})
+  const {currentUser} = useAuth()
 
   const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
 
@@ -100,12 +102,16 @@ const RedeemRequest: React.FC = () => {
         customBodyRender: (data: any, i: number) => {
           return (
             <div className=' '>
-              <button className='btn-comn-danger me-3' onClick={() => RejectRedeem(data[i]?._id)}>
-                Reject
-              </button>
-              <button className='btn-comn-submit' onClick={() => ApproveRedeem(data[i]?.amount_paid, data[i]?.request_status, data[i]?.completed_at)}>
-                Done
-              </button>
+              {!currentUser?.is_tester && (
+                <>
+                  <button className='btn-comn-danger me-3' onClick={() => RejectRedeem(data[i]?._id)}>
+                    Reject
+                  </button>
+                  <button className='btn-comn-submit' onClick={() => ApproveRedeem(data[i]?.amount_paid, data[i]?.request_status, data[i]?.completed_at)}>
+                    Done
+                  </button>
+                </>
+              )}
             </div>
           )
         },

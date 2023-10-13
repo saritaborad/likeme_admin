@@ -71,4 +71,5 @@ export interface UserModel {
   socialNetworks?: UserSocialNetworksModel
   is_agent: any
   user?: any
+  is_tester?: any
 }

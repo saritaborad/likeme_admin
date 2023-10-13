@@ -4,11 +4,13 @@ import {Modal} from 'react-bootstrap'
 import SendMessage from '../Modals/sendMessage'
 import {toast} from 'react-toastify'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
+import {useAuth} from '../app/modules/auth'
 
 const TopPurchase = () => {
   const [purchase, setPurchase] = useState()
   const [show, setShow] = useState(false)
   const [userId, setUserId] = useState('')
+  const {currentUser} = useAuth()
 
   const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
 
@@ -68,16 +70,18 @@ const TopPurchase = () => {
         sort: false,
         customBodyRender: (data: any, i: number) => {
           return (
-            <button
-              type='button'
-              className='btn btn-dark noty'
-              onClick={() => {
-                setShow(true)
-                setUserId(data[i]?.user?._id)
-              }}
-            >
-              Send &nbsp; <i className='fas fa-bell' />
-            </button>
+            !currentUser?.is_tester && (
+              <button
+                type='button'
+                className='btn btn-dark noty'
+                onClick={() => {
+                  setShow(true)
+                  setUserId(data[i]?.user?._id)
+                }}
+              >
+                Send &nbsp; <i className='fas fa-bell' />
+              </button>
+            )
           )
         },
       },

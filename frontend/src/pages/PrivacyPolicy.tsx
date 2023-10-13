@@ -7,10 +7,12 @@ import {Formik} from 'formik'
 import * as Yup from 'yup'
 import {addPageData, getPageData} from '../ApiService/_requests'
 import {toast} from 'react-toastify'
+import {useAuth} from '../app/modules/auth'
 
 const PrivacyPolicy: React.FC = () => {
   const [description, setDescription] = useState('')
   const sendRef: any = useRef()
+  const {currentUser} = useAuth()
 
   useEffect(() => {
     getPage()
@@ -67,9 +69,11 @@ const PrivacyPolicy: React.FC = () => {
                     />
                     {errorContainer(runform, 'description')}
                   </div>
-                  <button type='submit' className='btn-comn-submit mt-5'>
-                    Submit
-                  </button>
+                  {!currentUser?.is_tester && (
+                    <button type='submit' className='btn-comn-submit mt-5'>
+                      Submit
+                    </button>
+                  )}
                 </form>
               )}
             </Formik>

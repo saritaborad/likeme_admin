@@ -2,6 +2,7 @@ import {Formik} from 'formik'
 import React, {useState} from 'react'
 import * as Yup from 'yup'
 import {errorContainer, formAttr} from '../commonFun'
+import {useAuth} from '../app/modules/auth'
 
 interface IPROPS {
   submitFormData?: any

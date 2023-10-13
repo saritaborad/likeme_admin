@@ -5,6 +5,7 @@ import {Modal} from 'react-bootstrap'
 import AddGift from '../Modals/AddGift'
 import {ImgUrl} from '../const'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
+import {useAuth} from '../app/modules/auth'
 // import AddGift from '../Modals/AddGift'
 
 interface IState {
@@ -17,6 +18,7 @@ interface IState {
 const Gift: React.FC = () => {
   const [gifts, setGifts] = useState<IState[]>([])
   const [modalStates, setModalStates] = useState({update: false, show: false, giftInfo: ''})
+  const {currentUser} = useAuth()
 
   const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
 
@@ -54,12 +56,16 @@ const Gift: React.FC = () => {
         customBodyRender: (data: any, i: number) => {
           return (
             <div>
-              <button className='btn-comn-submit me-2' onClick={() => setModalStates({update: true, show: true, giftInfo: data[i]})}>
-                Edit
-              </button>
-              <button className='btn-comn-danger me-2' onClick={() => deleteGiftData(data[i]?._id)}>
-                Delete
-              </button>
+              {!currentUser?.is_tester && (
+                <>
+                  <button className='btn-comn-submit me-2' onClick={() => setModalStates({update: true, show: true, giftInfo: data[i]})}>
+                    Edit
+                  </button>
+                  <button className='btn-comn-danger me-2' onClick={() => deleteGiftData(data[i]?._id)}>
+                    Delete
+                  </button>
+                </>
+              )}
             </div>
           )
         },
@@ -123,9 +129,11 @@ const Gift: React.FC = () => {
                   <h1>Gifts</h1>
                 </div>
                 <div className='ms-auto'>
-                  <button className='btn-comn-submit me-2' onClick={() => setModalStates({...modalStates, show: true})}>
-                    Add Gift
-                  </button>
+                  {!currentUser?.is_tester && (
+                    <button className='btn-comn-submit me-2' onClick={() => setModalStates({...modalStates, show: true})}>
+                      Add Gift
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

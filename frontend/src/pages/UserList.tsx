@@ -5,6 +5,7 @@ import {ImgUrl} from '../const'
 import {Modal} from 'react-bootstrap'
 import AddCoin from '../Modals/AddCoin'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
+import {useAuth} from '../app/modules/auth'
 
 interface IState {
   fullname?: string
@@ -18,6 +19,7 @@ const UserList: React.FC = () => {
   const [show, setShow] = useState(false)
   const [id, setId] = useState('')
   const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
+  const {currentUser} = useAuth()
 
   const columns = [
     {
@@ -86,23 +88,25 @@ const UserList: React.FC = () => {
         sort: false,
         customBodyRender: (data: any, i: number) => {
           return (
-            <div className='d-flex '>
-              <button
-                className='btn btn-dark me-2'
-                onClick={() => {
-                  setShow(true)
-                  setId(data[i]?._id)
-                }}
-              >
-                Add Coin
-              </button>
-
-              <div style={{marginLeft: '5px'}}>
-                <button className={`${data[i]?.is_block === 1 ? 'btn-comn-danger' : 'btn-comn-submit'}`} onClick={() => handleBlock(data[i]?._id, data[i]?.is_block)}>
-                  {data[i]?.is_block === 1 ? 'Unblock' : 'Block'}
+            !currentUser?.is_tester && (
+              <div className='d-flex '>
+                <button
+                  className='btn btn-dark me-2'
+                  onClick={() => {
+                    setShow(true)
+                    setId(data[i]?._id)
+                  }}
+                >
+                  Add Coin
                 </button>
+
+                <div style={{marginLeft: '5px'}}>
+                  <button className={`${data[i]?.is_block === 1 ? 'btn-comn-danger' : 'btn-comn-submit'}`} onClick={() => handleBlock(data[i]?._id, data[i]?.is_block)}>
+                    {data[i]?.is_block === 1 ? 'Unblock' : 'Block'}
+                  </button>
+                </div>
               </div>
-            </div>
+            )
           )
         },
       },
