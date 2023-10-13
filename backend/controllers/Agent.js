@@ -53,3 +53,8 @@ exports.fetchAgents = asyncHandler(async (req, res, next) => {
  const agents = await Agent.find({ is_deleted: 0 }).sort({ _id: -1 }).select("name _id");
  return giveresponse(res, 200, true, "Agent data get success.", agents);
 });
+
+exports.fetchAgentById = asyncHandler(async (req, res, next) => {
+ const agent = await Agent.findOne({ _id: req.body?._id });
+ return giveresponse(res, 200, true, "Agent data get success.", agent);
+});

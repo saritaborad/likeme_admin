@@ -37,6 +37,7 @@ export const API_PATH = {
   addfakeUser: ApiBaseUrl + '/addfakeUser',
 
   fetchAllagent: ApiBaseUrl + '/fetchAllagent',
+  fetchAgentById: ApiBaseUrl + '/fetchAgentById',
   deleteAgent: ApiBaseUrl + '/deleteAgent',
   addAgent: ApiBaseUrl + '/addAgent',
   editAgent: ApiBaseUrl + '/editAgent',

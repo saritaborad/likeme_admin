@@ -1,12 +1,11 @@
 /* eslint-disable react/jsx-no-target-blank */
-import React from 'react'
 import {useIntl} from 'react-intl'
-import {KTSVG} from '../../../../helpers'
-import {SidebarMenuItemWithSub} from './SidebarMenuItemWithSub'
 import {SidebarMenuItem} from './SidebarMenuItem'
+import {useAuth} from '../../../../../app/modules/auth'
 
 const SidebarMenuMain = () => {
   const intl = useIntl()
+  const {currentUser, agent} = useAuth()
 
   return (
     <>
@@ -57,28 +56,38 @@ const SidebarMenuMain = () => {
         <SidebarMenuItem to='/apps/chat/group-chat' title='Group Chart' hasBullet={true} />
         <SidebarMenuItem to='/apps/chat/drawer-chat' title='Drawer Chart' hasBullet={true} />
       </SidebarMenuItemWithSub> */}
-      <SidebarMenuItem to='/dashboard' icon='/media/icons/duotune/general/gen051.svg' title='Dashboard' fontIcon='bi-layers' />
-      <SidebarMenuItem to='/reviewImage' icon='/media/icons/duotune/general/gen051.svg' title='Review Images' fontIcon='bi-layers' />
-      <SidebarMenuItem to='/reviewVideo' icon='/media/icons/duotune/general/gen051.svg' title='Review Videos' fontIcon='bi-layers' />
-      <SidebarMenuItem to='/users' icon='/media/icons/duotune/general/gen051.svg' title='Users' fontIcon='bi-layers' />
-      <SidebarMenuItem to='/hosts' icon='/media/icons/duotune/general/gen051.svg' title='Host List' fontIcon='bi-layers' />
-      <SidebarMenuItem to='/agents' icon='/media/icons/duotune/general/gen051.svg' title='Agents' fontIcon='bi-layers' />
-      <SidebarMenuItem to='/hostapps' icon='/media/icons/duotune/general/gen051.svg' title='Host Applications' fontIcon='bi-layers' />
-      <SidebarMenuItem to='/redeemRequest' icon='/media/icons/duotune/general/gen051.svg' title='Redeem Request' fontIcon='bi-layers' />
-      <SidebarMenuItem to='/userPurchase' icon='/media/icons/duotune/general/gen051.svg' title='User Purchase' fontIcon='bi-layers' />
-      <SidebarMenuItem to='/notification' icon='/media/icons/duotune/general/gen051.svg' title='Notifications' fontIcon='bi-layers' />
-      <SidebarMenuItem to='/reports' icon='/media/icons/duotune/general/gen051.svg' title='Reports' fontIcon='bi-layers' />
-      <SidebarMenuItem to='/subscription' icon='/media/icons/duotune/general/gen051.svg' title='Coin Plans' fontIcon='bi-layers' />
-      <SidebarMenuItem to='/gifts' icon='/media/icons/duotune/general/gen051.svg' title='Gifts' fontIcon='bi-layers' />
-      <SidebarMenuItem to='/country' icon='/media/icons/duotune/general/gen051.svg' title='Country List' fontIcon='bi-layers' />
-      <SidebarMenuItem to='/paymentgateway' icon='/media/icons/duotune/general/gen051.svg' title='Payment Gateway' fontIcon='bi-layers' />
-      <SidebarMenuItem to='/notiCredential' icon='/media/icons/duotune/general/gen051.svg' title='Notification credentials' fontIcon='bi-layers' />
-      <SidebarMenuItem to='/notificationContent' icon='/media/icons/duotune/general/gen051.svg' title='Notification Content' fontIcon='bi-layers' />
-      <SidebarMenuItem to='/message' icon='/media/icons/duotune/general/gen051.svg' title='Fake Chat Message' fontIcon='bi-layers' />
-      <SidebarMenuItem to='/reportReson' icon='/media/icons/duotune/general/gen051.svg' title='Report Reason' fontIcon='bi-layers' />
-      <SidebarMenuItem to='/setting' icon='/media/icons/duotune/general/gen051.svg' title='Setting' fontIcon='bi-layers' />
-      <SidebarMenuItem to='/privacy' icon='/media/icons/duotune/general/gen051.svg' title='Privacy Policy' fontIcon='bi-layers' />
-      <SidebarMenuItem to='/terms' icon='/media/icons/duotune/general/gen051.svg' title='Terms & Conditions' fontIcon='bi-layers' />
+
+      {currentUser?.is_agent ? (
+        <>
+          <SidebarMenuItem to='/dashboard' icon='/media/icons/duotune/general/gen051.svg' title='Dashboard' fontIcon='bi-layers' />
+          <SidebarMenuItem to='/agentHost' state={agent} icon='/media/icons/duotune/general/gen051.svg' title='Host List' fontIcon='bi-layers' />
+        </>
+      ) : (
+        <>
+          <SidebarMenuItem to='/dashboard' icon='/media/icons/duotune/general/gen051.svg' title='Dashboard' fontIcon='bi-layers' />
+          <SidebarMenuItem to='/reviewImage' icon='/media/icons/duotune/general/gen051.svg' title='Review Images' fontIcon='bi-layers' />
+          <SidebarMenuItem to='/reviewVideo' icon='/media/icons/duotune/general/gen051.svg' title='Review Videos' fontIcon='bi-layers' />
+          <SidebarMenuItem to='/users' icon='/media/icons/duotune/general/gen051.svg' title='Users' fontIcon='bi-layers' />
+          <SidebarMenuItem to='/hosts' icon='/media/icons/duotune/general/gen051.svg' title='Host List' fontIcon='bi-layers' />
+          <SidebarMenuItem to='/agents' icon='/media/icons/duotune/general/gen051.svg' title='Agents' fontIcon='bi-layers' />
+          <SidebarMenuItem to='/hostapps' icon='/media/icons/duotune/general/gen051.svg' title='Host Applications' fontIcon='bi-layers' />
+          <SidebarMenuItem to='/redeemRequest' icon='/media/icons/duotune/general/gen051.svg' title='Redeem Request' fontIcon='bi-layers' />
+          <SidebarMenuItem to='/userPurchase' icon='/media/icons/duotune/general/gen051.svg' title='User Purchase' fontIcon='bi-layers' />
+          <SidebarMenuItem to='/notification' icon='/media/icons/duotune/general/gen051.svg' title='Notifications' fontIcon='bi-layers' />
+          <SidebarMenuItem to='/reports' icon='/media/icons/duotune/general/gen051.svg' title='Reports' fontIcon='bi-layers' />
+          <SidebarMenuItem to='/subscription' icon='/media/icons/duotune/general/gen051.svg' title='Coin Plans' fontIcon='bi-layers' />
+          <SidebarMenuItem to='/gifts' icon='/media/icons/duotune/general/gen051.svg' title='Gifts' fontIcon='bi-layers' />
+          <SidebarMenuItem to='/country' icon='/media/icons/duotune/general/gen051.svg' title='Country List' fontIcon='bi-layers' />
+          <SidebarMenuItem to='/paymentgateway' icon='/media/icons/duotune/general/gen051.svg' title='Payment Gateway' fontIcon='bi-layers' />
+          <SidebarMenuItem to='/notiCredential' icon='/media/icons/duotune/general/gen051.svg' title='Notification credentials' fontIcon='bi-layers' />
+          <SidebarMenuItem to='/notificationContent' icon='/media/icons/duotune/general/gen051.svg' title='Notification Content' fontIcon='bi-layers' />
+          <SidebarMenuItem to='/message' icon='/media/icons/duotune/general/gen051.svg' title='Fake Chat Message' fontIcon='bi-layers' />
+          <SidebarMenuItem to='/reportReson' icon='/media/icons/duotune/general/gen051.svg' title='Report Reason' fontIcon='bi-layers' />
+          <SidebarMenuItem to='/setting' icon='/media/icons/duotune/general/gen051.svg' title='Setting' fontIcon='bi-layers' />
+          <SidebarMenuItem to='/privacy' icon='/media/icons/duotune/general/gen051.svg' title='Privacy Policy' fontIcon='bi-layers' />
+          <SidebarMenuItem to='/terms' icon='/media/icons/duotune/general/gen051.svg' title='Terms & Conditions' fontIcon='bi-layers' />
+        </>
+      )}
     </>
   )
 }

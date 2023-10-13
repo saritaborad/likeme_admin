@@ -23,7 +23,7 @@ const Image = require("../models/Image");
 exports.verifyToken = asyncHandler(async (req, res) => {
  const { authtoken } = req.body;
  const user = jwt.verify(authtoken, process.env.JWT_SECRET);
- return giveresponse(res, 200, true, "token verified", { user: user.id });
+ return giveresponse(res, 200, true, "token verified", { user: user.id, is_agent: user.is_agent });
 });
 
 exports.register = asyncHandler(async (req, res, next) => {

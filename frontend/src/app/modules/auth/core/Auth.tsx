@@ -8,6 +8,8 @@ import {WithChildren} from '../../../../_metronic/helpers'
 type AuthContextProps = {
   auth: AuthModel | undefined
   saveAuth: (auth: AuthModel | undefined) => void
+  agent: any
+  setAgent: Dispatch<SetStateAction<any>>
   currentUser: UserModel | undefined
   setCurrentUser: Dispatch<SetStateAction<UserModel | undefined>>
   logout: () => void
@@ -17,6 +19,8 @@ const initAuthContextPropsState = {
   auth: authHelper.getAuth(),
   saveAuth: () => {},
   currentUser: undefined,
+  agent: undefined,
+  setAgent: () => {},
   setCurrentUser: () => {},
   logout: () => {},
 }
@@ -30,6 +34,7 @@ const useAuth = () => {
 const AuthProvider: FC<WithChildren> = ({children}) => {
   const [auth, setAuth] = useState<AuthModel | undefined>(authHelper.getAuth())
   const [currentUser, setCurrentUser] = useState<UserModel | undefined>()
+  const [agent, setAgent] = useState<any>()
   const saveAuth = (auth: AuthModel | undefined) => {
     setAuth(auth)
     if (auth) {
@@ -44,7 +49,7 @@ const AuthProvider: FC<WithChildren> = ({children}) => {
     setCurrentUser(undefined)
   }
 
-  return <AuthContext.Provider value={{auth, saveAuth, currentUser, setCurrentUser, logout}}>{children}</AuthContext.Provider>
+  return <AuthContext.Provider value={{auth, saveAuth, currentUser, setCurrentUser, setAgent, agent, logout}}>{children}</AuthContext.Provider>
 }
 
 const AuthInit: FC<WithChildren> = ({children}) => {

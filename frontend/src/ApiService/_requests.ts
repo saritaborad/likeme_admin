@@ -137,6 +137,10 @@ export function fetchAllagents(option?: any) {
   return axios.post(API_PATH.fetchAllagent, option).then((res) => res.data)
 }
 
+export function getAgent(_id?: any) {
+  return axios.post(API_PATH.fetchAgentById, {_id}).then((res) => res.data)
+}
+
 export function editAgent(formData: any) {
   return axios.post(API_PATH.editAgent, formData).then((res) => res)
 }

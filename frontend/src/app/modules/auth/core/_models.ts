@@ -1,5 +1,6 @@
 export interface AuthModel {
   authtoken: string
+  is_agent: any
   refreshToken?: string
   status?: number
   success?: boolean
@@ -68,4 +69,6 @@ export interface UserModel {
   communication?: UserCommunicationModel
   address?: UserAddressModel
   socialNetworks?: UserSocialNetworksModel
+  is_agent: any
+  user?: any
 }
