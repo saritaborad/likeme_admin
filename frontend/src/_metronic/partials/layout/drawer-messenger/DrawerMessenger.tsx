@@ -1,21 +1,9 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, {FC} from 'react'
 import {KTSVG} from '../../../helpers'
-import {ChatInner} from '../../chat/ChatInner'
 
 const DrawerMessenger: FC = () => (
-  <div
-    id='kt_drawer_chat'
-    className='bg-body'
-    data-kt-drawer='true'
-    data-kt-drawer-name='chat'
-    data-kt-drawer-activate='true'
-    data-kt-drawer-overlay='true'
-    data-kt-drawer-width="{default:'300px', 'md': '500px'}"
-    data-kt-drawer-direction='end'
-    data-kt-drawer-toggle='#kt_drawer_chat_toggle'
-    data-kt-drawer-close='#kt_drawer_chat_close'
-  >
+  <div id='kt_drawer_chat' className='bg-body' data-kt-drawer='true' data-kt-drawer-name='chat' data-kt-drawer-activate='true' data-kt-drawer-overlay='true' data-kt-drawer-width="{default:'300px', 'md': '500px'}" data-kt-drawer-direction='end' data-kt-drawer-toggle='#kt_drawer_chat_toggle' data-kt-drawer-close='#kt_drawer_chat_close'>
     <div className='card w-100 rounded-0' id='kt_drawer_chat_messenger'>
       <div className='card-header pe-5' id='kt_drawer_chat_messenger_header'>
         <div className='card-title'>
@@ -33,12 +21,7 @@ const DrawerMessenger: FC = () => (
 
         <div className='card-toolbar'>
           <div className='me-2'>
-            <button
-              className='btn btn-sm btn-icon btn-active-light-primary'
-              data-kt-menu-trigger='click'
-              data-kt-menu-placement='bottom-end'
-              data-kt-menu-flip='top-end'
-            >
+            <button className='btn btn-sm btn-icon btn-active-light-primary' data-kt-menu-trigger='click' data-kt-menu-placement='bottom-end' data-kt-menu-flip='top-end'>
               <i className='bi bi-three-dots fs-3'></i>
             </button>
           </div>
@@ -48,8 +31,6 @@ const DrawerMessenger: FC = () => (
           </div>
         </div>
       </div>
-
-      <ChatInner isDrawer={true} />
     </div>
   </div>
 )
