@@ -11,13 +11,7 @@ type Props = {
 
 const SearchModal: React.FC<Props> = ({show, handleClose}) => {
   return (
-    <Modal
-      className='bg-body'
-      id='kt_header_search_modal'
-      aria-hidden='true'
-      dialogClassName='modal-fullscreen h-auto'
-      show={show}
-    >
+    <Modal className='bg-body' id='kt_header_search_modal' aria-hidden='true' dialogClassName='modal-fullscreen h-auto' show={show}>
       <div className='modal-content shadow-none'>
         <div className='container-xxl w-lg-800px'>
           <div className='modal-header d-flex justify-content-end border-0'>
@@ -30,13 +24,7 @@ const SearchModal: React.FC<Props> = ({show, handleClose}) => {
           <div className='modal-body'>
             {/* begin::Search */}
             <form className='pb-10'>
-              <input
-                autoFocus
-                type='text'
-                className='form-control bg-transparent border-0 fs-4x text-center fw-normal'
-                name='query'
-                placeholder='Search...'
-              />
+              <input autoFocus type='text' className='form-control bg-transparent border-0 fs-4x text-center fw-normal' name='query' placeholder='Search...' />
             </form>
             {/* end::Search */}
 
@@ -54,9 +42,7 @@ const SearchModal: React.FC<Props> = ({show, handleClose}) => {
                           <div
                             className='overlay-wrapper flex-grow-1 bgi-no-repeat bgi-size-cover bgi-position-center card-rounded'
                             style={{
-                              backgroundImage: `url('${toAbsoluteUrl(
-                                '/media/stock/600x400/img-17.jpg'
-                              )}')`,
+                              backgroundImage: `url('${toAbsoluteUrl('/media/stock/600x400/img-17.jpg')}')`,
                             }}
                           />
                           <div className='overlay-layer bg-body bg-opacity-50'>
@@ -71,9 +57,7 @@ const SearchModal: React.FC<Props> = ({show, handleClose}) => {
                           <div
                             className='overlay-wrapper flex-grow-1 bgi-no-repeat bgi-size-cover bgi-position-center card-rounded'
                             style={{
-                              backgroundImage: `url('${toAbsoluteUrl(
-                                '/media/stock/600x400/img-1.jpg'
-                              )}')`,
+                              backgroundImage: `url('${toAbsoluteUrl('/media/stock/600x400/img-1.jpg')}')`,
                             }}
                           />
                           <div className='overlay-layer bg-body bg-opacity-50'>
@@ -90,9 +74,7 @@ const SearchModal: React.FC<Props> = ({show, handleClose}) => {
                           <div
                             className='overlay-wrapper flex-grow-1 bgi-no-repeat bgi-size-cover bgi-position-center card-rounded'
                             style={{
-                              backgroundImage: `url('${toAbsoluteUrl(
-                                '/media/stock/600x400/img-23.jpg'
-                              )}')`,
+                              backgroundImage: `url('${toAbsoluteUrl('/media/stock/600x400/img-23.jpg')}')`,
                             }}
                           />
                           <div className='overlay-layer bg-body bg-opacity-50'>
@@ -111,9 +93,7 @@ const SearchModal: React.FC<Props> = ({show, handleClose}) => {
                       <div
                         className='overlay-wrapper flex-grow-1 bgi-no-repeat bgi-size-cover bgi-position-center card-rounded'
                         style={{
-                          backgroundImage: `url('${toAbsoluteUrl(
-                            '/media/stock/600x400/img-11.jpg'
-                          )}')`,
+                          backgroundImage: `url('${toAbsoluteUrl('/media/stock/600x400/img-11.jpg')}')`,
                         }}
                       ></div>
                       <div className='overlay-layer bg-body bg-opacity-50'>

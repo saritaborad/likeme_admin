@@ -2,12 +2,13 @@ import React, {useState, useEffect} from 'react'
 import {useLocation} from 'react-router-dom'
 import {fetchAllSpendHistory} from '../ApiService/_requests'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
+import Loader from '../Images/loader.gif'
 
 const SpendHistory: React.FC = () => {
   const [spendHistory, setSpendHistory] = useState<any>()
-  const {state}: any = useLocation()
-
+  const [loader, setLoader] = useState(true)
   const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
+  const {state}: any = useLocation()
 
   const columns = [
     {
@@ -97,6 +98,7 @@ const SpendHistory: React.FC = () => {
   const getAllSpendHistory = async (option?: any) => {
     const {data} = await fetchAllSpendHistory({...option, _id: state?.user_id})
     setSpendHistory(data)
+    setLoader(false)
   }
 
   const tableCallBack = (option: any) => {
@@ -117,8 +119,13 @@ const SpendHistory: React.FC = () => {
               <li className='badge badge-warning px-8 me-3 fs-5'>Available Balance : {spendHistory?.avail_bal} </li>
             </ul>
           </div>
-
-          <RtdDatatableNew data={spendHistory?.data} columns={columns} option={option} tableCallBack={tableCallBack} />
+          {loader ? (
+            <div className='loader-info-main'>
+              <img src={Loader} alt='loader' />
+            </div>
+          ) : (
+            <RtdDatatableNew data={spendHistory?.data} columns={columns} option={option} tableCallBack={tableCallBack} />
+          )}
         </div>
       </div>
     </div>

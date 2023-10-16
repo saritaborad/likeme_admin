@@ -6,23 +6,15 @@ import AddAgentModal from '../Modals/AddAgent'
 import {Link} from 'react-router-dom'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
 import {useAuth} from '../app/modules/auth'
-
-interface IState {
-  fullname?: string
-  profileimages?: string
-  identity?: string
-  is_fake?: number
-}
+import Loader from '../Images/loader.gif'
+import {DeleteConfirmModal} from '../Modals/DeleteConfirmModal'
 
 const AgentList: React.FC = () => {
-  const [agent, setAgent] = useState<IState[]>([])
-  const [show, setShow] = useState(false)
-  const [update, setUpdate] = useState(false)
-  const [agentDetail, setAgentDetail] = useState('')
-  const [selectedItem, setSelectedItem] = useState('All')
+  const [agent, setAgent] = useState<any>([])
+  const [modalStates, setModalStates] = useState({update: false, show: false, rowVal: '', deleteConfirm: false})
+  const [loader, setLoader] = useState(true)
+  const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
   const {currentUser} = useAuth()
-
-  const [option, set_option] = useState({sizePerPage: 3, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
 
   const columns = [
     {
@@ -116,17 +108,10 @@ const AgentList: React.FC = () => {
             <div>
               {!currentUser?.is_tester && (
                 <>
-                  <button
-                    className='btn-comn-submit me-2'
-                    onClick={() => {
-                      setShow(true)
-                      setUpdate(true)
-                      setAgentDetail(data[i])
-                    }}
-                  >
+                  <button className='btn-comn-submit me-2' onClick={() => setModalStates({...modalStates, update: true, show: true, rowVal: data[i]})}>
                     Edit
                   </button>
-                  <button className='btn-comn-danger me-2' onClick={() => deleteAgentById(data[i]?._id)}>
+                  <button className='btn-comn-danger me-2' onClick={() => setModalStates({...modalStates, rowVal: data[i]?._id, deleteConfirm: true})}>
                     Delete
                   </button>
                 </>
@@ -147,33 +132,33 @@ const AgentList: React.FC = () => {
 
   const getAgentData = async (option?: any) => {
     const {data} = await fetchAllagents({options: option})
-    setAgent(data.agents)
     set_option({...option, totalRecord: data.totalRecord})
+    setAgent(data.agents)
+    setModalStates({show: false, update: false, rowVal: '', deleteConfirm: false})
+    setLoader(false)
   }
 
-  const deleteAgentById = async (id: string) => {
-    const {data} = await deleteAgent(id)
+  const deleteAgentById = async () => {
+    const {data} = await deleteAgent(modalStates.rowVal)
     data.status == 200 ? toast.success(data.message) : toast.error(data.message)
     getAgentData(option)
   }
 
-  const submitFormData = async (formData: any, resetForm: any) => {
+  const submitFormData = async (formData: any) => {
     const {data} = await addAgent(formData)
 
     if (data.status === 200) {
       toast.success(data.message)
-      setShow(false)
       getAgentData(option)
     }
   }
 
-  const updateAgent = async (formData: any, resetForm: any) => {
+  const updateAgent = async (formData: any) => {
     const {data} = await editAgent(formData)
 
     if (data.status === 200) {
-      setShow(false)
       toast.success(data.message)
-      getAgentData()
+      getAgentData(option)
     }
   }
 
@@ -187,11 +172,7 @@ const AgentList: React.FC = () => {
     // Call your API to update data here
   }
 
-  const appModalClose = () => {
-    setShow(false)
-    setUpdate(false)
-    setAgentDetail('')
-  }
+  const appModalClose = () => setModalStates({...modalStates, update: false, show: false, rowVal: ''})
 
   return (
     <>
@@ -205,19 +186,29 @@ const AgentList: React.FC = () => {
                 </div>
                 <div className='ms-auto mb-2 me-2 mt-5'>
                   {!currentUser?.is_tester && (
-                    <button className='btn-comn-submit me-2' onClick={() => setShow(true)}>
+                    <button className='btn-comn-submit me-2' onClick={() => setModalStates({...modalStates, show: true})}>
                       Add Agent
                     </button>
                   )}
                 </div>
               </div>
             </div>
-            <RtdDatatableNew data={agent} columns={columns} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
+            {loader ? (
+              <div className='loader-info-main'>
+                <img src={Loader} alt='loader' />
+              </div>
+            ) : (
+              <RtdDatatableNew data={agent} columns={columns} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
+            )}
           </div>
         </div>
 
-        <Modal show={show} onHide={() => appModalClose()} size='lg' className='cust-comn-modal' centered>
-          <AddAgentModal update={update} agentInfo={agentDetail} submitFormData={submitFormData} updateAgent={updateAgent} appModalClose={appModalClose} />
+        <Modal show={modalStates.show} onHide={() => appModalClose()} size='lg' className='cust-comn-modal' centered>
+          <AddAgentModal update={modalStates.update} submitFormData={submitFormData} updateAgent={updateAgent} appModalClose={appModalClose} agentInfo={modalStates.rowVal} />
+        </Modal>
+
+        <Modal show={modalStates.deleteConfirm} onHide={() => setModalStates({...modalStates, deleteConfirm: false})} size='lg' className='cust-comn-modal' centered>
+          <DeleteConfirmModal setDelete={setModalStates} setConfirmDel={deleteAgentById} />
         </Modal>
       </div>
     </>

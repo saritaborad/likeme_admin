@@ -4,9 +4,14 @@ import {deleteReport, fetchReports, hostblock} from '../ApiService/_requests'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
 import {ImgUrl} from '../const'
 import {useAuth} from '../app/modules/auth'
+import Loader from '../Images/loader.gif'
+import {DeleteConfirmModal} from '../Modals/DeleteConfirmModal'
+import {Modal} from 'react-bootstrap'
 
 const Report: React.FC = () => {
   const [reports, setReport] = useState<any>([])
+  const [loader, setLoader] = useState(true)
+  const [modalStates, setModalStates] = useState({deleteConfirm: false, rowVal: ''})
   const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
   const {currentUser} = useAuth()
 
@@ -108,7 +113,7 @@ const Report: React.FC = () => {
                   >
                     Block
                   </button>
-                  <button className='btn-comn-danger me-2' onClick={() => deleteReportData(data[i]?._id)}>
+                  <button className='btn-comn-danger me-2' onClick={() => setModalStates({rowVal: data[i]?._id, deleteConfirm: true})}>
                     Delete Report
                   </button>
                 </>
@@ -128,10 +133,12 @@ const Report: React.FC = () => {
     const {data} = await fetchReports({options: option})
     setReport(data.reports)
     set_option({...option, totalRecord: data.totalRecord})
+    setModalStates({rowVal: '', deleteConfirm: false})
+    setLoader(false)
   }
 
-  const deleteReportData = async (_id: string) => {
-    const {data} = await deleteReport(_id)
+  const deleteReportData = async () => {
+    const {data} = await deleteReport(modalStates.rowVal)
     data.status == 200 ? toast.success(data.message) : toast.error(data.message)
     fetchAllReport(option)
   }
@@ -164,9 +171,19 @@ const Report: React.FC = () => {
         </div>
         <div className='col-12 '>
           <div className='white-box-table card-shadow'>
-            <RtdDatatableNew data={reports} columns={columns} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
+            {loader ? (
+              <div className='loader-info-main'>
+                <img src={Loader} alt='loader' />
+              </div>
+            ) : (
+              <RtdDatatableNew data={reports} columns={columns} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
+            )}
           </div>
         </div>
+
+        <Modal show={modalStates.deleteConfirm} onHide={() => setModalStates({...modalStates, deleteConfirm: false})} size='lg' className='cust-comn-modal' centered>
+          <DeleteConfirmModal setDelete={setModalStates} setConfirmDel={deleteReportData} />
+        </Modal>
       </div>
     </>
   )

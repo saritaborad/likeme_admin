@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react'
-import {RejectHost, blockUnblockHost, deleteImageById, deleteVideoById, fetchHostImages, fetchHostVideos, hostById, hostUpdate, makeHost} from '../ApiService/_requests'
+import {RejectHost, addHostImages, addHostVideo, blockUnblockHost, deleteImageById, deleteVideoById, fetchHostImages, fetchHostVideos, hostById, hostUpdate, makeHost} from '../ApiService/_requests'
 import {useLocation, useNavigate} from 'react-router-dom'
 import {ImgUrl} from '../const'
 import {Modal} from 'react-bootstrap'
@@ -13,9 +13,10 @@ import {useAllAgent, useAllCountry} from '../hooks/customHook'
 import AddVideo from '../Modals/AddVideo'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
 import {useAuth} from '../app/modules/auth'
+import Loader from '../Images/loader.gif'
+import {DeleteConfirmModal} from '../Modals/DeleteConfirmModal'
 
 const ViewHost: React.FC = () => {
-  const [user, setUser] = useState([])
   const [images, setImages] = useState([])
   const [video, setVideo] = useState([])
   const [videos, setVideos] = useState([])
@@ -24,14 +25,17 @@ const ViewHost: React.FC = () => {
   const [showVid, setShowVid] = useState(false)
   const [view, setView] = useState(false)
   const [hostData, setHostData] = useState<any>()
+  const [loader, setLoader] = useState(true)
+  const [modalStates, setModalStates] = useState<any>({rowVal: '', deleteConfirm: false})
+
   const {state}: any = useLocation()
   const agents = useAllAgent()
   const country = useAllCountry()
   const navigate = useNavigate()
+  const {currentUser} = useAuth()
 
   const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'desc'})
   const [option2, set_option2] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'desc'})
-  const {currentUser} = useAuth()
 
   const columns = [
     {
@@ -65,7 +69,7 @@ const ViewHost: React.FC = () => {
                 View
               </button>
               {!currentUser?.is_tester && (
-                <button className='btn-comn-danger me-2' onClick={() => (data[i]?.image ? deleteImage(data[i]?._id) : deleteVideo(data[i]?._id))}>
+                <button className='btn-comn-danger me-2' onClick={() => setModalStates({rowVal: data[i], deleteConfirm: true})}>
                   Delete
                 </button>
               )}
@@ -78,22 +82,26 @@ const ViewHost: React.FC = () => {
 
   useEffect(() => {
     if (state) {
-      getAllImage(option, state.hostData._id)
-      getAllVideo(option, state.hostData._id)
+      getAllImage(option)
+      getAllVideo(option)
       getHost(state.hostData._id)
     }
   }, [state.hostData._id])
 
-  const getAllImage = async (option?: any, _id?: string) => {
-    const {data} = await fetchHostImages({options: option, _id: _id})
+  const getAllImage = async (option?: any) => {
+    const {data} = await fetchHostImages({options: option, _id: state.hostData._id})
     setImages(data.data)
     set_option({...option, totalRecord: data.totalRecord})
+    setModalStates({rowVal: '', deleteConfirm: false})
+    setLoader(false)
   }
 
-  const getAllVideo = async (option?: any, _id?: string) => {
-    const {data} = await fetchHostVideos({options: option, _id: _id})
+  const getAllVideo = async (option?: any) => {
+    const {data} = await fetchHostVideos({options: option, _id: state.hostData._id})
     setVideos(data.data)
     set_option2({...option, totalRecord: data.totalRecord})
+    setModalStates({rowVal: '', deleteConfirm: false})
+    setLoader(false)
   }
 
   const getHost = async (_id: string) => {
@@ -101,16 +109,16 @@ const ViewHost: React.FC = () => {
     setHostData(data)
   }
 
-  const deleteImage = async (_id: string) => {
-    const {data} = await deleteImageById(_id)
+  const deleteImage = async () => {
+    const {data} = await deleteImageById(modalStates.rowVal?._id)
     data.status === 200 ? toast.success(data.message) : toast.error(data.message)
-    getAllImage(option, state.hostData._id)
+    getAllImage(option)
   }
 
-  const deleteVideo = async (_id: string) => {
-    const {data} = await deleteVideoById(_id)
+  const deleteVideo = async () => {
+    const {data} = await deleteVideoById(modalStates.rowVal?._id)
     data.status === 200 ? toast.success(data.message) : toast.error(data.message)
-    getAllVideo(option, state.hostData._id)
+    getAllVideo(option)
   }
 
   const makeHostById = async () => {
@@ -149,9 +157,47 @@ const ViewHost: React.FC = () => {
     getAllVideo(option)
   }
 
-  const handleDrop = (updatedData: any) => {
-    setUser(updatedData)
-    // Call your API to update data here
+  const submitImageData = async (e: any, imgFile: any) => {
+    e.preventDefault()
+    if (!imgFile || imgFile.length === 0) {
+      toast.error('No image selected')
+      return
+    }
+
+    const formData = new FormData()
+
+    for (let i = 0; i < imgFile.length; i++) {
+      formData.append(`images`, imgFile[i])
+    }
+    formData.append('_id', hostData._id)
+
+    const {data} = await addHostImages(formData)
+    data.status === 200 ? toast.success(data.message) : toast.error(data.message)
+    getAllImage(option)
+    appModalClose()
+  }
+
+  const submitVideoData = async (e: any, formData: any, vidFile: any) => {
+    e.preventDefault()
+    if (!vidFile || vidFile.length === 0) {
+      toast.error('No video selected')
+      return
+    }
+
+    const form = new FormData()
+
+    for (let i = 0; i < vidFile.length; i++) {
+      form.append(`video`, vidFile[i])
+    }
+    // form.append(`thumbnail_image`, video[i]?.thumbnail)
+    form.append('is_one_to_one', formData.is_one_to_one)
+    form.append('video_link', formData.video_link)
+    form.append('_id', hostData._id)
+
+    const {data} = await addHostVideo(form)
+    data.status === 200 ? toast.success(data.message) : toast.error(data.message)
+    getAllVideo(option2)
+    videoClose()
   }
 
   return (
@@ -340,7 +386,13 @@ const ViewHost: React.FC = () => {
                   )}
                 </div>
               </div>
-              <RtdDatatableNew data={images} columns={columns} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
+              {loader ? (
+                <div className='loader-info-main'>
+                  <img src={Loader} alt='loader' />
+                </div>
+              ) : (
+                <RtdDatatableNew data={images} columns={columns} option={option} tableCallBack={tableCallBack} />
+              )}
             </div>
           </div>
           <div className='col-12 col-md-6'>
@@ -355,21 +407,31 @@ const ViewHost: React.FC = () => {
                   )}
                 </div>
               </div>
-              <RtdDatatableNew data={videos} columns={columns} option={option2} tableCallBack={tableCallBack2} onDrop={handleDrop} />
+              {loader ? (
+                <div className='loader-info-main'>
+                  <img src={Loader} alt='loader' />
+                </div>
+              ) : (
+                <RtdDatatableNew data={videos} columns={columns} option={option2} tableCallBack={tableCallBack2} />
+              )}
             </div>
           </div>
         </div>
 
         <Modal show={show} onHide={() => appModalClose()} size='lg' className='cust-comn-modal' centered>
-          <AddImage HostId={hostData?._id} appModalClose={appModalClose} getAllImage={getAllImage} />
+          <AddImage submitImageData={submitImageData} appModalClose={appModalClose} />
         </Modal>
 
         <Modal show={showVid} onHide={() => videoClose()} size='lg' className='cust-comn-modal' centered>
-          <AddVideo HostId={hostData?._id} appModalClose={videoClose} getAllVideo={getAllVideo} />
+          <AddVideo submitVideoData={submitVideoData} appModalClose={videoClose} />
         </Modal>
 
         <Modal show={view} onHide={() => setView(false)} size='lg' className='cust-comn-modal' centered>
           <ImageView image={img} setView={setView} video={video} />
+        </Modal>
+
+        <Modal show={modalStates.deleteConfirm} onHide={() => setModalStates({...modalStates, deleteConfirm: false})} size='lg' className='cust-comn-modal' centered>
+          <DeleteConfirmModal setDelete={setModalStates} setConfirmDel={modalStates.rowVal?.image ? deleteImage : deleteVideo} />
         </Modal>
       </div>
     </>

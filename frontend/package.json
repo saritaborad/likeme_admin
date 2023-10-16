@@ -1,8 +1,8 @@
 {
-  "name": "demo1",
+  "name": "likeme",
   "version": "8.1.5",
   "private": true,
-  "homepage": "/",
+  "homepage": "/likeme",
   "dependencies": {
     "@ckeditor/ckeditor5-build-classic": "^39.0.2",
     "@ckeditor/ckeditor5-font": "^39.0.2",

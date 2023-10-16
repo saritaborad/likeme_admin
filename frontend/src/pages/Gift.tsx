@@ -6,21 +6,15 @@ import AddGift from '../Modals/AddGift'
 import {ImgUrl} from '../const'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
 import {useAuth} from '../app/modules/auth'
-// import AddGift from '../Modals/AddGift'
-
-interface IState {
-  fullname?: string
-  profileimages?: string
-  identity?: string
-  is_fake?: number
-}
+import Loader from '../Images/loader.gif'
+import {DeleteConfirmModal} from '../Modals/DeleteConfirmModal'
 
 const Gift: React.FC = () => {
-  const [gifts, setGifts] = useState<IState[]>([])
-  const [modalStates, setModalStates] = useState({update: false, show: false, giftInfo: ''})
-  const {currentUser} = useAuth()
-
+  const [gifts, setGifts] = useState<any>([])
+  const [modalStates, setModalStates] = useState({update: false, show: false, rowVal: '', deleteConfirm: false})
+  const [loader, setLoader] = useState(true)
   const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
+  const {currentUser} = useAuth()
 
   const columns = [
     {
@@ -58,10 +52,10 @@ const Gift: React.FC = () => {
             <div>
               {!currentUser?.is_tester && (
                 <>
-                  <button className='btn-comn-submit me-2' onClick={() => setModalStates({update: true, show: true, giftInfo: data[i]})}>
+                  <button className='btn-comn-submit me-2' onClick={() => setModalStates({...modalStates, update: true, show: true, rowVal: data[i]})}>
                     Edit
                   </button>
-                  <button className='btn-comn-danger me-2' onClick={() => deleteGiftData(data[i]?._id)}>
+                  <button className='btn-comn-danger me-2' onClick={() => setModalStates({...modalStates, rowVal: data[i]?._id, deleteConfirm: true})}>
                     Delete
                   </button>
                 </>
@@ -77,17 +71,18 @@ const Gift: React.FC = () => {
     getAllGifts(option)
   }, [])
 
-  const deleteGiftData = async (_id: string) => {
-    const {data} = await deleteGift(_id)
-    data.status == 200 ? toast.success(data.message) : toast.error(data.message)
-    getAllGifts(option)
-  }
-
   const getAllGifts = async (option?: any) => {
     const {data} = await fetchAllgifts({options: option})
     setGifts(data.gifts)
-    setModalStates({show: false, update: false, giftInfo: ''})
     set_option({...option, totalRecord: data.totalRecord})
+    setModalStates({show: false, update: false, rowVal: '', deleteConfirm: false})
+    setLoader(false)
+  }
+
+  const deleteGiftData = async () => {
+    const {data} = await deleteGift(modalStates.rowVal)
+    data.status == 200 ? toast.success(data.message) : toast.error(data.message)
+    getAllGifts(option)
   }
 
   const submitFormData = async (formData: any) => {
@@ -106,7 +101,7 @@ const Gift: React.FC = () => {
     }
   }
 
-  const appModalClose = () => setModalStates({update: false, show: false, giftInfo: ''})
+  const appModalClose = () => setModalStates({...modalStates, update: false, show: false, rowVal: ''})
 
   const tableCallBack = (option: any) => {
     set_option(option)
@@ -137,12 +132,22 @@ const Gift: React.FC = () => {
                 </div>
               </div>
             </div>
-            <RtdDatatableNew data={gifts} columns={columns} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
+            {loader ? (
+              <div className='loader-info-main'>
+                <img src={Loader} alt='loader' />
+              </div>
+            ) : (
+              <RtdDatatableNew data={gifts} columns={columns} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
+            )}
           </div>
         </div>
 
         <Modal show={modalStates.show} onHide={() => appModalClose()} size='lg' className='cust-comn-modal' centered>
-          <AddGift update={modalStates.update} giftInfo={modalStates.giftInfo} submitFormData={submitFormData} updateGift={updateGift} appModalClose={appModalClose} />
+          <AddGift update={modalStates.update} giftInfo={modalStates.rowVal} submitFormData={submitFormData} updateGift={updateGift} appModalClose={appModalClose} />
+        </Modal>
+
+        <Modal show={modalStates.deleteConfirm} onHide={() => setModalStates({...modalStates, deleteConfirm: false})} size='lg' className='cust-comn-modal' centered>
+          <DeleteConfirmModal setDelete={setModalStates} setConfirmDel={deleteGiftData} />
         </Modal>
       </div>
     </>

@@ -1,40 +1,16 @@
 import React, {useState} from 'react'
-import {handleImageUpload} from '../commonFun'
-import {addHostImages} from '../ApiService/_requests'
-import {toast} from 'react-toastify'
 
 interface IPROPS {
   appModalClose?: any
-  HostId?: any
-  getAllImage?: any
+  submitImageData?: any
 }
 
-const AddImage: React.FC<IPROPS> = ({HostId, appModalClose, getAllImage}) => {
+const AddImage: React.FC<IPROPS> = ({appModalClose, submitImageData}) => {
   const [images, setImages] = useState<FileList | null>(null)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     setImages(files)
-  }
-
-  const submitImageData = async (e: any) => {
-    e.preventDefault()
-    if (!images || images.length === 0) {
-      toast.error('No image selected')
-      return
-    }
-
-    const formData = new FormData()
-
-    for (let i = 0; i < images.length; i++) {
-      formData.append(`images`, images[i])
-    }
-    formData.append('_id', HostId)
-
-    const {data} = await addHostImages(formData)
-    data.status === 200 ? toast.success(data.message) : toast.error(data.message)
-    getAllImage(HostId)
-    appModalClose()
   }
 
   return (
@@ -45,14 +21,13 @@ const AddImage: React.FC<IPROPS> = ({HostId, appModalClose, getAllImage}) => {
           <button type='button' className='btn-close' onClick={appModalClose}></button>
         </div>
         <div className='modal-body'>
-          <form onSubmit={submitImageData}>
-            <input type='hidden' name='_token' defaultValue='EjAY5yPivM7ZAH2SisFwbB3rRK2Fj1AFLwH6sPuE' />
+          <form onSubmit={(e) => submitImageData(e, images)}>
             <div id='divThumb' className='form-group'>
               <div className='mb-3'>
                 <label htmlFor='image' className='form-label'>
                   Select Images
                 </label>
-                <input className='form-control' type='file' id='hostImages' name='images' accept='image/x-png,image/gif,image/jpeg' multiple onChange={handleFileChange} />
+                <input className='form-control' type='file' id='hostImages' name='images' accept='image/x-png,image/gif,image/jpeg' multiple onChange={handleFileChange} required />
               </div>
             </div>
             <div className='form-group mt-5'>

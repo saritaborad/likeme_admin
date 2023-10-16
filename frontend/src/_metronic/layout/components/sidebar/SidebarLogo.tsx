@@ -28,8 +28,6 @@ const SidebarLogo = () => {
             </div>
           </>
         )}
-
-        <img alt='Logo' src={toAbsoluteUrl('/media/logos/default-small.svg')} className='h-20px app-sidebar-logo-minimize' />
       </Link>
 
       {(appSidebarDefaultMinimizeDesktopEnabled || appSidebarDefaultCollapseDesktopEnabled) && (

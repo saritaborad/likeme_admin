@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, {FC} from 'react'
-import {KTSVG} from '../../../helpers'
+// import {KTSVG} from '../../../helpers'
 
 const DrawerMessenger: FC = () => (
   <div id='kt_drawer_chat' className='bg-body' data-kt-drawer='true' data-kt-drawer-name='chat' data-kt-drawer-activate='true' data-kt-drawer-overlay='true' data-kt-drawer-width="{default:'300px', 'md': '500px'}" data-kt-drawer-direction='end' data-kt-drawer-toggle='#kt_drawer_chat_toggle' data-kt-drawer-close='#kt_drawer_chat_close'>
@@ -27,7 +27,7 @@ const DrawerMessenger: FC = () => (
           </div>
 
           <div className='btn btn-sm btn-icon btn-active-light-primary' id='kt_drawer_chat_close'>
-            <KTSVG path='/media/icons/duotune/arrows/arr061.svg' className='svg-icon-2' />
+            {/* <KTSVG path='/media/icons/duotune/arrows/arr061.svg' className='svg-icon-2' /> */}
           </div>
         </div>
       </div>

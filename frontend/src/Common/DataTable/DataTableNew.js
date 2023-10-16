@@ -34,6 +34,7 @@ export default function RtdDatatableNew(props) {
     }
   }
   const search_object_change = (e, field) => {
+    console.log(e.target)
     let tmp_option = option
     let temp_search = tmp_option.search
     temp_search[field.value] = e.target.value

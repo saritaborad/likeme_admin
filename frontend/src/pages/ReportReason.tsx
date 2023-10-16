@@ -5,13 +5,15 @@ import {Modal} from 'react-bootstrap'
 import ReportReasonModal from '../Modals/ReportReason'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
 import {useAuth} from '../app/modules/auth'
+import Loader from '../Images/loader.gif'
+import {DeleteConfirmModal} from '../Modals/DeleteConfirmModal'
 
 const ReportReason: React.FC = () => {
   const [reportReason, setReportReason] = useState([])
-  const [modalStates, setModalStates] = useState({update: false, show: false, reasonInfo: ''})
-  const {currentUser} = useAuth()
-
+  const [modalStates, setModalStates] = useState({update: false, show: false, rowVal: '', deleteConfirm: false})
+  const [loader, setLoader] = useState(true)
   const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
+  const {currentUser} = useAuth()
 
   const columns = [
     {
@@ -27,37 +29,28 @@ const ReportReason: React.FC = () => {
       },
     },
     {
-      ...(!currentUser?.is_tester
-        ? {
-            value: 'action',
-            label: 'Action',
-            options: {
-              filter: false,
-              sort: false,
-              customBodyRender: (data: any, i: number) => {
-                return (
-                  <div>
-                    {!currentUser?.is_tester && (
-                      <button className='btn-comn-submit me-2' onClick={() => setModalStates({update: true, show: true, reasonInfo: data[i]})}>
-                        Edit
-                      </button>
-                    )}
-                    {!currentUser?.is_tester && (
-                      <button className='btn-comn-danger me-2' onClick={() => deleteReason(data[i]?._id)}>
-                        Delete
-                      </button>
-                    )}
-                  </div>
-                )
-              },
-            },
-          }
-        : {
-            options: {
-              filter: false,
-              sort: false,
-            },
-          }),
+      value: 'action',
+      label: 'Action',
+      options: {
+        filter: false,
+        sort: false,
+        customBodyRender: (data: any, i: number) => {
+          return (
+            <div>
+              {!currentUser?.is_tester && (
+                <button className='btn-comn-submit me-2' onClick={() => setModalStates({...modalStates, update: true, show: true, rowVal: data[i]})}>
+                  Edit
+                </button>
+              )}
+              {!currentUser?.is_tester && (
+                <button className='btn-comn-danger me-2' onClick={() => setModalStates({...modalStates, rowVal: data[i]?._id, deleteConfirm: true})}>
+                  Delete
+                </button>
+              )}
+            </div>
+          )
+        },
+      },
     },
   ]
 
@@ -68,12 +61,13 @@ const ReportReason: React.FC = () => {
   const getReportReason = async (option?: any) => {
     const {data} = await fetchAllReportReson({options: option})
     setReportReason(data.data)
-    setModalStates({update: false, show: false, reasonInfo: ''})
+    setModalStates({update: false, show: false, rowVal: '', deleteConfirm: false})
     set_option({...option, totalRecord: data.totalRecord})
+    setLoader(false)
   }
 
-  const deleteReason = async (_id: string) => {
-    const {data} = await deleteReportReson(_id)
+  const deleteReason = async () => {
+    const {data} = await deleteReportReson(modalStates.rowVal)
     data.status === 200 ? toast.success(data.message) : toast.error(data.message)
     getReportReason(option)
   }
@@ -104,7 +98,7 @@ const ReportReason: React.FC = () => {
     // Call your API to update data here
   }
 
-  const appModalClose = () => setModalStates({update: false, show: false, reasonInfo: ''})
+  const appModalClose = () => setModalStates({...modalStates, update: false, show: false, rowVal: ''})
 
   return (
     <>
@@ -125,11 +119,21 @@ const ReportReason: React.FC = () => {
                 </div>
               </div>
             </div>
-            <RtdDatatableNew data={reportReason} columns={columns} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
+            {loader ? (
+              <div className='loader-info-main'>
+                <img src={Loader} alt='loader' />
+              </div>
+            ) : (
+              <RtdDatatableNew data={reportReason} columns={columns} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
+            )}
           </div>
         </div>
         <Modal show={modalStates.show} onHide={() => appModalClose()} size='lg' className='cust-comn-modal' centered>
-          <ReportReasonModal update={modalStates.update} reasonInfo={modalStates.reasonInfo} submitFormData={submitFormData} updateReason={updateReason} appModalClose={appModalClose} />
+          <ReportReasonModal update={modalStates.update} reasonInfo={modalStates.rowVal} submitFormData={submitFormData} updateReason={updateReason} appModalClose={appModalClose} />
+        </Modal>
+
+        <Modal show={modalStates.deleteConfirm} onHide={() => setModalStates({...modalStates, deleteConfirm: false})} size='lg' className='cust-comn-modal' centered>
+          <DeleteConfirmModal setDelete={setModalStates} setConfirmDel={deleteReason} />
         </Modal>
       </div>
     </>

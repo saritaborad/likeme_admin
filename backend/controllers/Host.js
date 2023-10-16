@@ -174,7 +174,8 @@ exports.addHostVideos = asyncHandler(async (req, res, next) => {
  const videos = req.files;
 
  for (const video of videos) {
-  const it = new Video({ video_link, is_one_to_one, user_id: _id, video: video.path });
+  const img = video.path?.split(".")[0] + ".jpg";
+  const it = new Video({ video_link, is_one_to_one, user_id: _id, video: video.path, thumbnail_image: img });
   await it.save();
  }
 

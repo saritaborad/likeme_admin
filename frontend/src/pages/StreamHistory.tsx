@@ -4,15 +4,16 @@ import {ImgUrl} from '../const'
 import {fetchAllStreamHistory, fetchStreamHistoryDayWise} from '../ApiService/_requests'
 import moment from 'moment'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
+import Loader from '../Images/loader.gif'
 
 const StreamHistory = () => {
+  const {state}: any = useLocation()
   const [hostInfo, setHostInfo] = useState<any>()
   const [streamHistory, setStreamHistory] = useState<any>()
   const [dayWise, setDayWise] = useState<any>()
-  const {state}: any = useLocation()
-  const [date, setDate] = useState<any>({from: '', to: '', _id: state?.hostInfo?._id})
-
+  const [loader, setLoader] = useState(true)
   const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
+  const [date, setDate] = useState<any>({from: '', to: '', _id: state?.hostInfo?._id})
 
   const columns = [
     {
@@ -130,6 +131,7 @@ const StreamHistory = () => {
     const {data} = await fetchAllStreamHistory({options: option, _id: state?.hostInfo?._id})
     setStreamHistory(data)
     set_option({...option, totalRecord: data.totalRecord})
+    setLoader(false)
   }
 
   const getStreamHistoryDaywise = async (filtered?: any) => {
@@ -137,6 +139,7 @@ const StreamHistory = () => {
     let to = filtered.to ? filtered.to : filtered.from
     const {data} = await fetchStreamHistoryDayWise({...filtered, from, to})
     setDayWise(data)
+    setLoader(false)
   }
 
   const tableCallBack = (option: any) => {
@@ -174,8 +177,13 @@ const StreamHistory = () => {
                 </div>
               </div>
             </div>
-
-            <RtdDatatableNew data={dayWise} columns={columns} option={{}} tableCallBack={tableCallBack} />
+            {loader ? (
+              <div className='loader-info-main'>
+                <img src={Loader} alt='loader' />
+              </div>
+            ) : (
+              <RtdDatatableNew data={dayWise} columns={columns} option={{}} tableCallBack={tableCallBack} />
+            )}
           </div>
         </div>
       </div>
@@ -200,7 +208,13 @@ const StreamHistory = () => {
                 </div>
               </div>
             </div>
-            <RtdDatatableNew data={streamHistory?.data} columns={columns1} option={option} tableCallBack={tableCallBack} />
+            {loader ? (
+              <div className='loader-info-main'>
+                <img src={Loader} alt='loader' />
+              </div>
+            ) : (
+              <RtdDatatableNew data={streamHistory?.data} columns={columns1} option={option} tableCallBack={tableCallBack} />
+            )}
           </div>
         </div>
       </div>

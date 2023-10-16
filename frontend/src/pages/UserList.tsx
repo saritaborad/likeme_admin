@@ -6,19 +6,14 @@ import {Modal} from 'react-bootstrap'
 import AddCoin from '../Modals/AddCoin'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
 import {useAuth} from '../app/modules/auth'
-
-interface IState {
-  fullname?: string
-  profileimages?: string
-  identity?: string
-  is_fake?: number
-}
+import Loader from '../Images/loader.gif'
 
 const UserList: React.FC = () => {
-  const [users, setUsers] = useState<IState[]>([])
+  const [users, setUsers] = useState<any>([])
   const [show, setShow] = useState(false)
   const [id, setId] = useState('')
   const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
+  const [loader, setLoader] = useState(true)
   const {currentUser} = useAuth()
 
   const columns = [
@@ -121,6 +116,7 @@ const UserList: React.FC = () => {
     const {data} = await getAllUser({options: option})
     setUsers(data.users)
     set_option({...option, totalRecord: data.totalRecord})
+    setLoader(false)
   }
 
   const handleBlock = async (id: string, is_block: number) => {
@@ -162,7 +158,13 @@ const UserList: React.FC = () => {
               </div>
             </div>
           </div>
-          <RtdDatatableNew data={users} columns={columns} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
+          {loader ? (
+            <div className='loader-info-main'>
+              <img src={Loader} alt='loader' />
+            </div>
+          ) : (
+            <RtdDatatableNew data={users} columns={columns} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
+          )}
         </div>
       </div>
 

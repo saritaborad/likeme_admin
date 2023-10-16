@@ -48,7 +48,7 @@ exports.acceptImageReview = asyncHandler(async (req, res, next) => {
  const image = await ImageReview.findOne({ _id: req.body._id });
  const img = new Image({ image: image.image, user_id: image.user_id });
  await img.save();
- await Image.deleteOne({ _id: req.body._id });
+ await ImageReview.findByIdAndDelete({ _id: req.body._id });
  return giveresponse(res, 200, true, "Image Accepted");
 });
 

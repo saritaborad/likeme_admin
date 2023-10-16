@@ -3,12 +3,13 @@ import {Link} from 'react-router-dom'
 import {fetchAllPurchaseHistory, getPackageName} from '../ApiService/_requests'
 import moment from 'moment'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
+import Loader from '../Images/loader.gif'
 
 const UserPurchase: React.FC = () => {
   const [packageName, setPackageName] = useState<any>()
   const [purchase, setPurchase] = useState<any>()
   const [filter, setFilter] = useState<any>({gain_type: 0, package_name: 'com.videocall.randomcallapps', from: '', to: ''})
-
+  const [loader, setLoader] = useState(true)
   const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
 
   const columns = [
@@ -20,7 +21,6 @@ const UserPurchase: React.FC = () => {
         filter: false,
         sort: false,
         customBodyRender: (data: any, i: number) => {
-          console.log(data[i]?.type == 1 ? 'Purchase' : 'Rewarded')
           return <div>{data[i]?.type == 1 ? 'Purchase' : 'Rewarded'}</div>
         },
       },
@@ -111,6 +111,7 @@ const UserPurchase: React.FC = () => {
     const {data} = await fetchAllPurchaseHistory({options: option, ...{...filtered, from, to}})
     setPurchase(data)
     set_option({...option, totalRecord: data.totalRecord})
+    setLoader(false)
   }
 
   const getAllPackageName = async (option?: any) => {
@@ -177,7 +178,13 @@ const UserPurchase: React.FC = () => {
                 </Link>
               </ul>
             </div>
-            <RtdDatatableNew data={purchase?.data} columns={columns} option={option} tableCallBack={tableCallBack} />
+            {loader ? (
+              <div className='loader-info-main'>
+                <img src={Loader} alt='loader' />
+              </div>
+            ) : (
+              <RtdDatatableNew data={purchase?.data} columns={columns} option={option} tableCallBack={tableCallBack} />
+            )}
           </div>
         </div>
       </div>

@@ -83,6 +83,7 @@ const AddAgentModal: React.FC<IPROPS> = ({update, submitFormData, updateAgent, a
                         handleImageUpload(e.target.files?.[0] || null, setImgUrl)
                         setAgentImg(e.target.files?.[0] || null)
                       }}
+                      required
                     />
                     <label> (Only PNG images are recommended)</label>
                   </div>
@@ -98,7 +99,7 @@ const AddAgentModal: React.FC<IPROPS> = ({update, submitFormData, updateAgent, a
                   </div>
                   <div className='form-group pb-4'>
                     <label htmlFor='password'> Password</label>
-                    <input type='text' className='form-control' required name='password' {...formAttr(runform, 'password')} />
+                    <input type='password' className='form-control' required name='password' {...formAttr(runform, 'password')} />
                     {errorContainer(runform, 'password')}
                   </div>
                   <div className='form-group pb-4'>
@@ -111,6 +112,9 @@ const AddAgentModal: React.FC<IPROPS> = ({update, submitFormData, updateAgent, a
                       <div className='form-group col-md-8'>
                         <label htmlFor='contry'> Country</label>
                         <select className='form-control' name='country' id='agent-contry_add' {...formAttr(runform, 'country')}>
+                          <option value='' disabled>
+                            select country
+                          </option>
                           {country?.length > 0 &&
                             country?.map((item: any, i) => {
                               return (
@@ -125,7 +129,7 @@ const AddAgentModal: React.FC<IPROPS> = ({update, submitFormData, updateAgent, a
                       <div className='form-group col-md-4'>
                         <label htmlFor='status'> Status</label>
                         <select className='form-control' name='status' {...formAttr(runform, 'status')}>
-                          <option disabled selected>
+                          <option value='' disabled>
                             Choose Status
                           </option>
                           <option value={1}>On</option>

@@ -4,19 +4,13 @@ import {toast} from 'react-toastify'
 import {RejectHost, fetchHostApplications, makeHost} from '../ApiService/_requests'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
 import {useAuth} from '../app/modules/auth'
-
-interface IState {
-  fullname?: string
-  profileimages?: string
-  identity?: string
-  is_fake?: number
-}
+import Loader from '../Images/loader.gif'
 
 const HostApplication: React.FC = () => {
-  const [hostApp, setHostApp] = useState<IState[]>([])
-  const {currentUser} = useAuth()
-
+  const [hostApp, setHostApp] = useState<any>([])
+  const [loader, setLoader] = useState(true)
   const [option, set_option] = useState({sizePerPage: 3, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
+  const {currentUser} = useAuth()
 
   const columns = [
     {
@@ -100,16 +94,17 @@ const HostApplication: React.FC = () => {
     getAllHostApp(option)
   }, [])
 
-  const makeHostById = async (_id: string) => {
-    const {data} = await makeHost(_id)
-    data.status == 200 ? toast.success(data.message) : toast.error(data.message)
-    getAllHostApp(option)
-  }
-
   const getAllHostApp = async (option?: any) => {
     const {data} = await fetchHostApplications({options: option})
     setHostApp(data.hostApp)
     set_option({...option, totalRecord: data.totalRecord})
+    setLoader(false)
+  }
+
+  const makeHostById = async (_id: string) => {
+    const {data} = await makeHost(_id)
+    data.status == 200 ? toast.success(data.message) : toast.error(data.message)
+    getAllHostApp(option)
   }
 
   const RejectHostApp = async (_id: string) => {
@@ -140,7 +135,13 @@ const HostApplication: React.FC = () => {
         </div>
         <div className='col-12'>
           <div className='white-box-table  card-shadow'>
-            <RtdDatatableNew data={hostApp} columns={columns} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
+            {loader ? (
+              <div className='loader-info-main'>
+                <img src={Loader} alt='loader' />
+              </div>
+            ) : (
+              <RtdDatatableNew data={hostApp} columns={columns} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
+            )}
           </div>
         </div>
       </div>

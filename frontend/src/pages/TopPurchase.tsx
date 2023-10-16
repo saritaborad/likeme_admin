@@ -1,18 +1,19 @@
-import React, {useState, useEffect} from 'react'
+import {useState, useEffect} from 'react'
 import {fetchAllSortPurchased, notiSortPurchased} from '../ApiService/_requests'
 import {Modal} from 'react-bootstrap'
 import SendMessage from '../Modals/sendMessage'
 import {toast} from 'react-toastify'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
 import {useAuth} from '../app/modules/auth'
+import Loader from '../Images/loader.gif'
 
 const TopPurchase = () => {
   const [purchase, setPurchase] = useState()
   const [show, setShow] = useState(false)
   const [userId, setUserId] = useState('')
-  const {currentUser} = useAuth()
-
+  const [loader, setLoader] = useState(true)
   const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
+  const {currentUser} = useAuth()
 
   const columns = [
     {
@@ -95,6 +96,7 @@ const TopPurchase = () => {
   const getAllSpendHistory = async (option?: any) => {
     const {data} = await fetchAllSortPurchased()
     setPurchase(data)
+    setLoader(false)
   }
 
   const submitFormData = async (formData: any) => {
@@ -124,7 +126,13 @@ const TopPurchase = () => {
               </div>
             </div>
           </div>
-          <RtdDatatableNew data={purchase} columns={columns} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
+          {loader ? (
+            <div className='loader-info-main'>
+              <img src={Loader} alt='loader' />
+            </div>
+          ) : (
+            <RtdDatatableNew data={purchase} columns={columns} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
+          )}
         </div>
       </div>
 

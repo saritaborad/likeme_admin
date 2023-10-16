@@ -5,14 +5,15 @@ import moment from 'moment'
 import {toast} from 'react-toastify'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
 import {useAuth} from '../app/modules/auth'
+import Loader from '../Images/loader.gif'
 
 const RedeemRequest: React.FC = () => {
   const [redeems, setRedeems] = useState([])
-  const agents: any = useAllAgent()
   const [selectedItem, setSelectedItem] = useState<any>({request_status: 0, agent_id: ''})
-  const {currentUser} = useAuth()
-
   const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
+  const [loader, setLoader] = useState(true)
+  const agents: any = useAllAgent()
+  const {currentUser} = useAuth()
 
   const columns = [
     {
@@ -209,6 +210,7 @@ const RedeemRequest: React.FC = () => {
     const {data} = await fetchAllRedeems({options: option, formData})
     setRedeems(data.data)
     set_option({...option, totalRecord: data.totalRecord})
+    setLoader(false)
   }
 
   const ApproveRedeem = async (amount_paid: any, request_status: any, completed_at: any) => {
@@ -269,7 +271,13 @@ const RedeemRequest: React.FC = () => {
                 </div>
               </div>
             </div>
-            <RtdDatatableNew data={redeems} columns={selectedItem.request_status == 0 ? columns : columns1} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
+            {loader ? (
+              <div className='loader-info-main'>
+                <img src={Loader} alt='loader' />
+              </div>
+            ) : (
+              <RtdDatatableNew data={redeems} columns={selectedItem.request_status == 0 ? columns : columns1} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
+            )}
           </div>
         </div>
       </div>

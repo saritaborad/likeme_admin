@@ -6,23 +6,17 @@ import CoinPlanModal from '../Modals/CoinPlanModal'
 import {usePackageName} from '../hooks/customHook'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
 import {useAuth} from '../app/modules/auth'
-
-interface IState {
-  fullname?: string
-  profileimages?: string
-  identity?: string
-  is_fake?: number
-}
+import Loader from '../Images/loader.gif'
+import {DeleteConfirmModal} from '../Modals/DeleteConfirmModal'
 
 const CoinPlan: React.FC = () => {
-  const [coinPlanList, setCoinPlanList] = useState<IState[]>([])
-  const [modalStates, setModalStates] = useState({update: false, show: false, coinPlan: ''})
+  const [coinPlanList, setCoinPlanList] = useState<any>([])
+  const [modalStates, setModalStates] = useState({update: false, show: false, rowVal: '', deleteConfirm: false})
   const [selectedItem, setSelectedItem] = useState<any>({package_name: 'com.videocall.randomcallapps'})
-  const {currentUser} = useAuth()
-
-  const packageName = usePackageName()
-
+  const [loader, setLoader] = useState(true)
   const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
+  const {currentUser} = useAuth()
+  const packageName = usePackageName()
 
   const columns = [
     {
@@ -147,15 +141,10 @@ const CoinPlan: React.FC = () => {
             <div>
               {!currentUser?.is_tester && (
                 <>
-                  <button
-                    className='btn-comn-submit me-2'
-                    onClick={() => {
-                      setModalStates({show: true, update: true, coinPlan: data[i]})
-                    }}
-                  >
+                  <button className='btn-comn-submit me-2' onClick={() => setModalStates({...modalStates, update: true, show: true, rowVal: data[i]})}>
                     Edit
                   </button>
-                  <button className='btn-comn-danger me-2' onClick={() => deleteCoinPlan(data[i]?._id)}>
+                  <button className='btn-comn-danger me-2' onClick={() => setModalStates({...modalStates, rowVal: data[i]?._id, deleteConfirm: true})}>
                     Delete
                   </button>
                 </>
@@ -171,21 +160,22 @@ const CoinPlan: React.FC = () => {
     getAllCoinPlan(option, selectedItem)
   }, [])
 
+  const getAllCoinPlan = async (option?: any, filter?: any) => {
+    const {data} = await fetchAllCoinPlans({options: option, ...filter})
+    setCoinPlanList(data.data)
+    setModalStates({show: false, update: false, rowVal: '', deleteConfirm: false})
+    set_option({...option, totalRecord: data.totalRecord})
+    setLoader(false)
+  }
+
   const changeSelect = async (id: string) => {
     const {data} = await default_flag(id)
     data.status == 200 ? toast.success(data.message) : toast.error(data.message)
     getAllCoinPlan(option, selectedItem)
   }
 
-  const getAllCoinPlan = async (option?: any, filter?: any) => {
-    const {data} = await fetchAllCoinPlans({options: option, ...filter})
-    setCoinPlanList(data.data)
-    setModalStates({show: false, update: false, coinPlan: ''})
-    set_option({...option, totalRecord: data.totalRecord})
-  }
-
-  const deleteCoinPlan = async (id: string) => {
-    const {data} = await deleteSubcriptionById(id)
+  const deleteCoinPlan = async () => {
+    const {data} = await deleteSubcriptionById(modalStates.rowVal)
     data.status == 200 ? toast.success(data.message) : toast.error(data.message)
     getAllCoinPlan(option, selectedItem)
   }
@@ -223,7 +213,7 @@ const CoinPlan: React.FC = () => {
     getAllCoinPlan(option, {...selectedItem, [e.target.name]: e.target.value})
   }
 
-  const appModalClose = () => setModalStates({show: false, update: false, coinPlan: ''})
+  const appModalClose = () => setModalStates({...modalStates, update: false, show: false, rowVal: ''})
 
   return (
     <>
@@ -255,13 +245,22 @@ const CoinPlan: React.FC = () => {
                 </select>
               </div>
             </div>
-
-            <RtdDatatableNew data={coinPlanList} columns={columns} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
+            {loader ? (
+              <div className='loader-info-main'>
+                <img src={Loader} alt='loader' />
+              </div>
+            ) : (
+              <RtdDatatableNew data={coinPlanList} columns={columns} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
+            )}
           </div>
         </div>
 
         <Modal show={modalStates.show} onHide={() => appModalClose()} size='lg' className='cust-comn-modal' centered>
-          <CoinPlanModal update={modalStates.update} coinPlan={modalStates.coinPlan} submitFormData={submitFormData} updateCoinPlan={updateCoinPlan} appModalClose={appModalClose} />
+          <CoinPlanModal update={modalStates.update} coinPlan={modalStates.rowVal} submitFormData={submitFormData} updateCoinPlan={updateCoinPlan} appModalClose={appModalClose} />
+        </Modal>
+
+        <Modal show={modalStates.deleteConfirm} onHide={() => setModalStates({...modalStates, deleteConfirm: false})} size='lg' className='cust-comn-modal' centered>
+          <DeleteConfirmModal setDelete={setModalStates} setConfirmDel={deleteCoinPlan} />
         </Modal>
       </div>
     </>

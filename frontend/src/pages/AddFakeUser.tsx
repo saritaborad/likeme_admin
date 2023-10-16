@@ -13,8 +13,8 @@ interface Image {
 }
 
 const AddFakeUser: React.FC = () => {
-  const country = useAllCountry()
   const [images, setImages] = useState<Image[]>([])
+  const country = useAllCountry()
   const navigate = useNavigate()
 
   const submitFormData = async (formData: any) => {

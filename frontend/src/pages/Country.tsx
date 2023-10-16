@@ -5,17 +5,13 @@ import {Modal} from 'react-bootstrap'
 import AddCountry from '../Modals/AddCountry'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
 import {useAuth} from '../app/modules/auth'
-
-interface IState {
-  fullname?: string
-  profileimages?: string
-  identity?: string
-  is_fake?: number
-}
+import Loader from '../Images/loader.gif'
+import {DeleteConfirmModal} from '../Modals/DeleteConfirmModal'
 
 const Country: React.FC = () => {
-  const [user, setUser] = useState<IState[]>([])
-  const [modalStates, setModalStates] = useState({update: false, show: false, countryInfo: ''})
+  const [user, setUser] = useState<any>([])
+  const [modalStates, setModalStates] = useState({update: false, show: false, rowVal: '', deleteConfirm: false})
+  const [loader, setLoader] = useState(true)
   const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
   const {currentUser} = useAuth()
 
@@ -43,10 +39,10 @@ const Country: React.FC = () => {
             <div>
               {!currentUser?.is_tester && (
                 <>
-                  <button className='btn-comn-submit me-2' onClick={() => setModalStates({update: true, show: true, countryInfo: data[i]})}>
+                  <button className='btn-comn-submit me-2' onClick={() => setModalStates({...modalStates, update: true, show: true, rowVal: data[i]})}>
                     Edit
                   </button>
-                  <button className='btn-comn-danger me-2' onClick={() => deleteCountry(data[i]?._id)}>
+                  <button className='btn-comn-danger me-2' onClick={() => setModalStates({...modalStates, rowVal: data[i]?._id, deleteConfirm: true})}>
                     Delete
                   </button>
                 </>
@@ -65,12 +61,13 @@ const Country: React.FC = () => {
   const getCountryList = async (option?: any) => {
     const {data} = await fetchAllCountry({options: option})
     setUser(data.countries)
-    setModalStates({show: false, update: false, countryInfo: ''})
+    setModalStates({show: false, update: false, rowVal: '', deleteConfirm: false})
     set_option({...option, totalRecord: data.totalRecord})
+    setLoader(false)
   }
 
-  const deleteCountry = async (_id: string) => {
-    const {data} = await deleteCountryData(_id)
+  const deleteCountry = async () => {
+    const {data} = await deleteCountryData(modalStates.rowVal)
     data.status == 200 ? toast.success(data.message) : toast.error(data.message)
     getCountryList(option)
   }
@@ -101,34 +98,11 @@ const Country: React.FC = () => {
     }
   }
 
-  const appModalClose = () => setModalStates({update: false, show: false, countryInfo: ''})
+  const appModalClose = () => setModalStates({...modalStates, update: false, show: false, rowVal: ''})
 
   return (
     <>
       <div className='container-fluid'>
-        {/* <div className='row'>
-          <div className='col-12 d-flex'>
-          
-          </div>
-        </div> */}
-        {/* <div className='col-12  mt-2'>
-          <div className='table-custom-info card-shadow'>
-            <div className='row'>
-              <div className='col-12 d-flex align-items-center mt-8'>
-                <div className=' '>
-                  <h1>Country List</h1>
-                </div>
-                <div className='ms-auto'>
-                  <button className='btn-comn-submit me-2' onClick={() => setModalStates({...modalStates, show: true})}>
-                    Add Country
-                  </button>
-                </div>
-              </div>
-            </div>
-            <RtdDatatableNew data={user} columns={columns} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
-          </div>
-        </div> */}
-
         <div className='col-12'>
           <div className='white-box-table  card-shadow'>
             <div className='row'>
@@ -145,11 +119,20 @@ const Country: React.FC = () => {
                 </div>
               </div>
             </div>
-            <RtdDatatableNew data={user} columns={columns} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
+            {loader ? (
+              <div className='loader-info-main'>
+                <img src={Loader} alt='loader' />
+              </div>
+            ) : (
+              <RtdDatatableNew data={user} columns={columns} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
+            )}
           </div>
         </div>
         <Modal show={modalStates.show} onHide={() => appModalClose()} size='lg' className='cust-comn-modal' centered>
-          <AddCountry update={modalStates.update} countryDetail={modalStates.countryInfo} submitFormData={submitFormData} updateCountry={updateCountry} appModalClose={appModalClose} />
+          <AddCountry update={modalStates.update} countryDetail={modalStates.rowVal} submitFormData={submitFormData} updateCountry={updateCountry} appModalClose={appModalClose} />
+        </Modal>
+        <Modal show={modalStates.deleteConfirm} onHide={() => setModalStates({...modalStates, deleteConfirm: false})} size='lg' className='cust-comn-modal' centered>
+          <DeleteConfirmModal setDelete={setModalStates} setConfirmDel={deleteCountry} />
         </Modal>
       </div>
     </>

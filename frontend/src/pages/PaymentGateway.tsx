@@ -5,10 +5,13 @@ import {addPayment, deletePaymentById, fetchAllPayment, updatePayment} from '../
 import AddPaymentGateway from '../Modals/AddPaymentGateway'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
 import {useAuth} from '../app/modules/auth'
+import Loader from '../Images/loader.gif'
+import {DeleteConfirmModal} from '../Modals/DeleteConfirmModal'
 
 const PaymentGateway: React.FC = () => {
   const [gatewayList, setGatewayList] = useState([])
-  const [modalStates, setModalStates] = useState({update: false, show: false, gatewayInfo: ''})
+  const [modalStates, setModalStates] = useState({update: false, show: false, rowVal: '', deleteConfirm: false})
+  const [loader, setLoader] = useState(true)
   const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
   const {currentUser} = useAuth()
 
@@ -36,10 +39,10 @@ const PaymentGateway: React.FC = () => {
             <div>
               {!currentUser?.is_tester && (
                 <>
-                  <button className='btn-comn-submit me-2' onClick={() => setModalStates({update: true, show: true, gatewayInfo: data[i]})}>
+                  <button className='btn-comn-submit me-2' onClick={() => setModalStates({...modalStates, update: true, show: true, rowVal: data[i]})}>
                     Edit
                   </button>
-                  <button className='btn-comn-danger me-2' onClick={() => deleteGateway(data[i]?._id)}>
+                  <button className='btn-comn-danger me-2' onClick={() => setModalStates({...modalStates, rowVal: data[i]?._id, deleteConfirm: true})}>
                     Delete
                   </button>
                 </>
@@ -58,8 +61,9 @@ const PaymentGateway: React.FC = () => {
   const getPaymentGateway = async (option?: any) => {
     const {data} = await fetchAllPayment({options: option})
     setGatewayList(data.data)
-    setModalStates({show: false, update: false, gatewayInfo: ''})
+    setModalStates({show: false, update: false, rowVal: '', deleteConfirm: false})
     set_option({...option, totalRecord: data.totalRecord})
+    setLoader(false)
   }
 
   const submitFormData = async (formData: any) => {
@@ -80,8 +84,8 @@ const PaymentGateway: React.FC = () => {
     }
   }
 
-  const deleteGateway = async (_id: any) => {
-    const {data} = await deletePaymentById(_id)
+  const deleteGateway = async () => {
+    const {data} = await deletePaymentById(modalStates.rowVal)
     data.status == 200 ? toast.success(data.message) : toast.error(data.message)
     getPaymentGateway(option)
   }
@@ -96,7 +100,7 @@ const PaymentGateway: React.FC = () => {
     // Call your API to update data here
   }
 
-  const appModalClose = () => setModalStates({show: false, update: false, gatewayInfo: ''})
+  const appModalClose = () => setModalStates({...modalStates, update: false, show: false, rowVal: ''})
 
   return (
     <>
@@ -117,12 +121,22 @@ const PaymentGateway: React.FC = () => {
                 </div>
               </div>
             </div>
-            <RtdDatatableNew data={gatewayList} columns={columns} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
+            {loader ? (
+              <div className='loader-info-main'>
+                <img src={Loader} alt='loader' />
+              </div>
+            ) : (
+              <RtdDatatableNew data={gatewayList} columns={columns} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
+            )}
           </div>
         </div>
 
         <Modal show={modalStates.show} onHide={() => appModalClose()} size='lg' className='cust-comn-modal' centered>
-          <AddPaymentGateway update={modalStates.update} gatewayInfo={modalStates.gatewayInfo} submitFormData={submitFormData} updateGateway={updateGateway} appModalClose={appModalClose} />
+          <AddPaymentGateway update={modalStates.update} gatewayInfo={modalStates.rowVal} submitFormData={submitFormData} updateGateway={updateGateway} appModalClose={appModalClose} />
+        </Modal>
+
+        <Modal show={modalStates.deleteConfirm} onHide={() => setModalStates({...modalStates, deleteConfirm: false})} size='lg' className='cust-comn-modal' centered>
+          <DeleteConfirmModal setDelete={setModalStates} setConfirmDel={deleteGateway} />
         </Modal>
       </div>
     </>

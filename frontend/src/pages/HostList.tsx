@@ -5,15 +5,20 @@ import {blockUnblockHost, deleteHostById, featureUpdate, fetchHosts} from '../Ap
 import {useAllAgent} from '../hooks/customHook'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
 import {useAuth} from '../app/modules/auth'
+import Loader from '../Images/loader.gif'
+import {Modal} from 'react-bootstrap'
+import {DeleteConfirmModal} from '../Modals/DeleteConfirmModal'
+import {ImgUrl} from '../const'
 
 const HostList: React.FC = () => {
-  const [hosts, setHosts] = useState([])
   const {state}: any = useLocation()
+  const [hosts, setHosts] = useState([])
+  const [modalStates, setModalStates] = useState({rowVal: '', deleteConfirm: false})
+  const [loader, setLoader] = useState(true)
   const [selectedItem, setSelectedItem] = useState<any>({is_fake: 0, is_block: state?.is_block})
+  const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
   const agents = useAllAgent()
   const {currentUser} = useAuth()
-
-  const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
 
   const column1 = [
     {
@@ -23,7 +28,7 @@ const HostList: React.FC = () => {
         filter: false,
         sort: false,
         customBodyRender: (data: any, i: number) => {
-          return <img src={`http://localhost:5000/${data[i]?.profileimages}`} className='profile-img' alt='' />
+          return <img src={data[i]?.profileimages ? `${ImgUrl + data[i]?.profileimages}` : `${ImgUrl + data[i]?.images.image}`} className='profile-img' alt='' />
         },
       },
     },
@@ -130,7 +135,7 @@ const HostList: React.FC = () => {
         filter: false,
         sort: false,
         customBodyRender: (data: any, i: number) => {
-          return <img src={data[i]?.profileimages ? `http://localhost:5000/${data[i]?.profileimages}` : `http://localhost:5000/${data[i]?.images?.image}`} className='profile-img' alt='' />
+          return <img src={data[i]?.profileimages ? `${ImgUrl + data[i]?.profileimages}` : `${ImgUrl + data[i]?.images?.image}`} className='profile-img' alt='' />
         },
       },
     },
@@ -169,7 +174,7 @@ const HostList: React.FC = () => {
                 View
               </Link>
               {!currentUser?.is_tester && (
-                <button className='btn-comn-danger me-2' onClick={() => deleteHost(data[i]?._id)}>
+                <button className='btn-comn-danger me-2' onClick={() => setModalStates({rowVal: data[i]?._id, deleteConfirm: true})}>
                   Delete
                 </button>
               )}
@@ -188,10 +193,12 @@ const HostList: React.FC = () => {
     const {data} = await fetchHosts({options: option, ...filter})
     setHosts(data.hosts)
     set_option({...option, totalRecord: data.totalRecord})
+    setModalStates({rowVal: '', deleteConfirm: false})
+    setLoader(false)
   }
 
-  const deleteHost = async (_id: string) => {
-    const {data} = await deleteHostById(_id)
+  const deleteHost = async () => {
+    const {data} = await deleteHostById(modalStates.rowVal)
     data.status == 200 ? toast.success(data.message) : toast.error(data.message)
     getAllHost(option, selectedItem)
   }
@@ -225,7 +232,7 @@ const HostList: React.FC = () => {
 
   const tableCallBack = (option: any) => {
     set_option(option)
-    getAllHost(option)
+    getAllHost(option, selectedItem)
   }
 
   const handleDrop = (updatedData: any) => {
@@ -292,10 +299,19 @@ const HostList: React.FC = () => {
                 </div>
               </div>
             </div>
-
-            <RtdDatatableNew data={hosts} columns={selectedItem?.is_fake == '0' ? column1 : column2} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
+            {loader ? (
+              <div className='loader-info-main'>
+                <img src={Loader} alt='loader' />
+              </div>
+            ) : (
+              <RtdDatatableNew data={hosts} columns={selectedItem?.is_fake == '0' ? column1 : column2} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
+            )}
           </div>
         </div>
+
+        <Modal show={modalStates.deleteConfirm} onHide={() => setModalStates({...modalStates, deleteConfirm: false})} size='lg' className='cust-comn-modal' centered>
+          <DeleteConfirmModal setDelete={setModalStates} setConfirmDel={deleteHost} />
+        </Modal>
       </div>
     </>
   )

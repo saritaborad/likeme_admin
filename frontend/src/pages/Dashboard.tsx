@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import {useEffect, useState} from 'react'
 import {Link} from 'react-router-dom'
 import {fetchAgentDashboard, fetchDashboardCount} from '../ApiService/_requests'
 import {useAuth} from '../app/modules/auth'
@@ -47,9 +47,6 @@ const Dashboard = () => {
                               <div className='card-content'>
                                 <h3 className='fs-3'>{item?.name}</h3>
                                 <h3 className='mb-3'>{item?.count}</h3>
-                                {/* <Link to={item?.link} state={item.state} className='badge badge-dark text-light text-capitalize bg-dark'>
-                                  View
-                                </Link> */}
                               </div>
                             </div>
                             <div className='col-lg-5 col-md-5 col-sm-5 col-xs-5'>

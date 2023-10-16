@@ -1,17 +1,17 @@
-import React, {useEffect, useState} from 'react'
+import {useEffect, useState} from 'react'
 import {fetchAllHostHistory} from '../ApiService/_requests'
 import {Link, useLocation} from 'react-router-dom'
 import {ImgUrl} from '../const'
 import moment from 'moment'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
+import Loader from '../Images/loader.gif'
 
 const HostHistory = () => {
-  const {state}: any = useLocation()
-
   const [history, setHistory] = useState<any>()
   const [hostInfo, setHostInfo] = useState<any>()
-
+  const [loader, setLoader] = useState(true)
   const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
+  const {state}: any = useLocation()
 
   const columns = [
     {
@@ -95,6 +95,7 @@ const HostHistory = () => {
     const {data} = await fetchAllHostHistory({options: option, _id: state?.hostInfo?._id})
     setHistory(data)
     set_option({...option, totalRecord: data.totalRecord})
+    setLoader(false)
   }
 
   const tableCallBack = (option: any) => {
@@ -127,8 +128,13 @@ const HostHistory = () => {
               </div>
             </div>
           </div>
-
-          <RtdDatatableNew data={history?.history} columns={columns} option={option} tableCallBack={tableCallBack} />
+          {loader ? (
+            <div className='loader-info-main'>
+              <img src={Loader} alt='loader' />
+            </div>
+          ) : (
+            <RtdDatatableNew data={history?.history} columns={columns} option={option} tableCallBack={tableCallBack} />
+          )}
         </div>
       </div>
     </div>

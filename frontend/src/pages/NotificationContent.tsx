@@ -5,20 +5,15 @@ import NotiContent from '../Modals/NotiContent'
 import {addNotiContent, deleteNotiContent, getNotiContent, updateNotiContent} from '../ApiService/_requests'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
 import {useAuth} from '../app/modules/auth'
-
-interface IState {
-  fullname?: string
-  profileimages?: string
-  identity?: string
-  is_fake?: number
-}
+import Loader from '../Images/loader.gif'
+import {DeleteConfirmModal} from '../Modals/DeleteConfirmModal'
 
 const NotificationContent: React.FC = () => {
-  const [notiContentList, setNotiContentList] = useState<IState[]>([])
-  const [modalStates, setModalStates] = useState({update: false, show: false, notiInfo: ''})
-  const {currentUser} = useAuth()
-
+  const [notiContentList, setNotiContentList] = useState<any>([])
+  const [modalStates, setModalStates] = useState({update: false, show: false, rowVal: '', deleteConfirm: false})
+  const [loader, setLoader] = useState(true)
   const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
+  const {currentUser} = useAuth()
 
   const columns = [
     {
@@ -56,10 +51,10 @@ const NotificationContent: React.FC = () => {
             <div>
               {!currentUser?.is_tester && (
                 <>
-                  <button className='btn-comn-submit me-2' onClick={() => setModalStates({update: true, show: true, notiInfo: data[i]})}>
+                  <button className='btn-comn-submit me-2' onClick={() => setModalStates({...modalStates, update: true, show: true, rowVal: data[i]})}>
                     Edit
                   </button>
-                  <button className='btn-comn-danger me-2' onClick={() => delNotiContentData(data[i]?._id)}>
+                  <button className='btn-comn-danger me-2' onClick={() => setModalStates({...modalStates, rowVal: data[i]?._id, deleteConfirm: true})}>
                     Delete
                   </button>
                 </>
@@ -78,8 +73,9 @@ const NotificationContent: React.FC = () => {
   const getNotiContentData = async (option?: any) => {
     const {data} = await getNotiContent({options: option})
     setNotiContentList(data.data)
-    setModalStates({update: false, show: false, notiInfo: ''})
+    setModalStates({show: false, update: false, rowVal: '', deleteConfirm: false})
     set_option({...option, totalRecord: data.totalRecord})
+    setLoader(false)
   }
 
   const submitFormData = async (formData: any) => {
@@ -98,8 +94,8 @@ const NotificationContent: React.FC = () => {
     }
   }
 
-  const delNotiContentData = async (_id: string) => {
-    const {data} = await deleteNotiContent(_id)
+  const delNotiContentData = async () => {
+    const {data} = await deleteNotiContent(modalStates.rowVal)
     data.status == 200 ? toast.success(data.message) : toast.error(data.message)
     getNotiContentData(option)
   }
@@ -109,7 +105,7 @@ const NotificationContent: React.FC = () => {
     getNotiContentData(option)
   }
 
-  const appModalClose = () => setModalStates({update: false, show: false, notiInfo: ''})
+  const appModalClose = () => setModalStates({...modalStates, update: false, show: false, rowVal: ''})
 
   const handleDrop = (updatedData: any) => {
     setNotiContentList(updatedData)
@@ -135,26 +131,21 @@ const NotificationContent: React.FC = () => {
                 </div>
               </div>
             </div>
-            <RtdDatatableNew data={notiContentList} columns={columns} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
-          </div>
-          {/* <div className='table-custom-info'>
-            <div className='row'>
-              <div className='col-12 d-flex my-6'>
-                <div className=''>
-                  <h1>Notification Content</h1>
-                </div>
-                <div className='ms-auto'>
-                  <button className='btn-comn-submit me-2' onClick={() => setModalStates({...modalStates, show: true})}>
-                    Add Notification Content
-                  </button>
-                </div>
+            {loader ? (
+              <div className='loader-info-main'>
+                <img src={Loader} alt='loader' />
               </div>
-            </div>
-            <RtdDatatable data={notiContentList} columns={columns} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
-          </div> */}
+            ) : (
+              <RtdDatatableNew data={notiContentList} columns={columns} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
+            )}
+          </div>
         </div>
         <Modal show={modalStates.show} onHide={() => appModalClose()} size='lg' className='cust-comn-modal' centered>
-          <NotiContent update={modalStates.update} notiInfo={modalStates.notiInfo} submitFormData={submitFormData} updateNotiData={updateNotiData} appModalClose={appModalClose} />
+          <NotiContent update={modalStates.update} notiInfo={modalStates.rowVal} submitFormData={submitFormData} updateNotiData={updateNotiData} appModalClose={appModalClose} />
+        </Modal>
+
+        <Modal show={modalStates.deleteConfirm} onHide={() => setModalStates({...modalStates, deleteConfirm: false})} size='lg' className='cust-comn-modal' centered>
+          <DeleteConfirmModal setDelete={setModalStates} setConfirmDel={delNotiContentData} />
         </Modal>
       </div>
     </>

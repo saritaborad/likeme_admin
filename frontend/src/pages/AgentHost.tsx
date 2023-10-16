@@ -1,15 +1,16 @@
-import React, {useState, useEffect} from 'react'
+import {useState, useEffect} from 'react'
 import {Link, useLocation} from 'react-router-dom'
 import {getAgentHosts} from '../ApiService/_requests'
 import {ImgUrl} from '../const'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
+import Loader from '../Images/loader.gif'
 
 const AgentHost = () => {
-  const {state}: any = useLocation()
   const [hosts, setHosts] = useState<any>()
   const [agentInfo, setAgentInfo] = useState<any>()
-
+  const [loader, setLoader] = useState(true)
   const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
+  const {state}: any = useLocation()
 
   const columns = [
     {
@@ -130,6 +131,7 @@ const AgentHost = () => {
     const {data} = await getAgentHosts({options: option, _id: state?.agentInfo?._id})
     set_option({...option, totalRecord: data.totalRecord})
     setHosts(data)
+    setLoader(false)
   }
 
   const tableCallBack = (option: any) => {
@@ -157,7 +159,13 @@ const AgentHost = () => {
             </div>
           </div>
           <button className='btn-comn-submit mb-6 py-3'>Pending Payments</button>
-          <RtdDatatableNew data={hosts?.agentHost} columns={columns} option={option} tableCallBack={tableCallBack} />
+          {loader ? (
+            <div className='loader-info-main'>
+              <img src={Loader} alt='loader' />
+            </div>
+          ) : (
+            <RtdDatatableNew data={hosts?.agentHost} columns={columns} option={option} tableCallBack={tableCallBack} />
+          )}
         </div>
       </div>
     </div>

@@ -8,15 +8,15 @@ import * as Yup from 'yup'
 import {errorContainer, formAttr} from '../commonFun'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
 import {useAuth} from '../app/modules/auth'
+import Loader from '../Images/loader.gif'
+import {DeleteConfirmModal} from '../Modals/DeleteConfirmModal'
 
 const Notification: React.FC = () => {
   const [notification, setNotification] = useState<any>([])
-  const [notificationData, setNotificationData] = useState()
-  const [show, setShow] = useState(false)
-  const [update, setUpdate] = useState(false)
-  const {currentUser} = useAuth()
-
+  const [modalStates, setModalStates] = useState({update: false, show: false, rowVal: '', deleteConfirm: false})
+  const [loader, setLoader] = useState(true)
   const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
+  const {currentUser} = useAuth()
 
   const columns = [
     {
@@ -55,16 +55,10 @@ const Notification: React.FC = () => {
             <div>
               {!currentUser?.is_tester && (
                 <>
-                  <button
-                    className='btn-comn-submit me-2'
-                    onClick={() => {
-                      setNotificationData(data[i])
-                      setShow(true)
-                    }}
-                  >
+                  <button className='btn-comn-submit me-2' onClick={() => setModalStates({...modalStates, update: true, show: true, rowVal: data[i]})}>
                     Edit
                   </button>
-                  <button className='btn-comn-danger me-2' onClick={() => deleteNotification(data[i]?._id)}>
+                  <button className='btn-comn-danger me-2' onClick={() => setModalStates({...modalStates, rowVal: data[i]?._id, deleteConfirm: true})}>
                     Delete
                   </button>
                 </>
@@ -80,23 +74,24 @@ const Notification: React.FC = () => {
     fetchNotification(option)
   }, [])
 
-  const deleteNotification = async (_id: string) => {
-    const {data} = await deleteNotificationyById(_id)
-    data.status == 200 ? toast.success(data.message) : toast.error(data.message)
-    fetchNotification(option)
-  }
-
   const fetchNotification = async (option?: any) => {
     const {data} = await fetchNotificationData({options: option})
     setNotification(data.data)
     set_option({...option, totalRecord: data.totalRecord})
+    setModalStates({show: false, update: false, rowVal: '', deleteConfirm: false})
+    setLoader(false)
+  }
+
+  const deleteNotification = async () => {
+    const {data} = await deleteNotificationyById(modalStates.rowVal)
+    data.status == 200 ? toast.success(data.message) : toast.error(data.message)
+    fetchNotification(option)
   }
 
   const submitFormData = async (formData: any) => {
     const {data} = await updateNotification(formData)
     if (data.status === 200) {
       toast.success(data.message)
-      setShow(false)
       fetchNotification(option)
     }
   }
@@ -106,15 +101,11 @@ const Notification: React.FC = () => {
     if (data.status === 200) {
       resetForm(formData)
       toast.success(data.message)
-      setShow(false)
       fetchNotification(option)
     }
   }
 
-  const appModalClose = () => {
-    setShow(false)
-    setUpdate(false)
-  }
+  const appModalClose = () => setModalStates({...modalStates, update: false, show: false, rowVal: ''})
 
   const tableCallBack = (option: any) => {
     set_option(option)
@@ -181,12 +172,22 @@ const Notification: React.FC = () => {
                 </div>
               </div>
             </div>
-            <RtdDatatableNew data={notification} columns={columns} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
+            {loader ? (
+              <div className='loader-info-main'>
+                <img src={Loader} alt='loader' />
+              </div>
+            ) : (
+              <RtdDatatableNew data={notification} columns={columns} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
+            )}
           </div>
         </div>
 
-        <Modal show={show} onHide={() => appModalClose()} size='lg' className='cust-comn-modal' centered>
-          <EditNotification notificationData={notificationData} submitFormData={submitFormData} appModalClose={appModalClose} />
+        <Modal show={modalStates.show} onHide={() => appModalClose()} size='lg' className='cust-comn-modal' centered>
+          <EditNotification notificationData={modalStates.rowVal} submitFormData={submitFormData} appModalClose={appModalClose} />
+        </Modal>
+
+        <Modal show={modalStates.deleteConfirm} onHide={() => setModalStates({...modalStates, deleteConfirm: false})} size='lg' className='cust-comn-modal' centered>
+          <DeleteConfirmModal setDelete={setModalStates} setConfirmDel={deleteNotification} />
         </Modal>
       </div>
     </>

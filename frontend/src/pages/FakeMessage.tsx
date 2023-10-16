@@ -6,17 +6,13 @@ import FakeMsg from '../Modals/FakeMsg'
 import {ImgUrl} from '../const'
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
 import {useAuth} from '../app/modules/auth'
-
-interface IState {
-  fullname?: string
-  profileimages?: string
-  identity?: string
-  is_fake?: number
-}
+import Loader from '../Images/loader.gif'
+import {DeleteConfirmModal} from '../Modals/DeleteConfirmModal'
 
 const FakeMessage: React.FC = () => {
-  const [messageList, setMessageList] = useState<IState[]>([])
-  const [modalStates, setModalStates] = useState({update: false, show: false, messageInfo: ''})
+  const [messageList, setMessageList] = useState<any>([])
+  const [modalStates, setModalStates] = useState({update: false, show: false, rowVal: '', deleteConfirm: false})
+  const [loader, setLoader] = useState(true)
   const {currentUser} = useAuth()
 
   const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
@@ -41,7 +37,7 @@ const FakeMessage: React.FC = () => {
         customBodyRender: (data: any, i: number) => {
           return (
             !currentUser?.is_tester && (
-              <button className='btn-comn-danger' onClick={() => deleteMessage(data[i]._id)}>
+              <button className='btn-comn-danger' onClick={() => setModalStates({...modalStates, rowVal: data[i]?._id, deleteConfirm: true})}>
                 Delete
               </button>
             )
@@ -59,11 +55,12 @@ const FakeMessage: React.FC = () => {
     const {data} = await fetchAllMessages({options: option})
     setMessageList(data.data)
     set_option({...option, totalRecord: data.totalRecord})
-    setModalStates({update: false, show: false, messageInfo: ''})
+    setModalStates({show: false, update: false, rowVal: '', deleteConfirm: false})
+    setLoader(false)
   }
 
-  const deleteMessage = async (_id: string) => {
-    const {data} = await deleteMessageById(_id)
+  const deleteMessage = async () => {
+    const {data} = await deleteMessageById(modalStates.rowVal)
     data.status == 200 ? toast.success(data.message) : toast.error(data.message)
     getMessages(option)
   }
@@ -90,7 +87,7 @@ const FakeMessage: React.FC = () => {
     // Call your API to update data here
   }
 
-  const appModalClose = () => setModalStates({update: false, show: false, messageInfo: ''})
+  const appModalClose = () => setModalStates({...modalStates, update: false, show: false, rowVal: ''})
 
   return (
     <>
@@ -111,11 +108,21 @@ const FakeMessage: React.FC = () => {
                 </div>
               </div>
             </div>
-            <RtdDatatableNew data={messageList} columns={columns} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
+            {loader ? (
+              <div className='loader-info-main'>
+                <img src={Loader} alt='loader' />
+              </div>
+            ) : (
+              <RtdDatatableNew data={messageList} columns={columns} option={option} tableCallBack={tableCallBack} onDrop={handleDrop} />
+            )}
           </div>
         </div>
         <Modal show={modalStates.show} onHide={() => appModalClose()} size='lg' className='cust-comn-modal' centered>
           <FakeMsg submitFormData={submitFormData} appModalClose={appModalClose} />
+        </Modal>
+
+        <Modal show={modalStates.deleteConfirm} onHide={() => setModalStates({...modalStates, deleteConfirm: false})} size='lg' className='cust-comn-modal' centered>
+          <DeleteConfirmModal setDelete={setModalStates} setConfirmDel={deleteMessage} />
         </Modal>
       </div>
     </>
