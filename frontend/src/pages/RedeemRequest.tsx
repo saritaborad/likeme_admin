@@ -23,7 +23,7 @@ const RedeemRequest: React.FC = () => {
         filter: false,
         sort: false,
         customBodyRender: (data: any, i: number) => {
-          return <div>{data[i]?.user?.fullName}</div>
+          return <div>{data[i]?.fullName}</div>
         },
       },
     },
@@ -207,7 +207,7 @@ const RedeemRequest: React.FC = () => {
 
   // 0 - pending 1 -completed 2 - rejected
   const getAllRedeems = async (option?: any, formData?: any) => {
-    const {data} = await fetchAllRedeems({options: option, formData})
+    const {data} = await fetchAllRedeems({options: option, ...formData})
     setRedeems(data.data)
     set_option({...option, totalRecord: data.totalRecord})
     setLoader(false)

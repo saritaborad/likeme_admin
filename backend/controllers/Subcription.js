@@ -11,15 +11,15 @@ exports.fetchAllCoinPlans = asyncHandler(async (req, res, next) => {
 });
 
 exports.addSubcription = asyncHandler(async (req, res, next) => {
- const { price, discount_price, diamond, play_store_id, app_store_id, orignal_sku } = req.body;
- const subcription = new Subscription({ price, discount_price, discount: Math.round((discount_price / price) * 100), diamond, play_store_id, app_store_id, orignal_sku });
+ const { price, discount_price, diamond, play_store_id, app_store_id, orignal_sku, highlight_text } = req.body;
+ const subcription = new Subscription({ price, discount_price, discount: Math.round((discount_price / price) * 100), diamond, play_store_id, app_store_id, orignal_sku, highlight_text });
  const result = await subcription.save();
  if (result) return giveresponse(res, 200, true, "subcription added successfully!");
 });
 
 exports.updateSubcription = asyncHandler(async (req, res) => {
- const { _id, discount_price, price, diamond, play_store_id, app_store_id, orignal_sku } = req.body;
- const result = await Subscription.updateOne({ _id }, { $set: { price, discount_price, discount: Math.round((discount_price / price) * 100), diamond, play_store_id, app_store_id, orignal_sku } });
+ const { _id, discount_price, price, diamond, play_store_id, app_store_id, orignal_sku, highlight_text } = req.body;
+ const result = await Subscription.updateOne({ _id }, { $set: { price, discount_price, discount: Math.round((discount_price / price) * 100), diamond, play_store_id, app_store_id, orignal_sku, highlight_text } });
  if (result) return giveresponse(res, 200, true, "subscription updated.");
 });
 

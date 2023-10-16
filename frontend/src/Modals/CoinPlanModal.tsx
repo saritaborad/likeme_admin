@@ -32,6 +32,7 @@ const CoinPlanModal: React.FC<IPROPS> = ({update, coinPlan, submitFormData, upda
               diamond: coinPlan?.diamond || 0,
               discount_price: coinPlan?.discount_price || 0,
               price: coinPlan?.price || 0,
+              highlight_text: coinPlan?.highlight_text || '',
             }}
             validationSchema={Yup.object({
               orignal_sku: Yup.string().required('required.'),
@@ -40,6 +41,7 @@ const CoinPlanModal: React.FC<IPROPS> = ({update, coinPlan, submitFormData, upda
               diamond: Yup.number().required('required.'),
               discount_price: Yup.number().required('required.'),
               price: Yup.number().required('required.'),
+              highlight_text: Yup.string().required('required.'),
             })}
             onSubmit={(formData, {resetForm}) => {
               update ? updateCoinPlan(formData) : submitFormData(formData)
@@ -78,6 +80,11 @@ const CoinPlanModal: React.FC<IPROPS> = ({update, coinPlan, submitFormData, upda
                   <label htmlFor='orignal_sku'>Orignal SKU - without discount</label>
                   <input type='text' className='form-control mt-2' name='orignal_sku' id='orignal_sku' {...formAttr(runform, 'orignal_sku')} />
                   {errorContainer(runform, 'orignal_sku')}
+                </div>
+                <div className='form-group mt-5'>
+                  <label htmlFor='orignal_sku'>Highlight text</label>
+                  <input type='text' className='form-control mt-2' name='highlight_text' id='highlight_text' {...formAttr(runform, 'highlight_text')} />
+                  {errorContainer(runform, 'highlight_text')}
                 </div>
                 <button type='submit' className='btn-comn-submit mt-5'>
                   {update ? 'Edit Subscription' : 'Add Subcription'}

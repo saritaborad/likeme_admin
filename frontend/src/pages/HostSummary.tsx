@@ -66,7 +66,7 @@ const HostSummary = () => {
             <div className='card '>
               <div className='card-header mt-6 ms-10'>
                 <h4 className='mr-auto col-8 '>
-                  <img alt='imagedfdf' src={ImgUrl + hostInfo?.profileimages} className='profile-img' />
+                  <img alt='imagedfdf' src={ImgUrl + hostInfo?.profileimages || 'https://likeme.live/public/assets/img/default.png'} className='profile-img' />
                   &nbsp;&nbsp;&nbsp;
                   <i id='host_name'>{hostInfo?.fullName}</i>
                 </h4>
