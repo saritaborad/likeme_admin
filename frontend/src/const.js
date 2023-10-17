@@ -1,5 +1,6 @@
-export const ApiBaseUrl = process.env.REACT_APP_API_URL
-export const ImgUrl = process.env.REACT_APP_BACKEND_URL
+export const ApiBaseUrl = Number(process.env.REACT_APP_PRODUCTION) === 1 ? process.env.REACT_APP_LIVE_API_URL : process.env.REACT_APP_LOCAL_API_URL
+export const ImgUrl = Number(process.env.REACT_APP_PRODUCTION) === 1 ? process.env.REACT_APP_LIVE_BACKEND_URL : process.env.REACT_APP_LOCAL_BACKEND_URL
+
 export const API_PATH = {
   login: ApiBaseUrl + '/login',
   register: ApiBaseUrl + '/register',

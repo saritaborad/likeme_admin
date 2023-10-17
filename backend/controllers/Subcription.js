@@ -11,8 +11,8 @@ exports.fetchAllCoinPlans = asyncHandler(async (req, res, next) => {
 });
 
 exports.addSubcription = asyncHandler(async (req, res, next) => {
- const { price, discount_price, diamond, play_store_id, app_store_id, orignal_sku, highlight_text } = req.body;
- const subcription = new Subscription({ price, discount_price, discount: Math.round((discount_price / price) * 100), diamond, play_store_id, app_store_id, orignal_sku, highlight_text });
+ const { price, discount_price, diamond, play_store_id, app_store_id, orignal_sku, highlight_text, package_name } = req.body;
+ const subcription = new Subscription({ price, discount_price, discount: Math.round((discount_price / price) * 100), diamond, play_store_id, app_store_id, orignal_sku, highlight_text, package_name });
  const result = await subcription.save();
  if (result) return giveresponse(res, 200, true, "subcription added successfully!");
 });

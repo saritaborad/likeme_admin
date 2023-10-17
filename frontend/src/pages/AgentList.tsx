@@ -8,6 +8,7 @@ import RtdDatatableNew from '../Common/DataTable/DataTableNew'
 import {useAuth} from '../app/modules/auth'
 import Loader from '../Images/loader.gif'
 import {DeleteConfirmModal} from '../Modals/DeleteConfirmModal'
+import {ImgUrl} from '../const'
 
 const AgentList: React.FC = () => {
   const [agent, setAgent] = useState<any>([])
@@ -24,7 +25,7 @@ const AgentList: React.FC = () => {
         filter: false,
         sort: false,
         customBodyRender: (data: any, i: number) => {
-          return <img src={`http://localhost:5000/${data[i]?.images}`} className='profile-img' alt='' />
+          return <img src={`${ImgUrl + data[i]?.images}`} className='profile-img' alt='' />
         },
       },
     },

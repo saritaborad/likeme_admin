@@ -12,7 +12,7 @@ exports.fetchAllgifts = asyncHandler(async (req, res, next) => {
 });
 
 exports.addGifts = asyncHandler(async (req, res, next) => {
- const gift = new Gifts({ diamond: req.body.diamond, images: req.body.images });
+ const gift = new Gifts({ diamond: req.body.diamond, images: req.file.path });
  const result = await gift.save();
  if (!result) return giveresponse(res, 400, false, "Failed to add image");
  return giveresponse(res, 200, true, "Successfully added image (only png)");
@@ -23,15 +23,16 @@ exports.editGift = asyncHandler(async (req, res, next) => {
 
  let updateData = { diamond };
 
- if (images) {
+ if (images || req.file?.path) {
   const unlinkData = await Gifts.findById(_id);
+
   if (unlinkData.images) {
    const imagePath = path.join(__dirname, "..", unlinkData.images);
    if (fs.existsSync(imagePath)) {
     fs.unlinkSync(imagePath);
    }
   }
-  updateData.images = images;
+  updateData.images = images || req.file?.path;
  }
 
  const result = await Gifts.updateOne({ _id }, updateData);

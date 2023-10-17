@@ -65,14 +65,11 @@ const AddAgentModal: React.FC<IPROPS> = ({update, submitFormData, updateAgent, a
             >
               {(runform) => (
                 <form onSubmit={runform.handleSubmit}>
-                  <input type='hidden' name='_token' defaultValue='CYlHZ6YicNVJKJHPNa1bTjPYMcTZ39cOxchOc4Ck' />{' '}
                   <div className='d-flex flex-column pb-4'>
                     <label htmlFor='imagefile'>
                       <img className='mb-3 rounded' height={120} width={120} id='agentimage-file' src={update ? (agentImg ? URL.createObjectURL(agentImg) : agentInfo ? ImgUrl + agentInfo?.images : Cloud) : agentImg ? URL.createObjectURL(agentImg) : Cloud} alt='' />
                     </label>
-                    {/* <label htmlFor='imagefile' className='form-label'>
-                      Agents Image
-                    </label> */}
+
                     <input
                       type='file'
                       id='imagefile'
@@ -83,7 +80,7 @@ const AddAgentModal: React.FC<IPROPS> = ({update, submitFormData, updateAgent, a
                         handleImageUpload(e.target.files?.[0] || null, setImgUrl)
                         setAgentImg(e.target.files?.[0] || null)
                       }}
-                      required
+                      required={update ? false : true}
                     />
                     <label> (Only PNG images are recommended)</label>
                   </div>

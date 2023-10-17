@@ -5,11 +5,12 @@ import {RejectHost, fetchHostApplications, makeHost} from '../ApiService/_reques
 import RtdDatatableNew from '../Common/DataTable/DataTableNew'
 import {useAuth} from '../app/modules/auth'
 import Loader from '../Images/loader.gif'
+import {ImgUrl} from '../const'
 
 const HostApplication: React.FC = () => {
   const [hostApp, setHostApp] = useState<any>([])
   const [loader, setLoader] = useState(true)
-  const [option, set_option] = useState({sizePerPage: 3, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
+  const [option, set_option] = useState({sizePerPage: 10, search: {}, totalRecord: 0, page: 1, sort: '_id', order: 'ASC'})
   const {currentUser} = useAuth()
 
   const columns = [
@@ -20,7 +21,7 @@ const HostApplication: React.FC = () => {
         filter: false,
         sort: false,
         customBodyRender: (data: any, i: number) => {
-          return <img src={`http://localhost:5000/${data[i]?.profileimages}`} className='profile-img' alt='' />
+          return <img src={data[i]?.profileimages ? `${ImgUrl + data[i]?.profileimages}` : `${ImgUrl + data[i]?.images?.image}`} className='profile-img' alt='' />
         },
       },
     },

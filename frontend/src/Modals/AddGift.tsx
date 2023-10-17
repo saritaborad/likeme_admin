@@ -16,14 +16,6 @@ interface IPROPS {
 
 const AddGift: React.FC<IPROPS> = ({update, giftInfo, submitFormData, updateGift, appModalClose}) => {
   const [giftImg, setGiftImg] = useState<File | null>(null)
-  const [imgUrl, setImgUrl] = useState()
-
-  const handleImageUpload = async (file: any) => {
-    const formData = new FormData()
-    formData.append('image', file)
-    const {data} = await uploadImg(formData)
-    setImgUrl(data.imgUrl)
-  }
 
   return (
     <div>
@@ -45,12 +37,11 @@ const AddGift: React.FC<IPROPS> = ({update, giftInfo, submitFormData, updateGift
               diamond: Yup.number().required('required.'),
             })}
             onSubmit={(formData, {resetForm}) => {
-              update ? updateGift({...formData, images: imgUrl ? imgUrl : giftInfo.images}) : submitFormData({...formData, images: imgUrl})
+              update ? updateGift({...formData, images: giftImg ? giftImg : giftInfo.images}) : submitFormData({...formData, images: giftImg})
             }}
           >
             {(runform) => (
               <form onSubmit={runform.handleSubmit}>
-                <input type='hidden' name='_token' defaultValue='XY5iNbVG05Yv9SSQSapfD88c5Nb1VkQoaZXPAIrZ' />
                 <div className='d-flex flex-column'>
                   <label htmlFor='imagefile'>
                     <img className='mb-3 rounded' height={120} width={120} id='giftimage-file' src={update ? (giftImg ? URL.createObjectURL(giftImg) : giftInfo ? ImgUrl + giftInfo?.images : Cloud) : giftImg ? URL.createObjectURL(giftImg) : Cloud} />
@@ -64,8 +55,8 @@ const AddGift: React.FC<IPROPS> = ({update, giftInfo, submitFormData, updateGift
                     className='imagefile form-control mb-2'
                     accept='image/png'
                     name='images'
+                    required={update ? false : true}
                     onChangeCapture={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      handleImageUpload(e.target.files?.[0] || null)
                       setGiftImg(e.target.files?.[0] || null)
                     }}
                   />

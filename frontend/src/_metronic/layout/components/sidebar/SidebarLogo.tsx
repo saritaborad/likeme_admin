@@ -1,6 +1,6 @@
 import {Link} from 'react-router-dom'
 import clsx from 'clsx'
-import {KTSVG, toAbsoluteUrl} from '../../../helpers'
+import {KTSVG} from '../../../helpers'
 import {useLayout} from '../../core'
 
 const SidebarLogo = () => {
@@ -15,7 +15,7 @@ const SidebarLogo = () => {
       <Link to='/dashboard'>
         {config.layoutType === 'dark-sidebar' ? (
           <div className='sidebar-brand'>
-            <h1 className='logo-name text-uppercase fw-bold' style={{color: 'black'}}>
+            <h1 className='logo-name text-uppercase fw-bold' style={{color: 'white'}}>
               Like Me
             </h1>
           </div>

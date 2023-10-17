@@ -33,7 +33,6 @@ const MasterLayout = () => {
           </div>
         </div>
 
-        {/* <RightToolbar /> */}
         <DrawerMessenger />
         {/* end:: Drawers */}
 

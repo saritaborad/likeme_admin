@@ -1,7 +1,7 @@
 import {useEffect, useRef} from 'react'
 import {useLocation} from 'react-router-dom'
 import {ScrollTopComponent, DrawerComponent, ToggleComponent, StickyComponent} from '../../../assets/ts/components'
-// import {KTSVG} from '../../../helpers'
+import {KTSVG} from '../../../helpers'
 
 export function ScrollTop() {
   const {pathname} = useLocation()
@@ -45,9 +45,8 @@ export function ScrollTop() {
   }, [pathname])
 
   return (
-    <></>
-    // <div id='kt_scrolltop' className='scrolltop' data-kt-scrolltop='true'>
-    //   <KTSVG path='/media/icons/duotune/arrows/arr066.svg' />
-    // </div>
+    <div id='kt_scrolltop' className='scrolltop' data-kt-scrolltop='true'>
+      <KTSVG path='/media/icons/duotune/arrows/arr066.svg' />
+    </div>
   )
 }

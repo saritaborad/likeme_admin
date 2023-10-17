@@ -1,12 +1,4 @@
-import {
-  getElementIndex,
-  getUniqueIdWithPrefix,
-  ElementAnimateUtil,
-  EventHandlerUtil,
-  DataUtil,
-  DOMEventHandlerUtil,
-  ElementStyleUtil,
-} from '../_utils/index'
+import {getElementIndex, getUniqueIdWithPrefix, ElementAnimateUtil, EventHandlerUtil, DataUtil, DOMEventHandlerUtil, ElementStyleUtil} from '../_utils/index'
 
 export interface IStepperOptions {
   startIndex: number
@@ -157,9 +149,7 @@ class StepperComponent {
     this.element.classList.add(state)
 
     // Step Items
-    const elements = this.element.querySelectorAll(
-      '[data-kt-stepper-element="nav"], [data-kt-stepper-element="content"], [data-kt-stepper-element="info"]'
-    )
+    const elements = this.element.querySelectorAll('[data-kt-stepper-element="nav"], [data-kt-stepper-element="content"], [data-kt-stepper-element="info"]')
 
     if (!elements || elements.length <= 0) {
       return
@@ -176,16 +166,10 @@ class StepperComponent {
       if (index === this.currentStepIndex) {
         element.classList.add('current')
 
-        if (
-          this.options.animation !== false &&
-          element.getAttribute('data-kt-stepper-element') === 'content'
-        ) {
+        if (this.options.animation !== false && element.getAttribute('data-kt-stepper-element') === 'content') {
           ElementStyleUtil.set(element, 'animationDuration', this.options.animationSpeed)
 
-          const animation =
-            this._getStepDirection(this.passedStepIndex) === 'previous'
-              ? this.options.animationPreviousClass
-              : this.options.animationNextClass
+          const animation = this._getStepDirection(this.passedStepIndex) === 'previous' ? this.options.animationPreviousClass : this.options.animationNextClass
           ElementAnimateUtil.animateClass(element, animation)
         }
       } else {
@@ -310,10 +294,7 @@ class StepperComponent {
     })
   }
 
-  public static createInsance = (
-    element: HTMLElement,
-    options: IStepperOptions = defaultStepperOptions
-  ): StepperComponent | null => {
+  public static createInsance = (element: HTMLElement, options: IStepperOptions = defaultStepperOptions): StepperComponent | null => {
     if (!element) {
       return null
     }

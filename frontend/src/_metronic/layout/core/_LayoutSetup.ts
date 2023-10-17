@@ -212,11 +212,4 @@ class LayoutSetup {
   })()
 }
 
-export {
-  LayoutSetup,
-  getLayoutFromLocalStorage,
-  setLayoutIntoLocalStorage,
-  getEmptyCssClasses,
-  getEmptyCSSVariables,
-  getEmptyHTMLAttributes,
-}
+export {LayoutSetup, getLayoutFromLocalStorage, setLayoutIntoLocalStorage, getEmptyCssClasses, getEmptyCSSVariables, getEmptyHTMLAttributes}

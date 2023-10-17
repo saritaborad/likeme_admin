@@ -181,7 +181,7 @@ const CoinPlan: React.FC = () => {
   }
 
   const submitFormData = async (formData: any) => {
-    const {data} = await addSubcription(formData)
+    const {data} = await addSubcription({...formData, package_name: selectedItem.package_name})
 
     if (data.status === 200) {
       toast.success(data.message)

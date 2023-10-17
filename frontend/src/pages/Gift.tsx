@@ -86,7 +86,10 @@ const Gift: React.FC = () => {
   }
 
   const submitFormData = async (formData: any) => {
-    const {data} = await addGifts(formData)
+    const formdata = new FormData()
+    formdata.append('images', formData.images)
+    formdata.append('diamond', formData.diamond)
+    const {data} = await addGifts(formdata)
     if (data.status === 200) {
       toast.success(data.message)
       getAllGifts(option)
@@ -94,7 +97,11 @@ const Gift: React.FC = () => {
   }
 
   const updateGift = async (formData: any) => {
-    const {data} = await editGift(formData)
+    const formdata = new FormData()
+    formdata.append('images', formData.images)
+    formdata.append('diamond', formData.diamond)
+    formdata.append('_id', formData._id)
+    const {data} = await editGift(formdata)
     if (data.status === 200) {
       toast.success(data.message)
       getAllGifts(option)
