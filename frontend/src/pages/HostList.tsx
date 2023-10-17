@@ -28,7 +28,7 @@ const HostList: React.FC = () => {
         filter: false,
         sort: false,
         customBodyRender: (data: any, i: number) => {
-          return <img src={data[i]?.profileimages ? `${ImgUrl + data[i]?.profileimages}` : `${ImgUrl + data[i]?.images.image}`} className='profile-img' alt='' />
+          return <img src={data[i]?.profileimages ? `${ImgUrl + data[i]?.profileimages}` : `${ImgUrl + data[i]?.images?.image}`} className='profile-img' alt='' />
         },
       },
     },
