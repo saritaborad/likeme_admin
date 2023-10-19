@@ -13,6 +13,9 @@ const subscriptionSchema = new mongoose.Schema(
   position: { type: Number },
   highlight_text: { type: String },
   package_name: { type: String },
+  bronze: { type: String },
+  gold: { type: String },
+  silver: { type: String },
  },
  { timestamps: true }
 );

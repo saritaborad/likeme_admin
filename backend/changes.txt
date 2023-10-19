@@ -1,0 +1,127 @@
+agent model
+=> country field => contry
+=> version => string
+
+
+changes to be done 
+
+adminuser
+ - id 
+
+admob 
+ - id
+
+app 
+ - id 
+
+message 
+  -id 
+
+notification_admin 
+ - id 
+
+subscription 
+ - id 
+
+report_reason 
+ - id  
+
+gifts 
+ - id 
+ - images
+
+notification_packagename
+ - id 
+ - date 
+
+
+
+
+
+
+
+------------------ relational ---------------
+
+contry 
+ -id
+
+agent 
+ - id
+ - country_id 
+ - images 
+ - created_at
+
+user
+ - id 
+ - agent_id(user - 1 / 2)   
+ - country_id 
+ - save_profile  - user_id
+ - created_at 
+ - updated_at 
+ - interested_country - country_id
+ - profileimages 
+ - is_block_list - user_id
+
+ notification 
+ - id 
+ - created_at
+ - updated_at
+ - user_id
+
+
+image 
+- id 
+- user_id
+- image 
+
+ 
+host_live_stream 
+ - id
+ - host_id 
+ - start 
+ - end 
+
+user_gain_history 
+ - id 
+ - user_id 
+ - created_at
+
+user_spend_history 
+ - id 
+ - send_by  - user_id  
+ - received_by - host_id 
+ - created_at 
+
+video 
+ - id 
+ - user_id 
+ - video 
+ - thumb_img 
+
+
+
+
+
+
+----------------------------
+
+ report 
+ - id 
+ - user_id
+
+video_fake 
+ - id 
+ - user_id 
+ - video 
+ - thumb_img
+
+ video_review 
+ - id 
+ - user_id 
+ - video 
+ - thum_img 
+
+ imageReview 
+ - id
+ - user_id
+ - image 

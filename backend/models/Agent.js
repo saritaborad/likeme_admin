@@ -7,7 +7,7 @@ const agentSchema = new mongoose.Schema(
   images: { type: String },
   email_id: { type: String },
   phone_no: { type: String },
-  country: { type: mongoose.Schema.Types.ObjectId, ref: "Country" },
+  contry: { type: mongoose.Schema.Types.ObjectId, ref: "Country" },
   status: { type: Number, default: 0 }, // 0 - disable 1 - enable
   password: { type: String },
   is_deleted: { type: Number, default: 0 },
@@ -32,4 +32,5 @@ const agentSchema = new mongoose.Schema(
 //  return await bcrypt.compare(enterpassword, this.password);
 // };
 
-module.exports = mongoose.model("Agent", agentSchema);
+const Agent = mongoose.model("Agent", agentSchema);
+module.exports = Agent;

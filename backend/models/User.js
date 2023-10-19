@@ -18,11 +18,11 @@ const UserSchema = new mongoose.Schema(
   billingAddress: { type: String, default: null },
   availabiltyHours: { type: Number, default: null },
   is_block: { type: Number, default: 0 }, //0-no  1-blocked
-  is_host: { type: Number, default: 0, required: true }, // 0 -no   1-pending   2-approved
+  is_host: { type: Number, default: 0, required: true }, // 0 -no -user / 1-pending -host app / 2-approved - host
   email: { type: String, default: null },
   diamond: { type: Number, default: null },
   country_id: { type: mongoose.Schema.Types.ObjectId, ref: "Country", default: null },
-  save_profile: { type: String, default: null },
+  save_profile: { type: Array, default: [] },
   intrests: { type: Array, default: [] },
   diamond_per_min: { type: Number, default: 0 },
   total_diamond: { type: Number, default: 0, required: true },
@@ -34,10 +34,11 @@ const UserSchema = new mongoose.Schema(
   is_block_list: { type: Array, default: [] },
   auth_token: { type: String, default: null },
   is_feature: { type: Number, default: 0 }, // 0 -select 1 -selected
-  version: { type: Number, default: null },
-  interested_country: { type: String, default: null },
+  version: { type: String, default: null },
+  interested_country: { type: Array, default: [] },
   device_id: { type: String, default: null },
   gender: { type: String, default: null },
+  id: { type: String },
  },
  {
   timestamps: true,

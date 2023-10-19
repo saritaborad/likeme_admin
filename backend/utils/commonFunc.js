@@ -1,3 +1,4 @@
+const { ObjectId } = require("mongodb");
 function generateCode() {
  function generateRandomString(length) {
   const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -24,4 +25,9 @@ function deleteFile(filename) {
  }
 }
 
-module.exports = { generateCode, deleteFile };
+function isValidObjectId(value) {
+ const pattern = /^[0-9a-fA-F]{24}$/;
+ return ObjectId.isValid(value) && pattern.test(value);
+}
+
+module.exports = { generateCode, deleteFile, isValidObjectId };

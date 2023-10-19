@@ -1,0 +1,8 @@
+{
+ "data": [
+  { "id": "1", "package_name": "com.likeme.makematchcall", "fcm_key": "AAAAlVF36rg:APA91bG2jaU_sP4-rrFFi-2nnefl7qTN7WmNRVIyX9hYSvACmuCMqoWlfKT4NjCgulS0NCTcbqY69Tws3UYVIPEIuBqLUU4frZMl9aMMIa9Gek0m8s4ar7eb7bkgxIgOM39abL4I-EkR", "device_type": "1", "date": "2023-04-19 09:03:40", "app_name": "likeme" },
+  { "id": "6", "package_name": "com.likeme.streamapp", "fcm_key": "AAAAzs8nCfk:APA91bEb1ST8vKQ3tBOONaJSXHhNoQVFKpkP8-LvBa3Gc1qGKCAVToFWGYox0ef7SL6JWRcCZuLrHs6nstT6Flk5BP44TT407hTlMkfvr7Xa4RaP9YdGpawpCUHC2xakV23w1J_MW9l3", "device_type": "2", "date": "2023-04-25 05:40:45", "app_name": null },
+  { "id": "7", "package_name": "com.livecall.livestreamapp", "fcm_key": "AAAAvZ51SYU:APA91bHiIpa1qmBMQxMN1ZJ_VuXC0AtMYGOJCHT7REH8ZAiqNG0NeOr1qCLBapz0Ekq8j8-uYiPZXIMrpGVYukVWfpjpb54qleZ3xmUuXBjm_5sAEODa-B70gp2Ttp6tyej4JBsWuVrg", "device_type": "1", "date": "2023-08-04 12:45:52", "app_name": "me too" },
+  { "id": "8", "package_name": "com.videocall.randomcallapps", "fcm_key": "AAAAr1gow_8:APA91bHt4anwOunVM1jpx24N7VQct970OlEU6RJUUPshJ1B34od-tZLeOFmE8CGbt_b6Czps_OeLWmz7nWkPW7l230Sl1XXA-m-1cJACafhQDaiUhyoT6tyGgWd16_afY7_JmVesKpP5", "device_type": "1", "date": "2023-08-17 05:34:26", "app_name": "video call one" }
+ ]
+}

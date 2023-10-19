@@ -1,0 +1,6 @@
+{
+ "data": [
+  { "id": "1", "username": "admin", "password": "team@athh.likeme191", "type": "0" },
+  { "id": "5", "username": "tester", "password": "tester", "type": "1" }
+ ]
+}

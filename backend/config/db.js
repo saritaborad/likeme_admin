@@ -5,6 +5,7 @@ const connectDB = async () => {
   .connect(process.env.MONGO_URI, {
    useNewUrlParser: true,
    useUnifiedTopology: true,
+   family: 4,
   })
   .then(() => {
    console.log("Mongodb Connected");

@@ -1,0 +1,40 @@
+{
+ "payload": [
+  {
+   "dbName": "AdminUser",
+   "jsonFile": "adminuser.json"
+  },
+  {
+   "dbName": "Admob",
+   "jsonFile": "admob.json"
+  },
+  {
+   "dbName": "App",
+   "jsonFile": "app.json"
+  },
+  {
+   "dbName": "Message",
+   "jsonFile": "message.json"
+  },
+  {
+   "dbName": "NotificationAdmin",
+   "jsonFile": "notification_admin.json"
+  },
+  {
+   "dbName": "Subscription",
+   "jsonFile": "subscription.json"
+  },
+  {
+   "dbName": "ReportReson",
+   "jsonFile": "report_reson.json"
+  },
+  {
+   "dbName": "Gift",
+   "jsonFile": "gift.json"
+  },
+  {
+   "dbName": "PaymentGetway",
+   "jsonFile": "gift.json"
+  }
+ ]
+}
