@@ -3,6 +3,7 @@ const ApiFeatures = require("../utils/ApiFeatures");
 const { asyncHandler, giveresponse } = require("../utils/res_help");
 const path = require("path");
 const fs = require("fs");
+const Message = require("../models/Message");
 
 exports.fetchAllMessages = asyncHandler(async (req, res, next) => {
  const apiFeature = new ApiFeatures(Messages.find(), req.body?.options).search().sort().pagination();
@@ -24,20 +25,6 @@ exports.addMessage = asyncHandler(async (req, res, next) => {
 
  await addMessage.save();
  return giveresponse(res, 200, true, "Message added successfully!");
-});
-
-exports.fakeMessagesList = asyncHandler(async (req, res, next) => {
- const apiFeature = new ApiFeatures(Messages.find(), req.body).search().sort().pagination();
- const Messagecheat = apiFeature.query;
- apiFeature.totalRecord = await Messages.countDocuments();
-
- const data = Messagecheat.map((message) => {
-  let title = message.type === 1 ? `<img alt="image" src="public/storage/${message.title}" width="50" height="50">` : message.title;
-  let deleteButton = `<a href="" rel="${message._id}" class="btn btn-danger deleteMessage text-white">Delete</a>`;
-  return [title, deleteButton];
- });
-
- return giveresponse(res, 200, true, "Data deleted successfully!", { totalRecord: apiFeature.totalRecord, totalPage: apiFeature.totalPage, data: data });
 });
 
 exports.deleteMessageById = asyncHandler(async (req, res, next) => {
@@ -67,4 +54,13 @@ exports.updateMessage = asyncHandler(async (req, res, next) => {
  await message.save();
 
  return giveresponse(res, 200, true, "Message data is updated");
+});
+
+// ------------------ android api -----------------------
+
+exports.fakeMessagesList = asyncHandler(async (req, res, next) => {
+ const msg = await Message.find().select("title");
+ let messages = msg.filter((item) => item.type == 0);
+ let images = msg.filter((item) => item.type == 1);
+ return giveresponse(res, 200, true, "fake message list get success!", { data: messages, images: images });
 });

@@ -13,13 +13,6 @@ exports.updateSettingApp = asyncHandler(async (req, res, next) => {
  return giveresponse(res, 200, true, "settings updated");
 });
 
-exports.all_setting = asyncHandler(async (req, res, next) => {
- const appResult = await App.findOne();
- const admobResult = await Admob.find();
-
- return giveresponse(res, 200, true, "Data fetched successfully!", { app: appResult, android: admobResult[0], ios: admobResult[admobResult.length - 1] });
-});
-
 exports.getAdmob = asyncHandler(async (req, res, next) => {
  const admobData = await Admob.findOne({ type: req.body.type });
  return giveresponse(res, 200, true, "Admob data get success", admobData);
@@ -42,25 +35,6 @@ exports.liveSwitch = asyncHandler(async (req, res, next) => {
  }
 });
 
-exports.generateAgoraToken = asyncHandler(async (req, res, next) => {
- const channelName = req.body.channelName;
-
- App.findOne({}, (err, result) => {
-  if (err) return giveresponse(res, 500, false, "Error fetching data from database");
-
-  const appID = result.agora_app_id;
-  const appCertificate = result.agora_app_cert;
-  const role = AgoraRtcTokenBuilder.Role.PUBLISHER;
-  const expireTimeInSeconds = 3600;
-  const currentTimestamp = Math.floor(Date.now() / 1000);
-  const privilegeExpiredTs = currentTimestamp + expireTimeInSeconds;
-
-  const token = AgoraRtcTokenBuilder.buildTokenWithUid(appID, appCertificate, channelName, 0, role, privilegeExpiredTs);
-
-  return giveresponse(res, 200, true, "Agora token generate success", token);
- });
-});
-
 exports.setting = asyncHandler(async (req, res, next) => {
  const data = await Admob.find();
 
@@ -68,4 +42,27 @@ exports.setting = asyncHandler(async (req, res, next) => {
  const iOSAdmob = data[data.length - 1];
 
  return giveresponse(res, 200, true, "setting get success", { androidAdmob, iOSAdmob });
+});
+
+// ------------------- android api ------------------------
+
+exports.all_setting = asyncHandler(async (req, res, next) => {
+ const appResult = await App.findOne();
+ const admobResult = await Admob.find();
+ return giveresponse(res, 200, true, "Data fetched successfully!", { app: appResult, android: admobResult[0], ios: admobResult[admobResult.length - 1] });
+});
+
+exports.generateAgoraToken = asyncHandler(async (req, res, next) => {
+ const { channelName } = req.boy;
+ const appInfo = await App.findOne({});
+ const appID = appInfo.agora_app_id;
+ const appCertificate = appInfo.agora_app_cert;
+ const role = RtcTokenBuilder.RolePublisher;
+ const expireTimeInSeconds = 3600;
+
+ const currentTimestamp = Math.floor(Date.now() / 1000);
+ const privilegeExpiredTs = currentTimestamp + expireTimeInSeconds;
+
+ const token = RtcTokenBuilder.buildTokenWithUid(appID, appCertificate, channelName, 0, role, privilegeExpiredTs);
+ return giveresponse(res, 200, true, "Agora token generate success", token);
 });

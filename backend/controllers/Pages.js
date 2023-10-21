@@ -22,3 +22,10 @@ exports.terms_conditions = asyncHandler(async (req, res, next) => {
  const result = await Pages.findOne();
  return giveresponse(res, 200, true, "Data terms and condition successfully!", result.terms_of_use);
 });
+
+// ------------- android api --------------
+
+exports.privacyPolicy = asyncHandler(async (req, res, next) => {
+ const result = await Pages.find();
+ return giveresponse(res, 200, true, "Data get successfully!", result);
+});

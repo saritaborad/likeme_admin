@@ -1,12 +1,10 @@
 const express = require("express");
-const { fetchHost_name, fetchHost_historyAPI, get_host_profile, fetchHostProfiles, hostProfileUpdate, hostDetail, hostblock, makeHost, fetchHosts_agent, fetchHosts, fetchAllFakeHost, hostById, applyForHost, fetchAllHost_historyExport, fetchAgentSubtotal, fetchPayout, fetchHostWorkhistory, featureUpdate, blockUnblockHost, addHostImages, addHostVideos, deleteHostById, hostUpdate } = require("../controllers/Host");
+const { fetchHost_name, fetchHost_historyAPI, get_host_profile, fetchHostProfiles, hostProfileUpdate, hostDetail, hostblock, makeHost, fetchHosts_agent, fetchHosts, fetchAllFakeHost, hostById, applyForHost, fetchAllHost_historyExport, fetchAgentSubtotal, fetchPayout, fetchHostWorkhistory, featureUpdate, blockUnblockHost, addHostImages, addHostVideos, deleteHostById, hostUpdate, fetchHostProfiles_one_to_one, find_random_host, blockHost, unblockHost } = require("../controllers/Host");
 const { uploadImage, uploadVideo } = require("../middleware/upload");
 const router = express.Router();
 
 router.post("/fetchHost_name", fetchHost_name);
 router.post("/fetchHost_historyAPI", fetchHost_historyAPI);
-// router.post("/unblockHost", unblockHost);
-// router.post("/blockHost", blockHost);
 
 router.post("/get_host_profile", get_host_profile);
 router.post("/blockUnblockHost", blockUnblockHost);
@@ -26,10 +24,16 @@ router.post("/addHostVideos", uploadVideo.array("video"), addHostVideos);
 router.post("/hostUpdate", hostUpdate);
 
 router.post("/hostById", hostById);
-router.post("/applyForHost", applyForHost);
+router.post("/applyForHost", uploadImage.any(), applyForHost);
 router.post("/fetchAllHost_historyExport", fetchAllHost_historyExport);
 router.post("/fetchHostWorkhistory", fetchHostWorkhistory);
 router.post("/fetchAgentSubtotal", fetchAgentSubtotal);
 router.post("/fetchPayout", fetchPayout);
+
+//  ------------------ android api -----------------
+router.post("/fetchHostProfiles_one_to_one", fetchHostProfiles_one_to_one);
+router.post("/find_random_host", find_random_host);
+router.post("/blockHost", blockHost);
+router.post("/unblockHost", unblockHost);
 
 module.exports = router;

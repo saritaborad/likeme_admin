@@ -98,6 +98,14 @@ video
  - video 
  - thumb_img 
 
+ redeem 
+ - id 
+ - user_id 
+ - created_at
+ - updated_at
+ - completed_at 
+ 
+
 
 
 

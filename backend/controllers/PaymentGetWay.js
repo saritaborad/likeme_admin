@@ -31,9 +31,10 @@ exports.deletePaymentById = asyncHandler(async (req, res, next) => {
  if (result) return giveresponse(res, 200, true, "payment gateway deleted successfully");
 });
 
-// app API routes
+// ------------------- android api -----------------
 
 exports.PaymentGetWayList = asyncHandler(async (req, res, next) => {
  const result = await PaymentGetWay.find();
+ if (!result) return giveresponse(res, 400, false, "data not found.");
  return giveresponse(res, 200, true, "data get success.", result);
 });

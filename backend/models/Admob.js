@@ -13,4 +13,5 @@ const admobSchema = new mongoose.Schema(
  }
 );
 
-module.exports = mongoose.model("Admob", admobSchema);
+const Admob = mongoose.model("Admob", admobSchema);
+module.exports = Admob;

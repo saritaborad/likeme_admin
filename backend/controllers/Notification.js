@@ -37,15 +37,6 @@ exports.sendNotification = asyncHandler(async (req, res, next) => {
  }
 });
 
-// exports.sendNotification = asyncHandler(async (req, res, next) => {
-//  const { title, description, fcm_tokens } = req.body;
-//  await notificationToAllUsers(res, title, description, fcm_tokens);
-
-//  const addNoti = new Notification({ title, description });
-//  await addNoti.save();
-//  return giveresponse(res, 200, true, "Notification created successfully!");
-// });
-
 exports.notificationRemove = asyncHandler(async (req, res, next) => {
  const user = User.findOne({ _id: req.body.user_id });
  if (!user) return giveresponse(res, 404, false, "User doesn't exist!", null);
@@ -57,9 +48,10 @@ exports.notificationRemove = asyncHandler(async (req, res, next) => {
 exports.sendNotificationToUsers = asyncHandler(async (req, res, next) => {
  // Validator
  const { user_id, username, identity, diamond_per_min, agoraToken } = req.body;
- if (!user_id || !username || !identity || !diamond_per_min || !agoraToken) {
-  return res.json({ status: false, message: "Validation failed" });
- }
+ if (!user_id || !username || !identity || !diamond_per_min || !agoraToken) return res.json({ status: false, message: "Validation failed" });
+
+ const FCMKEYs = await NotificationPackagename.find();
+ const url = "https://fcm.googleapis.com/fcm/send";
 
  // Add data to notification
  const randomNotification = await Notification.aggregate([{ $sample: { size: 1 } }]);
@@ -67,26 +59,15 @@ exports.sendNotificationToUsers = asyncHandler(async (req, res, next) => {
  const titleUser = notificationData.title.replace("Name", username);
  const descriptionUser = notificationData.description.replace("Name", username);
 
- // Send notification code here
- const FCMKEYs = await NotificationTable.find();
  for (const data of FCMKEYs) {
   const api_key = data.fcm_key;
-
   const notificationArray = { title: titleUser, body: descriptionUser, sound: "default", badge: "1", user_id: user_id, identity: identity, notification_type: "LIVE" };
-
   const fields = { to: "/topics/dimdim_android", data: notificationArray, priority: "high" };
-
   const headers = { "Content-Type": "application/json", Authorization: "key=" + api_key };
-
-  // Perform HTTP request using a library like 'axios' or 'node-fetch'
-  // Example using 'axios':
-  // const axios = require('axios');
-  // const result = await axios.post('https://fcm.googleapis.com/fcm/send', fields, { headers });
-
-  // Handle result of HTTP request
+  const response = await fetch(url, { method: "POST", headers: headers, body: JSON.stringify(fields) });
+  result = await response.json();
  }
 
- // Save notification to MongoDB
  const notification = new Notification({ title: titleUser, description: descriptionUser, user_id: user_id, identity: identity, user_type: 1, diamond_per_min: diamond_per_min, agoraToken: agoraToken });
 
  const savedNotification = await notification.save();
@@ -123,6 +104,8 @@ exports.fetchNotification = asyncHandler(async (req, res, next) => {
  return giveresponse(res, 200, true, "Fetch Notification successfully!", resultsWithImages);
 });
 
+// -------------------- admin API -------------
+
 exports.fetchAllNotification = asyncHandler(async (req, res, next) => {
  const apiFeature = new ApiFeatures(Notification.find(), req.body?.options).search().sort().pagination();
  const data = await apiFeature.query;
@@ -130,21 +113,21 @@ exports.fetchAllNotification = asyncHandler(async (req, res, next) => {
  return giveresponse(res, 200, true, "all notification get success.", { totalRecord: apiFeature.totalRecord, totalPage: apiFeature.totalPage, data: data });
 });
 
-exports.updateNotification = asyncHandler(async (req, res, next) => {
- const result = await Notification.updateOne({ _id: req.body._id }, { $set: { title: req.body.title, description: req.body.description } });
- if (result) return giveresponse(res, 200, true, "Updated successfully!");
-});
-
 exports.deleteNotificationyById = asyncHandler(async (req, res, next) => {
  const result = await Notification.deleteOne({ _id: req.body._id });
  if (result.acknowledged) return giveresponse(res, 200, true, "Notification data deleted");
 });
 
-//---------------------- Notification Table ---------------------------
+exports.updateNotification = asyncHandler(async (req, res, next) => {
+ const result = await Notification.updateOne({ _id: req.body._id }, { $set: { title: req.body.title, description: req.body.description } });
+ if (result) return giveresponse(res, 200, true, "Updated successfully!");
+});
+
+//---------------------- Notification Table // notification_packagename ---------------------------
 
 exports.getNotificationTable = asyncHandler(async (req, res, next) => {
- const data = await NotificationTable.find();
- return giveresponse(res, 200, true, "Data fetch successfully", data);
+ const data = await NotificationPackagename.find();
+ return giveresponse(res, 200, true, "packagename get successfully", data);
 });
 
 exports.addNotificationCredential = asyncHandler(async (req, res, next) => {

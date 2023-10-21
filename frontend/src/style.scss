@@ -3854,6 +3854,11 @@ ul.plan-list li p i {
 }
 
 
+.loader-info-main img {
+	position: relative;
+	max-width: 150px;
+}
+
 .loading {
 	position: relative;
 	top: 0;
@@ -3885,10 +3890,6 @@ ul.plan-list li p i {
 }
 
 
-.loader-info-main img {
-	position: relative;
-	max-width: 150px;
-}
 
 .loader {
 	position: relative;
