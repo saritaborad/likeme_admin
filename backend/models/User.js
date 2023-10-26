@@ -52,9 +52,9 @@ UserSchema.pre("save", async function (next) {
  this.password = await bcrypt.hash(this.password, 10);
 });
 
-UserSchema.virtual("country_data", { ref: "Country", localField: "country_id", foreignField: "_id", justOne: false });
+UserSchema.virtual("country_data", { ref: "Country", localField: "country_id", foreignField: "_id", justOne: true });
 
-UserSchema.virtual("images", { ref: "Image", localField: "_id", foreignField: "user_id", justOne: true });
+UserSchema.virtual("images", { ref: "Image", localField: "_id", foreignField: "user_id", justOne: false });
 
 UserSchema.virtual("video", { ref: "Video", localField: "_id", foreignField: "user_id", justOne: false });
 

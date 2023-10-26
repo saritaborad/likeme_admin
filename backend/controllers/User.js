@@ -16,45 +16,16 @@ const jwt = require("jsonwebtoken");
 const sendToken = require("../utils/jwtToken");
 const ApiFeatures = require("../utils/ApiFeatures");
 const { giveresponse, asyncHandler } = require("../utils/res_help");
+const Subscription = require("../models/Subscription");
+const { ObjectId } = require("mongodb");
+const HostLiveStreamTrack = require("../models/HostLiveStreamTrack");
+const fs = require("fs");
+const path = require("path");
 
 exports.verifyToken = asyncHandler(async (req, res) => {
  const { authtoken } = req.body;
  const user = jwt.verify(authtoken, process.env.JWT_SECRET);
  return giveresponse(res, 200, true, "token verified", { user: user.id, is_agent: user.is_agent, is_tester: user.is_tester });
-});
-
-exports.register = asyncHandler(async (req, res, next) => {
- const { identity, deviceType, loginType, deviceToken, fullName, package_name, email, one_signal_id, gender } = req.body;
-
- const date = new Date();
- const auth_token = jwt.sign({ identity, date }, process.env.JWT_SECRET);
-
- let user = await User.findOne({ identity });
- let result = await App.findOne({ type: 1 }).select("default_diamond");
-
- if (!user) {
-  user = new User({ identity, loginType, deviceToken, package_name, deviceType, fullName, email, diamond: package_name !== "com.likeme.makematchcall" ? diomand : 0, one_signal_id, auth_token, gender: gender || "" });
-  await user.save();
-
-  user = await User.findOne({ identity }).populate("country_data images video");
-  const result = await User.findOne({ identity }).select("-_id -__v");
-  const intrests = result.intrests ? JSON.parse(result.intrests) : [];
-  result.intrests = intrests;
-
-  return giveresponse(res, 200, true, "User registered", user);
- } else {
-  await User.updateOne({ identity }, { loginType, deviceType, deviceToken, package_name, one_signal_id, auth_token });
-
-  user = await User.findOne({ identity }).select("-password");
-  return giveresponse(res, 400, false, "User already registered");
- }
-});
-
-exports.logOut = asyncHandler(async (req, res, next) => {
- const result = await User.findOne({ _id: req.body.user_id });
- result.deviceToken = null;
- result.one_signal_id = "";
- if (result) return giveresponse(res, 200, true, "device logout success.");
 });
 
 exports.fetchAllUser = asyncHandler(async (req, res, next) => {
@@ -114,120 +85,6 @@ exports.multiUser = asyncHandler(async (req, res, next) => {
  }
 });
 
-exports.diamondPlus = asyncHandler(async (req, res) => {
- const { gain_type, user_id, type, diamond } = req.body;
- const user = await User.findOne({ _id: user_id });
-
- if (type == 2) {
-  const gain = new UserGainTransactionHistory({ type: gain_type, user_id, diamond });
-  await gain.save();
- }
- user.diamond += diamond;
- if (type == 1) {
-  user.total_diamond += diamond;
-  await user.save();
-  return giveresponse(res, 200, true, "coin increment successfull !", { diamond: user.diamond });
- }
- await user.save();
- return giveresponse(res, 200, true, "coin increment successfull !", { diamond: user.diamond });
-});
-
-exports.diamondMinus = asyncHandler(async (req, res) => {
- const { user_id, host_id, diamond, spend_type } = req.body;
-
- const user = await User.findOne({ _id: user_id });
-
- if (user.diamond < diamond) {
-  return giveresponse(res, 400, false, "Insufficient coin", { diamond: user.diamond });
- } else {
-  const totalDiamond = user.diamond - diamond;
-  await User.updateOne({ id: user_id }, { diamond: totalDiamond });
-
-  const spend = new UserSpendTransactionHistory({ type: spend_type, send_by: user_id, received_by: host_id, diamond: diamond });
-  await spend.save();
-
-  // Add diamonds to the host's balance using the diamondPlus function (assuming it's defined elsewhere)
-  req.body.user_id = host_id;
-  req.body.type = 1;
-  await diamondPlus(req.body); // Call for adding diamonds to the host's id
-
-  return giveresponse(res, 200, true, "Coin minus success", { diamond: totalDiamond });
- }
-});
-
-exports.remove_from_save = asyncHandler(async (req, res) => {
- const user = await User.findOne({ _id: req.body.user_id });
- const saveProfileArray = user.save_profile;
- const updatedArray = saveProfileArray.filter((item) => item !== req.body.host_id);
- user.save_profile = updatedArray;
- await user.save();
- return giveresponse(res, 200, true, "Removed from saved successfully!");
-});
-
-exports.userProfileUpdate = asyncHandler(async (req, res, next) => {
- const { user_id, fullName } = req.body;
- const user = await User.findOne({ _id: user_id });
- if (!user) return giveresponse(res, 400, false, "User doesn't exist!", null);
-
- user.fullName = fullName;
-
- if (req.file) {
-  const unlinkPath = path.join(__dirname, "public", user.profileimages);
-  if (fs.existsSync(unlinkPath) && user.profileimages !== null) {
-   fs.unlinkSync(unlinkPath);
-  }
-  user.profileimages = req.file.path.replace("public/", "");
- }
-
- await user.save();
-
- const result = await User.findOne({ _id: user_id }).populate("video images country_data");
-
- if (result) return giveresponse(res, 200, true, "Data updated", result);
-});
-
-exports.delete_profile = asyncHandler(async (req, res) => {
- const { user_id } = req.body;
-
- const user_data = await User.findById(user_id);
- const videos = await Video.find({ user_id });
-
- if (!user_data) return giveresponse(res, 404, false, "User not found");
-
- let result = true;
-
- if (user_data.profileimages) {
-  const profileImagePath = "/var/www/html/app.codim.co.in/likeme/" + user_data.profileimages;
-  if (fs.existsSync(profileImagePath)) {
-   fs.unlinkSync(profileImagePath);
-  }
- }
-
- const user_image_data = await Images.find({ user_id });
-
- for (const image of user_image_data) {
-  if (image.image) {
-   const imagePath = "/var/www/html/app.codim.co.in/likeme/" + image.image;
-   if (fs.existsSync(imagePath)) {
-    fs.unlinkSync(imagePath);
-   }
-  }
- }
-
- for (const video of videos) {
-  if (video.video) {
-   const videoPath = "/var/www/html/app.codim.co.in/likeme/" + video.video;
-   if (fs.existsSync(videoPath)) {
-    fs.unlinkSync(videoPath);
-   }
-  }
- }
-
- await User.deleteOne({ _id: user_id });
-
- return giveresponse(res, 200, true, "Profile deleted successfully", result);
-});
-
 exports.onOff_video_call = asyncHandler(async (req, res) => {
  const { user_id, is_video_call } = req.body;
  const user = await User.findOne({ _id: user_id });
@@ -264,20 +121,211 @@ exports.fetchAgentDashboard = asyncHandler(async (req, res) => {
 
 // --------------- android api --------------------
 
-exports.getUserProfile = asyncHandler(async (req, res) => {
- const result = await User.findOne({ _id: req.body.user_id }).populate("video images country_data");
- if (!result) return giveresponse(res, 404, false, "User not found!");
+exports.register = asyncHandler(async (req, res, next) => {
+ const { identity, deviceType, loginType, deviceToken, fullName, package_name, email, one_signal_id, gender } = req.body;
 
- result.intrests = JSON.parse(result.intrests);
+ const date = new Date();
+ const auth_token = jwt.sign({ identity, date }, process.env.JWT_SECRET);
+
+ let user = await User.findOne({ identity });
+ let diamond = await App.findOne({ type: 1 }).select("default_diamond");
+
+ if (!user) {
+  const user1 = new User({ identity, loginType, deviceToken, package_name, deviceType, fullName, email, diamond: package_name !== "com.likeme.makematchcall" ? diomand : 0, one_signal_id, auth_token, gender: gender || "" });
+  await user1.save();
+
+  const result = await User.findOne({ identity }).populate("country_data images video");
+
+  result.intrests = result.intrests ? JSON.parse(result.intrests) : [];
+
+  return giveresponse(res, 200, true, "User registered", user);
+ } else {
+  const updated = await User.findOneAndUpdate({ identity }, { loginType, deviceType, deviceToken, package_name, one_signal_id, auth_token });
+  if (updated) return giveresponse(res, 200, true, "deviceToken & loginType & deviceType &one_signal_id is updated");
+  const newUser = await User.findOne({ identity }).populate("country_data images video");
+  newUser.interest = JSON.stringify(newUser.interest);
+  return giveresponse(res, 400, false, "User already registered");
+ }
+});
+
+exports.registerFast = asyncHandler(async (req, res, next) => {
+ const { device_id, identity, gender, deviceType, loginType, deviceToken, fullName, package_name, email, one_signal_id } = req.body;
+
+ let user = await User.findOne({ device_id });
+ let diamond = await App.findOne({ type: 1 }).select("default_diamond");
+
+ const date = new Date();
+ const auth_token = jwt.sign({ device_id, date }, process.env.JWT_SECRET);
+ if (!user) {
+  const user1 = new User({ device_id, identity, gender, loginType, deviceToken, package_name, deviceType, fullName, email, diamond: package_name !== "com.likeme.makematchcall" ? diamond : 0, one_signal_id, auth_token });
+
+  await user1.save();
+
+  const result = await User.findOne({ device_id }).populate("country_data images video");
+
+  result.intrests = result.intrests ? JSON.parse(result.intrests) : [];
+  return giveresponse(res, 200, true, "User registered", result);
+ } else {
+  const updated = await User.findOneAndUpdate({ device_id }, { loginType, deviceType, deviceToken, package_name, one_signal_id, auth_token });
+
+  if (updated) {
+   return giveresponse(res, 200, true, "User data updated", updated);
+  } else {
+   return giveresponse(res, 400, false, "User data not updated", result);
+  }
+ }
+});
+
+exports.getFast = asyncHandler(async (req, res, next) => {
+ const user = await User.findOne({ device_id: req.body.device_id }).populate("video images country_data");
+ if (!user) return giveresponse(res, 404, false, "User not found");
+ return giveresponse(res, 200, true, "User data get success!", user);
+});
+
+exports.delete_profile = asyncHandler(async (req, res) => {
+ const { user_id } = req.body;
+
+ const user_data = await User.findById({ _id: user_id });
+ const videos = await Video.find({ user_id });
+ const images = await Images.find({ user_id });
+
+ if (!user_data) return giveresponse(res, 404, false, "User not found");
+
+ if (user_data.profileimages) {
+  const profileImagePath = path.join(__dirname + "/../" + user_data.profileimages);
+  if (fs.existsSync(profileImagePath)) {
+   fs.unlinkSync(profileImagePath);
+  }
+ }
+
+ for (const image of images) {
+  if (image.image) {
+   const imagePath = path.join(__dirname + "/../" + image.image);
+
+   if (fs.existsSync(imagePath)) {
+    fs.unlinkSync(imagePath);
+   }
+  }
+ }
+
+ for (const video of videos) {
+  if (video.video) {
+   const videoPath = path.join(__dirname + "/../" + video.video);
+   if (fs.existsSync(videoPath)) {
+    fs.unlinkSync(videoPath);
+   }
+  }
+ }
+
+ await User.findOneAndDelete({ _id: user_id });
+
+ return giveresponse(res, 200, true, "Profile deleted successfully");
+});
+
+exports.getUserProfile = asyncHandler(async (req, res) => {
+ const result = await User.findOne({ _id: req.body.user_id }).populate({ path: "video", select: "-createdAt -updatedAt -__v" }).populate({ path: "images", select: "-createdAt -updatedAt -__v" }).populate({ path: "country_data", select: "-createdAt -updatedAt -__v -id" });
+ if (!result) return giveresponse(res, 404, false, "User not found!");
  return giveresponse(res, 200, true, "Data fetch success!", result);
+});
+
+exports.userProfileUpdate = asyncHandler(async (req, res, next) => {
+ const { user_id, fullName, loginType, email } = req.body;
+
+ const user = await User.findOne({ _id: user_id });
+ if (!user) return giveresponse(res, 400, false, "User doesn't exist!", null);
+
+ user.fullName = fullName;
+ if (loginType) user.loginType = loginType;
+ if (email) user.email = email;
+
+ if (req.file) {
+  const unlinkPath = path.join(__dirname, "/../", user?.profileimages || "");
+  if (fs.existsSync(unlinkPath) && user.profileimages !== null) fs.unlinkSync(unlinkPath);
+  user.profileimages = req.file.path;
+ }
+
+ await user.save();
+
+ const result = await User.findOne({ _id: user_id }).populate("video images country_data");
+
+ if (result) return giveresponse(res, 200, true, "Data updated", result);
+});
+
+exports.userVersionUpdate = asyncHandler(async (req, res, next) => {
+ const user = await User.findOne({ _id: req.body.user_id });
+ if (!user) return giveresponse(res, 200, true, "Version updated successfully!");
+ user.version = req.body.version;
+ await user.save();
+ return giveresponse(res, 200, true, "Version updated successfully!");
+});
+
+exports.logOut = asyncHandler(async (req, res, next) => {
+ const result = await User.findByIdAndUpdate({ _id: req.body.user_id }, { deviceToken: null, one_signal_id: "" }, { new: true });
+ if (result) return giveresponse(res, 200, true, "device logout success.");
+});
+
+exports.diamondMinus = asyncHandler(async (req, res) => {
+ const { user_id, host_id, diamond, spend_type, package_name } = req.body;
+
+ const user = await User.findOne({ _id: user_id }).select("diamond");
+
+ if (user.diamond < parseInt(diamond)) {
+  return giveresponse(res, 400, false, "Insufficient coin", { diamond: user.diamond });
+ } else {
+  const totalDiamond = user.diamond - parseInt(diamond);
+  const update = await User.findOneAndUpdate({ _id: user_id }, { diamond: totalDiamond });
+  if (update) {
+   const spend = new UserSpendTransactionHistory({ type: spend_type, send_by: user_id, received_by: host_id, diamond: diamond, package_name: package_name, host_paided: 1 });
+
+   await spend.save();
+   req.body.user_id = host_id;
+   req.body.type = 1; // 1= host gain added dimond / 2= user purchased dimond
+   await addDiamond(req, res); // add diamond to host
+   return giveresponse(res, 200, true, "Coin minus success", { diamond: totalDiamond });
+  }
+  return giveresponse(res, 400, false, "Something went wrong");
+ }
+});
+
+exports.diamondPlus = asyncHandler(async (req, res) => {
+ const { diamond, genratedId } = await addDiamond(req, res);
+ return giveresponse(res, 200, true, "coin increment successfull !", { diamond, genratedId });
+});
+
+exports.listOrder = asyncHandler(async (req, res) => {
+ const userGainHistory = await UserGainTransactionHistory.find({ user_id: req.body.user_id }).sort({ createdAt: -1 });
+ return giveresponse(res, 200, true, "user gain history get success", userGainHistory);
+});
+
+exports.diamondUpdate = asyncHandler(async (req, res) => {
+ const { user_id, genrated_id, sku, purchase_token, GPA_TOKEN } = req.body;
+ let diamond = req.body.diamond;
+ const user = await User.findOne({ _id: user_id });
+ if (!user) return giveresponse(res, 404, false, "User doesn't exist");
+ const userGainHistory = await UserGainTransactionHistory.findOne({ _id: genrated_id });
+ if (!userGainHistory) return giveresponse(res, 404, false, "transaction not found");
+ if (userGainHistory.diamond == 0) {
+  if (diamond != 0) {
+   const diamondD = await Subscription.findOne({ play_store_id: sku });
+   if (diamondD.diamond) diamond = diamondD.diamond;
+  }
+  user.diamond += parseInt(diamond);
+  user.save();
+  userGainHistory.diamond = diamond;
+  userGainHistory.sku = sku;
+  userGainHistory.GPA_TOKEN = GPA_TOKEN || null;
+  userGainHistory.purchase_token = purchase_token;
+  userGainHistory.save();
+ }
+ return giveresponse(res, 200, true, "diamond update success", { diamond: user.diamond });
 });
 
 exports.interestedCountry = asyncHandler(async (req, res) => {
  const { user_id, country_list } = req.body;
  const user = await User.findOne({ _id: user_id });
  if (!user) return giveresponse(res, 404, false, "User not found!");
- user.interested_country = JSON.parse(country_list);
- user.save();
+ const countryIds = country_list.map((countryId) => new ObjectId(countryId));
+ await User.findOneAndUpdate({ _id: user_id }, { $addToSet: { interested_country: { $each: countryIds } } });
  return giveresponse(res, 200, true, "country updated successfully!");
 });
 
@@ -286,73 +334,40 @@ exports.userlanguage = asyncHandler(async (req, res) => {
  const user = await User.findOne({ _id: user_id });
  if (!user) return giveresponse(res, 404, false, "User not found!");
  user.language = language;
- user.save();
+ await user.save();
  return giveresponse(res, 200, true, "Language updated successfully!");
-});
-
-exports.fetchHost_historyAPI = asyncHandler(async (req, res) => {
- const { id, payment } = req.body;
-
- const paymentFilter = payment !== "0" ? { host_paided: payment } : {};
-
- const gift = await UserSpendTransactionHistory.aggregate([{ $match: { received_by: parseInt(id), Type: 1, ...paymentFilter } }, { $group: { _id: null, total: { $sum: "$diamond" } } }]);
-
- const call = await UserSpendTransactionHistory.aggregate([{ $match: { received_by: parseInt(id), Type: 2, ...paymentFilter } }, { $group: { _id: null, total: { $sum: "$diamond" } } }]);
-
- const stream = await UserSpendTransactionHistory.aggregate([{ $match: { received_by: parseInt(id), Type: 3, ...paymentFilter } }, { $group: { _id: null, total: { $sum: "$diamond" } } }]);
-
- const chat = await UserSpendTransactionHistory.aggregate([{ $match: { received_by: parseInt(id), Type: 4, ...paymentFilter } }, { $group: { _id: null, total: { $sum: "$diamond" } } }]);
-
- const match = await UserSpendTransactionHistory.aggregate([{ $match: { received_by: parseInt(id), Type: 5, ...paymentFilter } }, { $group: { _id: null, total: { $sum: "$diamond" } } }]);
-
- const giftTotal = gift.length > 0 ? gift[0].total : 0;
- const callTotal = call.length > 0 ? call[0].total : 0;
- const streamTotal = stream.length > 0 ? stream[0].total : 0;
- const chatTotal = chat.length > 0 ? chat[0].total : 0;
- const matchTotal = match.length > 0 ? match[0].total : 0;
- const grandTotal = giftTotal + callTotal + streamTotal + chatTotal + matchTotal;
-
- const json_data = {
-  gift: giftTotal,
-  call: callTotal,
-  stream: streamTotal,
-  chat: chatTotal,
-  match: matchTotal,
-  grand: grandTotal,
- };
-
- return giveresponse(res, 200, true, "Host history get success!", json_data);
 });
 
 exports.save_profile = asyncHandler(async (req, res) => {
  const { user_id, host_id } = req.body;
- const user = await User.findOne({ user_id });
+ const user = await User.findOne({ _id: user_id });
  if (!user) return giveresponse(res, 404, false, "User doesn't exist");
  if (user.save_profile.includes(host_id)) return giveresponse(res, 200, true, "User has already saved this profile!");
-
- user.save_profile.push(host_id);
+ user.save_profile.push(new ObjectId(host_id));
  await user.save();
  return giveresponse(res, 200, true, "Profile saved successfully!");
 });
 
 exports.get_saved_profile = asyncHandler(async (req, res) => {
- const { user_id, start, limit } = req.query;
+ const { user_id, start, limit } = req.body;
 
  const user = await User.findOne({ _id: user_id });
-
  if (!user) return giveresponse(res, 404, false, "User not found!");
 
- if (user.save_profile.length === 0) return giveresponse(res, 404, false, "No saved data found");
+ if (user.save_profile.length === 0) return giveresponse(res, 404, false, "No saved profile found");
 
  const idsToRetrieve = user.save_profile.slice(start, start + limit);
+ const userData = await User.find({ _id: { $in: idsToRetrieve }, is_block: 0 }).populate("video images country_data");
+ if (userData.length == 0) return giveresponse(res, 200, true, "Data not found!", []);
+ return giveresponse(res, 200, true, "save profile data fetch success!", userData);
+});
 
- const userData = await User.find({ id: { $in: idsToRetrieve }, is_block: 0 }).populate("video images country_data");
-
- if (!userData) return giveresponse(res, 200, true, "Data not found!", []);
-
- const result = userData.map((res) => res.intrests);
-
- return giveresponse(res, 200, true, "save profile data fetch success!", result);
+exports.remove_from_save = asyncHandler(async (req, res) => {
+ const { user_id, host_id } = req.body;
+ const user = await User.findOne({ _id: user_id });
+ if (!user) return giveresponse(res, 404, false, "User not found!");
+ await User.findOneAndUpdate({ _id: user_id }, { $pull: { save_profile: new ObjectId(host_id) } }, { new: true });
+ return giveresponse(res, 200, true, "Removed from saved successfully!");
 });
 
 exports.updateUserCallStatus = asyncHandler(async (req, res) => {
@@ -387,17 +402,146 @@ exports.updateUserCallStatus = asyncHandler(async (req, res) => {
 
 exports.fetchBlockList = asyncHandler(async (req, res) => {
  const { user_id } = req.body;
-
- const user = await User.findOne({ _id: user_id }).select("is_block_list");
+ const user = await User.findOne({ _id: user_id });
  if (!user) return giveresponse(res, 404, false, "Use doesn't exists!");
+ const results = await User.find({ _id: { $in: user.is_block_list || [] } })
+  .populate({ path: "images", select: "-createdAt -updatedAt -__v" })
+  .populate({ path: "video", select: "-createdAt -updatedAt -__v" })
+  .populate({ path: "country_data", select: "-createdAt -updatedAt -__v -id" });
+ if (results.length == 0) return giveresponse(res, 400, false, "No blocked host found!");
+ return giveresponse(res, 200, true, "List fetched successfully!", results);
+});
 
- const blockList = user.is_block_list;
+exports.chatImageApi = asyncHandler(async (req, res) => {
+ if (req.file) {
+  if (req.file.mimetype.startsWith("image")) {
+   // Handle image uploads
+   const chatImage = req.file.filename;
+   const json_data = { status: true, msg: "Image stored", chat_image: chatImage };
+   res.json(json_data);
+  } else if (req.file.mimetype.startsWith("video")) {
+   // Handle video uploads
+   const chatVideo = req.file.filename;
+   const thumbnailFilename = path.basename(chatVideo, path.extname(chatVideo)) + ".jpg";
+   const thumbnailImage = "uploads/" + thumbnailFilename;
 
- const results = await User.find({ _id: { $in: blockList } }).populate("video images country_data");
+   // Generate a thumbnail from the video
+   ffmpeg(chatVideo)
+    .setFfmpegPath("/path/to/ffmpeg") // Set the path to your FFmpeg executable
+    .screenshots({
+     count: 1,
+     folder: "uploads",
+     filename: thumbnailFilename,
+    })
+    .on("end", () => {
+     const json_data = {
+      status: true,
+      msg: "Video and thumbnail stored",
+      chat_video: chatVideo,
+      thumbnail_image: thumbnailImage,
+     };
+     res.json(json_data);
+    });
+  }
+ } else {
+  const json_data = { status: false, msg: "File not received", chat_image: null, thumbnail_image: null };
+  res.json(json_data);
+ }
+});
 
- const data = results.map((res) => {
-  return { res, intrests: res.intrests };
- });
+exports.chatImageDeleteApi = asyncHandler(async (req, res) => {
+ try {
+  const fileId = req.params.id;
+  const file = await FileModel.findOne({ _id: ObjectId(fileId) });
 
- return giveresponse(res, 200, true, "List fetched successfully!", data);
+  if (!file) {
+   return res.json({ status: false, msg: "Data not found" });
+  }
+
+  // Assuming 'path' is a field in your MongoDB document that stores the file path
+  const filePath = file.path;
+
+  // Delete the file from the server
+  const fs = require("fs");
+  if (fs.existsSync(filePath)) {
+   fs.unlinkSync(filePath);
+   await FileModel.deleteOne({ _id: ObjectId(fileId) });
+   return res.json({ status: true, msg: "Data deleted" });
+  } else {
+   return res.json({ status: false, msg: "Data not found" });
+  }
+ } catch (error) {
+  console.error(error);
+  return res.status(500).json({ status: false, msg: "Server error" });
+ }
+});
+
+exports.host_live_stream_track = asyncHandler(async (req, res) => {
+ const { host_id, event, session } = req.body;
+ if (event === "start") {
+  const hostLiveStreamTrack = new HostLiveStreamTrack({ host_id: host_id, start: new Date() });
+  await hostLiveStreamTrack.save();
+  return giveresponse(res, 200, true, "success", hostLiveStreamTrack._id);
+ } else if (event === "end") {
+  await HostLiveStreamTrack.findOneAndUpdate({ _id: session }, { end: new Date() }, { new: true });
+  return giveresponse(res, 200, true, "updated success", session);
+ }
+});
+
+exports.host_live_stream_track_history = asyncHandler(async (req, res) => {
+ const { host_id } = req.body;
+
+ const todayStart = moment().startOf("day");
+ const todayEnd = moment().endOf("day");
+
+ const todaySessions = await HostLiveStreamTrack.countDocuments({ host_id, start: { $gte: todayStart, $lte: todayEnd } });
+
+ // Calculate today's session time
+ const todaySessionTime = await HostLiveStreamTrack.aggregate([{ $match: { host_id, start: { $gte: todayStart.toDate() } } }, { $group: { _id: null, total_minutes: { $sum: { $subtract: ["$end", "$start"] } } } }]);
+
+ const json_data = { today_session: todaySessions, today_session_time: todaySessionTime[0] ? todaySessionTime[0].total_minutes : 0 };
+ return giveresponse(res, 200, true, "updated success", json_data);
+});
+
+exports.host_live_stream_track_history_list = asyncHandler(async (req, res) => {
+ const { host_id, from, to, zone } = req.body;
+
+ // Query the database for sessions
+ const sessionList = await HostLiveStreamTrack.find({
+  host_id,
+  start: { $gte: new Date(from) },
+  end: { $lte: new Date(to) },
+ })
+  .select("-_id") // Exclude the _id field
+  .sort({ id: -1 }) // Sort by id in descending order
+  .lean(); // Convert Mongoose documents to plain JavaScript objects
+
+ const totalSessionTime = sessionList.map((session) => Math.floor((session.end - session.start) / 1000)).reduce((total, duration) => total + duration, 0);
+
+ const totalSession = sessionList.length;
+
+ // Respond with JSON data
+ const json_data = {
+  total_session: totalSession.toString(),
+  total_session_time: `${Math.floor(totalSessionTime / 60)}:${totalSessionTime % 60}`,
+  session_list: sessionList,
+ };
+
+ return giveresponse(res, 200, true, "updated success", json_data);
+});
+
+const addDiamond = asyncHandler(async (req, res) => {
+ const { gain_type, user_id, type, diamond, GPA_TOKEN, version, package_name } = req.body;
+ const user = await User.findOne({ _id: user_id });
+ if (!user) return giveresponse(res, 200, true, "User doesn't exists");
+ let genratedId;
+ if (type == 2) {
+  const gain = new UserGainTransactionHistory({ type: gain_type, user_id, diamond, GPA_TOKEN: GPA_TOKEN || null, version: version || null, package_name: package_name || null });
+  await gain.save();
+  genratedId = gain._id;
+ }
+ user.diamond += parseInt(diamond);
+ if (type == 1) user.total_diamond += parseInt(diamond);
+ await user.save();
+ return { diamond: user.diamond, genratedId };
 });

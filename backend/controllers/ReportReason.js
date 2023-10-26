@@ -33,6 +33,7 @@ exports.deleteReportReson = asyncHandler(async (req, res, next) => {
 //-----------android api route -------
 
 exports.reportReson = asyncHandler(async (req, res, next) => {
- const data = await ReportReson.find({ title: req.body.title });
+ const data = await ReportReson.find().select("title");
+ if (data.length == 0) return giveresponse(res, 404, false, "Data not found");
  return giveresponse(res, 200, true, "Data fetch successfully", data);
 });

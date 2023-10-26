@@ -1,10 +1,12 @@
 const express = require("express");
 const { addNotificationContent, fetchNotificationContent, updateNotificationContent, deleteNotificationContent, sendNotification, notificationRemove, sendNotificationToUsers, adminSendNotification, fetchNotification, fetchAllNotification, updateNotification, deleteNotificationyById, addNotificationTable, getNotificationTable, fetchNotificationTable, updateNotificationTable, deleteNotificationTable, getNotificationCredential, deleteNotificationCredential, updateNotificationCredential, addNotificationCredential, fetchNotificationAdmin, updateNotificationAdmin, addNotificationAdmin, deleteNotificationAdmin } = require("../controllers/Notification");
+const checkHeader = require("../middleware/checkHeader");
+const { reqired, isValidId } = require("../middleware/validateField");
 
 const router = express.Router();
 
 router.post("/sendNotification", sendNotification);
-router.post("/notificationRemove", notificationRemove);
+router.post("/notificationRemove", checkHeader, reqired("user_id"), isValidId("user_id"), notificationRemove);
 router.post("/sendNotificationToUsers", sendNotificationToUsers);
 router.post("/adminSendNotification", adminSendNotification);
 

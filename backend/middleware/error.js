@@ -5,8 +5,6 @@ const errorHandler = (err, req, res, next) => {
  let error = { ...err };
  error.message = err.message;
 
- console.log(err);
-
  //Mongoose Bad Object
  if (err.name === "CastError") {
   error = new ErrorResponse(err.message, 400);

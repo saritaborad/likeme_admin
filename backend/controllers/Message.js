@@ -59,8 +59,9 @@ exports.updateMessage = asyncHandler(async (req, res, next) => {
 // ------------------ android api -----------------------
 
 exports.fakeMessagesList = asyncHandler(async (req, res, next) => {
- const msg = await Message.find().select("title");
- let messages = msg.filter((item) => item.type == 0);
- let images = msg.filter((item) => item.type == 1);
- return giveresponse(res, 200, true, "fake message list get success!", { data: messages, images: images });
+ const msg = await Message.find().select("title type createdAt");
+
+ let messages = msg.filter((item) => item.type === 0);
+ let images = msg.filter((item) => item.type === 1);
+ return giveresponse(res, 200, true, "fake message list get success!", { messages, images });
 });

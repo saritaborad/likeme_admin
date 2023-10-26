@@ -6,6 +6,10 @@ const ApiFeatures = require("../utils/ApiFeatures");
 const { giveresponse, asyncHandler } = require("../utils/res_help");
 const App = require("../models/App");
 const Agent = require("../models/Agent");
+const HostLiveStreamTrack = require("../models/HostLiveStreamTrack");
+const NotificationPackagename = require("../models/NotificationPackagename");
+const moment = require("moment-timezone");
+const { ObjectId } = require("mongodb");
 
 exports.getRedeemById = asyncHandler(async (req, res, next) => {
  const redeem = await Redeem.findOne({ _id: req.body._id }).populate("user");
@@ -80,54 +84,78 @@ exports.completeRedeem = asyncHandler(async (req, res, next) => {
  return giveresponse(res, 200, true, "amount request approved");
 });
 
-//------------------------- api route ------------------
-
-exports.placeRedeemRequest = asyncHandler(async (req, res, next) => {
- const { user_id, account_info, payment_getway_title } = req.body;
- const user = await User.findOne({ id: user_id });
- if (!user) return giveresponse(res, 404, false, "User doesn't exist!");
-
- const dimnodRedeem = await UserSpendTransactionHistory.aggregate([{ $match: { received_by: user_id, host_paided: 1, create_at: { $lte: new Date() } } }, { $group: { _id: null, totalDiamond: { $sum: "$diamond" } } }]);
-
- const resultR = await UserSpendTransactionHistory.updateMany({ received_by: user_id, host_paided: 1, create_at: { $lte: new Date() } }, { $set: { host_paided: 2 } });
-
- const myRandomString = "DIM" + new Date().getTime();
-
- const redeem = new Redeem({ user_id: user.id, account_info, diamond: dimnodRedeem.length > 0 ? dimnodRedeem[0].totalDiamond : 0, payment_getway_title, redeem_token: myRandomString });
-
- const result = await redeem.save();
-
- if (user.diamond < dimnodRedeem.totalDiamond) return giveresponse(res, 400, false, "Insufficient balance to redeem!");
-
- user.diamond = user.diamond - dimnodRedeem.totalDiamond;
- await user.save();
-
- return giveresponse(res, 200, true, "Redeem Request added successfully!");
-});
+//------------------------- android api route ------------------
 
 exports.fetchRedeemRequests = asyncHandler(async (req, res, next) => {
  const { user_id, start, limit } = req.body;
-
  const user = await User.findOne({ _id: user_id });
  if (!user) return giveresponse(res, 404, false, "User doesn't exist!");
+ const redeem = await Redeem.find({ user_id: user_id }).sort({ _id: -1 }).skip(parseInt(start)).limit(parseInt(limit));
+ return giveresponse(res, 200, true, "Redeem Request get successfully!", redeem);
+});
 
- const redeem = await Redeem.find({ user_id: user_id }).sort({ id: -1 }).skip(parseInt(start)).limit(parseInt(limit));
-
- return giveresponse(res, 200, true, "Data fetched successfully!", redeem);
+exports.placeRedeemRequest = asyncHandler(async (req, res, next) => {
+ placeRedeem(req, res);
+ return giveresponse(res, 200, true, "Redeem Request added successfully!");
 });
 
 exports.placeRedeemRequestAll = asyncHandler(async (req, res, next) => {
  const agents = await Agents.find({ status: 1, is_deleted: 0 });
 
  for (const agent of agents) {
-  const hosts = await User.find({ agent_id: agent.id, is_host: 2 });
+  const hosts = await User.find({ agent_id: agent._id, is_host: 2, is_block: 0 });
 
   for (const host of hosts) {
-   const redeemRequest = { user_id: host.id, account_info: "1", payment_getway_title: "1" };
-
-   await placeRedeemRequest(redeemRequest);
+   const hostStatus = await UserSpendTransactionHistory.countDocuments({ received_by: host._id, type: 2, createdAt: { $gt: moment().subtract(14, "days").toDate() } });
+   if (hostStatus > 0) {
+    (req.body.user_id = host._id), (req.body.account_info = "1"), (req.body.payment_getway_title = "1"), (req.body.agent_id = agent._id), await placeRedeem(req, res);
+   } else {
+    await User.findOneAndUpdate({ _id: host._id }, { is_block: 1 }, { new: true });
+   }
   }
  }
 
- return giveresponse(res, 200, true, "Redeem requests placed successfully.");
+ return giveresponse(res, 200, true, "Reedem Request processed successfully!");
+});
+
+const placeRedeem = asyncHandler(async (req, res) => {
+ const { user_id, account_info, payment_getway_title, agent_id, diamond } = req.body;
+ const user = await User.findOne({ _id: user_id });
+
+ if (!user) return giveresponse(res, 404, false, "User doesn't exist");
+
+ const packageNames = await NotificationPackagename.find();
+ let itrate = 0;
+
+ for (const package of packageNames) {
+  const DaysAgo = moment().subtract(15, "days");
+  // redeem means to convert diamond worth into cash
+  const dimnodRedeem = await UserSpendTransactionHistory.aggregate([{ $match: { received_by: new ObjectId(user_id), package_name: package.package_name, host_paided: 1, createdAt: { $lte: DaysAgo.toDate() } } }, { $group: { _id: null, diamond: { $sum: "$diamond" } } }]);
+
+  await UserSpendTransactionHistory.updateMany({ received_by: user_id, package_name: package.package_name, host_paided: 1, createdAt: { $lte: DaysAgo.toDate() } }, { $set: { host_paided: 2 } });
+
+  if (itrate === 0) {
+   itrate = 1;
+
+   const agents = await Agents.findOne({ _id: agent_id });
+   const stream_minits = agents.stream_minits;
+   const stream_rate = agents.stream_rate;
+   const coins = agents.coins;
+   const coins_rate = agents.coins_rate;
+
+   const streamTracks = await HostLiveStreamTrack.aggregate([{ $match: { host_id: user_id, start: { $gte: DaysAgo.toDate() } } }, { $group: { _id: { host_id: "$host_id", date: { $dateToString: { format: "%Y-%m-%d", date: "$start" } } }, count: { $sum: 1 }, time_diff: { $sum: { $divide: [{ $subtract: ["$end", "$start"] }, 60000] } } } }, { $match: { time_diff: { $gt: stream_minits * 60 } } }]);
+
+   const myRandomString = "DIM" + Math.random().toString(36).substring(7).toUpperCase();
+   const redeem = new Redeem({ user_id, account_info, diamond: dimnodRedeem[0]?.diamond || 0, payment_getway_title, redeem_token: myRandomString, stream_days: streamTracks.length, stream_minits, stream_rate, coins, coins_rate, package_name: package.package_name });
+   await redeem.save();
+  } else {
+   const myRandomString = "DIM" + Math.random().toString(36).substring(7).toUpperCase();
+   const redeem = new Redeem({ user_id, account_info, diamond: dimnodRedeem[0]?.diamond || 0, payment_getway_title, redeem_token: myRandomString, package_name: package.package_name });
+   await redeem.save();
+  }
+
+  if (user.diamond < diamond) return giveresponse(res, 400, false, "Insufficient balance to redeem!");
+  user.diamond -= dimnodRedeem[0]?.diamond || 0;
+  await user.save();
+ }
 });

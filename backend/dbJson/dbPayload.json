@@ -9,6 +9,38 @@
    "jsonFile": "admob.json"
   },
   {
+   "dbName": "HostLiveStreamTrack",
+   "jsonFile": "host_live_stream_track.json"
+  },
+  {
+   "dbName": "Notification",
+   "jsonFile": "notification.json"
+  },
+  {
+   "dbName": "Image",
+   "jsonFile": "images.json"
+  },
+  {
+   "dbName": "Video",
+   "jsonFile": "video.json"
+  },
+  {
+   "dbName": "UserSpendTransactionHistory",
+   "jsonFile": "user_spend_transaction_history.json"
+  },
+  {
+   "dbName": "UserGainTransactionHistory",
+   "jsonFile": "user_gain_transaction_history.json"
+  },
+  {
+   "dbName": "HostLiveStreamTrack",
+   "jsonFile": "host_live_stream_track.json"
+  },
+  {
+   "dbName": "Redeem",
+   "jsonFile": "redeem.json"
+  },
+  {
    "dbName": "App",
    "jsonFile": "app.json"
   },

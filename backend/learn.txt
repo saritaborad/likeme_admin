@@ -1,21 +1,7 @@
-exports.getAllUser = async (req, res) => {
- let link = [];
- const { page, items_per_page, search } = req.query;
- const pageCount = page && page != 0 ? page : 1;
- const limit = items_per_page && items_per_page != 0 ? items_per_page : 10;
- const startIndex = (pageCount - 1) * limit;
- const user = await User.find().skip(startIndex).limit(limit);
- const totalRecord = await User.find().countDocuments();
- const tpage = totalRecord / limit;
- const totalPage = Math.ceil(tpage);
+--> To zip any folder in ubuntu 
+zip -r my_project.zip . --exclude=node_modules/ --exclude=dist/ --exclude=other_folder/
 
- link.push({ url: null, label: "&laquo; Previous", active: false, page: null });
- for (let i = 1; i <= totalPage; i++) {
-  link.push({ url: `/?page=${i}`, label: i.toString(), active: i == page, page: parseInt(i) });
- }
- totalPage !== parseInt(page) && link.push({ url: `/?page=${parseInt(page) + 1}`, label: "Next &raquo;", active: false, page: parseInt(page) + 1 });
- return res.status(200).json({
-  data: user,
-  payload: { pagination: { page: parseInt(page), first_page_url: "/?page=1", from: parseInt(page), last_page: totalPage, links: [...link], next_page_url: `/?page=${parseInt(page) + 1}`, items_per_page: items_per_page, prev_page_url: parseInt(page) === 1 ? null : parseInt(page) - 1, to: items_per_page, total: totalRecord } },
- });
-};
+--> apache2 command list 
+--> nginx command list 
+- systemctl status nginx
+- sudo systemctl start nginx

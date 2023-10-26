@@ -37,14 +37,6 @@ exports.sendNotification = asyncHandler(async (req, res, next) => {
  }
 });
 
-exports.notificationRemove = asyncHandler(async (req, res, next) => {
- const user = User.findOne({ _id: req.body.user_id });
- if (!user) return giveresponse(res, 404, false, "User doesn't exist!", null);
-
- await Notification.deleteMany({ user_id: req.body.user_id });
- return giveresponse(res, 200, true, "Notification removed successfully!", data);
-});
-
 exports.sendNotificationToUsers = asyncHandler(async (req, res, next) => {
  // Validator
  const { user_id, username, identity, diamond_per_min, agoraToken } = req.body;
@@ -125,11 +117,6 @@ exports.updateNotification = asyncHandler(async (req, res, next) => {
 
 //---------------------- Notification Table // notification_packagename ---------------------------
 
-exports.getNotificationTable = asyncHandler(async (req, res, next) => {
- const data = await NotificationPackagename.find();
- return giveresponse(res, 200, true, "packagename get successfully", data);
-});
-
 exports.addNotificationCredential = asyncHandler(async (req, res, next) => {
  const addNoti = new NotiPackageName({ package_name: req.body.package_name, fcm_key: req.body.fcm_key, device_type: req.body.device_type });
  await addNoti.save();
@@ -176,4 +163,19 @@ exports.updateNotificationAdmin = asyncHandler(async (req, res, next) => {
 exports.deleteNotificationAdmin = asyncHandler(async (req, res, next) => {
  const result = await NotificationAdmin.deleteOne({ _id: req.body._id });
  return giveresponse(res, 200, true, "Data deleted successfully!");
+});
+
+// ---------------------- android api -------------------------
+
+exports.notificationRemove = asyncHandler(async (req, res, next) => {
+ const user = User.findOne({ _id: req.body.user_id });
+ if (!user) return giveresponse(res, 404, false, "User doesn't exist!");
+
+ await Notification.deleteMany({ user_id: req.body.user_id });
+ return giveresponse(res, 200, true, "Notification removed successfully!");
+});
+
+exports.getNotificationTable = asyncHandler(async (req, res, next) => {
+ const data = await NotificationPackagename.find();
+ return giveresponse(res, 200, true, "packagename get successfully", data);
 });

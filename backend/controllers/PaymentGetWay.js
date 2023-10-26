@@ -35,6 +35,6 @@ exports.deletePaymentById = asyncHandler(async (req, res, next) => {
 
 exports.PaymentGetWayList = asyncHandler(async (req, res, next) => {
  const result = await PaymentGetWay.find();
- if (!result) return giveresponse(res, 400, false, "data not found.");
+ if (!result) return giveresponse(res, 404, false, "data not found.");
  return giveresponse(res, 200, true, "data get success.", result);
 });

@@ -32,7 +32,7 @@ exports.fetchAllCountry = asyncHandler(async (req, res, next) => {
 // ---------------- android api ------------------
 
 exports.country_list = asyncHandler(async (req, res) => {
- const result = await Country.find();
- if (!result || result.length === 0) return giveresponse(res, 404, false, "Country data not found!");
+ const result = await Country.find().sort({ position: 1 });
+ if (result.length === 0) return giveresponse(res, 404, false, "Country data not found!");
  return giveresponse(res, 200, true, "data fetch successfully", result);
 });

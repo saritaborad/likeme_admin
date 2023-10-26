@@ -17,17 +17,6 @@ exports.blockUnblockHost = asyncHandler(async (req, res) => {
  return giveresponse(res, 200, true, `${is_block == 1 ? "Blocked" : "Unblocked"} Successfully!`);
 });
 
-exports.get_host_profile = asyncHandler(async (req, res, next) => {
- const user = await User.find({ id: req.body.user_id });
- if (!user) return giveresponse(res, 404, false, "User doesn't exists!", null);
- const host_detail = await User.findOne({ id: req.body.host_id }).populate("video").populate("images").populate("country_data");
- if (!host_detail) return giveresponse(res, 404, false, "Host doesn't exist", []);
- const followers = await User.find({ is_host: 0, is_block: 0, save_profile: { $regex: host_detail.id.toString() } });
- host_detail.followers_count = followers.length;
- host_detail.intrests = JSON.parse(host_detail.intrests);
- return giveresponse(res, 200, true, "Data fetched successfully!", host_detail);
-});
-
 exports.hostDetail = asyncHandler(async (req, res, next) => {
  const user = await User.find({ _id: req.body.id, is_host: 1, is_block: 0 });
  return giveresponse(res, 200, true, "Host detail get success.", user);
@@ -173,56 +162,80 @@ exports.hostById = asyncHandler(async (req, res, next) => {
 exports.applyForHost = asyncHandler(async (req, res, next) => {
  const { id, availabiltyHours, billingAddress, bio, intrests, about, age, email, country_id, diamond_per_min, fullName } = req.body;
 
- const user = await User.findOne({ _id: id });
+ const user = await User.findOne({ _id: id }).populate("images video");
 
  if (!user) return giveresponse(res, 404, false, "User not found!");
  if (user.is_host == 2) return giveresponse(res, 400, false, "User is already a host!");
- if (user.is_host == 1) return giveresponse(res, 400, false, "User has already applied!");
+ if (user.is_host == 1) return giveresponse(res, 400, false, "User has already applied for host!");
 
  const intrestsArray = intrests.split(",").map((interest) => interest.trim());
-
- await user.updateOne({ availabiltyHours, billingAddress, bio, intrests: intrestsArray, about, age, email, country_id, diamond_per_min, is_host: 1, fullName });
-
+ console.log(req.files);
  if (req.files && req.files.length > 0) {
-  for (const img of req.files.images) {
-   const it = new Image({ image: img.path, user_id: id });
-   await it.save();
-  }
+  for (const file of req.files) {
+   if (file.fieldname == "images") {
+    const it = new Image({ image: file.path, user_id: id });
+    await it.save();
+   }
 
-  for (const video of req.files.video) {
-   const it = new Video();
-   const videoPath = video.path;
+   if (file.fieldname == "video") {
+    const it = new Video();
+    const videoPath = file.path;
 
-   const thumbnailPath = video.path.split(".")[0] + ".jpg";
+    const thumbnailPath = file.path.split(".")[0] + ".jpg";
 
-   await new Promise((resolve, reject) => {
-    ffmpeg(videoPath)
-     .seekInput(10) // Specify the path to your ffmpeg binary
-     .screenshots({
-      count: 1,
-      folder: "uploads/",
-      filename: thumbnailPath,
-      size: "640x480",
-     })
-     .on("end", () => {
-      resolve();
-     })
-     .on("error", (err) => {
-      reject(err);
-     });
-   });
+    // await new Promise((resolve, reject) => {
+    //  ffmpeg(videoPath)
+    //   .seekInput(10) // Specify the path to your ffmpeg binary
+    //   .screenshots({
+    //    count: 1,
+    //    folder: "uploads/",
+    //    filename: thumbnailPath,
+    //    size: "640x480",
+    //   })
+    //   .on("end", () => {
+    //    resolve();
+    //   })
+    //   .on("error", (err) => {
+    //    reject(err);
+    //   });
+    // });
 
-   it.thumbnail_image = thumbnailPath;
-   it.video = videoPath;
-   it.user_id = id;
-   await it.save();
+    it.thumbnail_image = thumbnailPath;
+    it.video = videoPath;
+    it.user_id = id;
+    await it.save();
+   }
   }
  }
 
- const result = await User.findOne({ _id: id }).populate("images").populate("video");
- result.intrests = intrestsArray;
+ await user.updateOne({ availabiltyHours, billingAddress, bio, intrests: intrestsArray, about, age, email, country_id, diamond_per_min, is_host: 1, fullName });
 
- return giveresponse(res, 200, true, "Request submitted", result);
+ return giveresponse(res, 200, true, "Request submitted", user);
+});
+
+exports.get_host_profile = asyncHandler(async (req, res, next) => {
+ const { user_id, host_id } = req.body;
+ const user = await User.findOne({ _id: user_id });
+ if (!user) return giveresponse(res, 404, false, "User doesn't exists!", null);
+ let host_detail = await User.findOne({ _id: host_id })
+  .populate({ path: "video", match: { is_one_to_one: 0 } })
+  .populate("images")
+  .populate("country_data");
+
+ if (!host_detail) return giveresponse(res, 404, false, "Host doesn't exist", []);
+ const followers = await User.find({ is_host: 0, is_block: 0, save_profile: { $in: host_detail._id } }); // find unblocked user whose profile is stored in save_profile to get follower
+
+ const data = { ...host_detail._doc, ...host_detail.$$populatedVirtuals, followers_count: followers.length, intrests: host_detail.intrests };
+ return giveresponse(res, 200, true, "Data fetched successfully!", data);
+});
+
+exports.get_host_profile_one_to_one = asyncHandler(async (req, res, next) => {
+ const { host_id } = req.body;
+ const user = await User.findOne({ _id: host_id });
+ if (!user) return giveresponse(res, 404, false, "Host doesn't exist");
+ const host_one_to_one = await Video.find({ user_id: host_id, is_one_to_one: 1 });
+ if (host_one_to_one.length == 0) return giveresponse(res, 404, false, "Host doesn't exists", []);
+ return giveresponse(res, 200, true, "Data fetch success!", host_one_to_one);
 });
 
 exports.fetchHost_historyAPI = asyncHandler(async (req, res) => {
@@ -243,7 +256,7 @@ exports.fetchHost_historyAPI = asyncHandler(async (req, res) => {
 });
 
 exports.fetchHostProfiles = asyncHandler(async (req, res, next) => {
- const { user_id, country_id } = req.body;
+ const { user_id, country_id, is_fake } = req.body;
  const user = await User.findOne({ _id: user_id });
 
  if (!user) return giveresponse(res, 404, false, "User doesn't exist!", null);
@@ -251,25 +264,13 @@ exports.fetchHostProfiles = asyncHandler(async (req, res, next) => {
  let blockhost = [];
  if (user.is_block_list) blockhost = user.is_block_list;
 
- let query = { is_host: 2, is_block: 0, $and: [{ _id: { $ne: user_id } }, { _id: { $nin: blockhost } }] };
+ let query = { is_host: 2, is_block: 0, _id: { $nin: [user_id, ...blockhost] } };
 
- if (country_id == 0) {
-  query = { is_host: 2, is_block: 0, country_id: country_id, $and: [{ _id: { $ne: user_id } }, { _id: { $nin: blockhost } }] };
- }
+ if (country_id != 0) query.country_id = country_id;
+ if (!is_fake) query.is_fake = 0;
 
  let results = await User.find(query).populate("video").populate("images").populate("country_data").limit(100);
-
- for (const result of results) {
-  const followers = await User.find({ is_host: 0, is_block: 0, save_profile: { $regex: new RegExp(result._id) } });
-  result.intrests = JSON.parse(result.intrests);
-  result.followers_count = followers.length;
- }
-
- if (results.length > 0) {
-  return giveresponse(res, 200, true, "Data fetched successfully!", results);
- } else {
-  return giveresponse(res, 400, false, "Data not fetched!");
- }
+ if (results.length > 0) return giveresponse(res, 200, true, "Data fetched successfully!", results);
 });
 
 exports.fetchHost_name = asyncHandler(async (req, res, next) => {
@@ -327,7 +328,7 @@ exports.find_random_host = asyncHandler(async (req, res) => {
  let blockHost = [];
  if (user.is_block_list) blockHost = user.is_block_list;
 
- const result = await User.findOne({ is_host: 2, is_block: 0, _id: { $ne: new ObjectId(user_id) }, _id: { $nin: blockHost.map((id) => new ObjectId(id)) } })
+ const result = await User.findOne({ is_host: 2, is_block: 0, _id: { $nin: [user_id, ...blockHost] } })
   .populate("video")
   .populate("images")
   .populate("country_data");
@@ -433,39 +434,46 @@ exports.fetchHostProfiles_one_to_one = asyncHandler(async (req, res, next) => {
   .populate("country_data");
 
  const filteredResults = results.filter((user) => user.video.length > 0);
-
- filteredResults.forEach((user) => user.intrests);
- if (filteredResults.length > 0) {
-  return giveresponse(res, 200, true, "Data fetched successfully!", filteredResults);
- } else {
-  return giveresponse(res, 400, false, "Data not found!", filteredResults);
- }
+ if (filteredResults.length == 0) return giveresponse(res, 400, false, "Data not found!");
+ return giveresponse(res, 200, true, "Data fetched successfully!", filteredResults);
 });
 
 exports.blockHost = asyncHandler(async (req, res, next) => {
  const { user_id, host_id } = req.body;
- if (!user_id || !host_id) return giveresponse(res, 400, false, "Invalid input data");
- const user = await User.findById(user_id);
+ const user = await User.findOne({ _id: user_id });
  if (!user) return giveresponse(res, 404, false, "User not found");
- const blockList = user.is_block_list || [];
- if (blockList.includes(host_id)) return giveresponse(res, 200, true, "This host is already blocked");
- user.is_block_list = blockList.push(host_id);
- user.save();
- return giveresponse(res, 200, false, "Blocked successfully!");
+ user.is_block_list = user.is_block_list || [];
+ if (user.is_block_list.includes(host_id)) return giveresponse(res, 400, false, "This host is already blocked");
+ user.is_block_list.push(new ObjectId(host_id));
+ await user.save();
+ return giveresponse(res, 200, true, "Host blocked successfully!");
 });
 
 exports.unblockHost = asyncHandler(async (req, res, next) => {
  const { user_id, host_id } = req.body;
- if (!user_id || !host_id) return giveresponse(res, 400, false, "Invalid input data");
- const user = await User.findById(user_id);
+ const user = await User.findOne({ _id: user_id });
  if (!user) return giveresponse(res, 404, false, "User not found");
- let blockList = user.is_block_list || [];
- if (blockList.includes(host_id)) {
-  blockList = blockList.filter((id) => id !== host_id);
-  user.is_block_list = blockList;
-  await user.save();
-  return giveresponse(res, 200, true, "Host unblocked successfully");
- } else {
-  return giveresponse(res, 400, false, "Host is not in the block list");
- }
+ if (!user.is_block_list.includes(host_id)) return giveresponse(res, 400, false, "Host is not in the block list");
+ user.is_block_list = user.is_block_list.filter((id) => id != host_id);
+ await user.save();
+ return giveresponse(res, 200, true, "Host unblocked successfully");
+});
+
+exports.fetchHostProfilesNew = asyncHandler(async (req, res, next) => {
+ const { user_id, country_id, is_fake, skip, limit } = req.body;
+ const user = await User.findOne({ _id: user_id });
+ if (!user) return giveresponse(res, 404, false, "User not found");
+
+ let results = [];
+ let blockhost = [];
+
+ if (user.is_block_list !== null) blockhost = user.is_block_list;
+
+ const query = { is_host: 2, is_block: 0, _id: { $nin: [user_id, ...blockhost] } };
+ if (country_id != 0) query.country_id = country_id;
+ if (is_fake) query.is_fake = 0;
+
+ results = await User.find(query).populate("images").skip(skip).limit(limit);
+
+ if (results) return giveresponse(res, 200, true, "Data fetched successfully!", results);
 });

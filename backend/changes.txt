@@ -2,6 +2,39 @@ agent model
 => country field => contry
 => version => string
 
+save_profile - checked
+get_saved_profile - checked
+get_host_profile - checked
+get_host_profile_one_to_one - checked
+remove_from_save - checked
+fetchHostProfilesNew - checked
+fetchHostProfiles - checked
+report - checked
+country_list - checked
+PaymentGetWayList - checked
+all_setting - checked
+find_random_host - checked
+fakeMessagesList - checked
+fetchAllHost_historyApi - checked
+interestedCountry - checked
+userlanguage - checked
+privacyPolicy - checked
+reportReson - checked
+getFast - checked
+delete_profile - checked
+getUserProfile - checked
+userVersionUpdate - checked
+userProfileUpdate - checked
+diamondPlus - checked
+diamondMinus - checked
+listOrder - checked
+fetchRedeemRequests - checked
+notificationRemove - checked
+giftList - checked
+blockHost - checked
+unblockHost - checked
+fetchBlockList - checked
+fetchHostProfiles_one_to_one - checked
 
 changes to be done 
 

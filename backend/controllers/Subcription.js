@@ -37,7 +37,9 @@ exports.default_flag = asyncHandler(async (req, res) => {
 // -----------Android API routes ------------
 
 exports.allSubcription = asyncHandler(async (req, res) => {
- const result = await Subscription.find().sort({ diamond: -1 });
+ const { package_name } = req.body;
+ let query = !package_name ? { package_name: "com.likeme.makematchcall" } : { package_name };
+ const result = await Subscription.find(query).sort({ position: 1 });
  return giveresponse(res, 200, true, "data fetch success.", result);
 });
 

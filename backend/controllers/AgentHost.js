@@ -231,30 +231,15 @@ exports.getHostAgents = asyncHandler(async (req, res, next) => {
 
 exports.fetchAllHost_historyApi = asyncHandler(async (req, res, next) => {
  const { id, skip, limit } = req.body;
- const history = await UserSpendTransactionHistory.find({
-  received_by: id,
-  host_paided: 1,
- })
-  .skip(parseInt(skip, 10))
-  .limit(parseInt(limit, 10))
-  .sort({ _id: -1 });
+ const history = await UserSpendTransactionHistory.find({ received_by: id, host_paided: 1 }).populate("user").populate("host").skip(parseInt(skip)).limit(parseInt(limit)).sort({ _id: -1 });
 
  const data = history.map((historys) => {
   const spendInOptions = ["gift", "call", "stream", "chat", "match"];
   const spendIn = spendInOptions[historys.type - 1];
-
   const dateTime = new Date(historys.createdAt);
   const convertedTime = dateTime.toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
 
-  return {
-   spend_in: spendIn,
-   user_fullName: historys.user.fullName,
-   host_fullName: historys.host.fullName,
-   diamond: historys.diamond,
-   host_paided: historys.host_paided,
-   date: convertedTime,
-  };
+  return { spend_in: spendIn, user_fullName: historys.user?.fullName, host_fullName: historys.host?.fullName, diamond: historys.diamond, host_paided: historys.host_paided, date: convertedTime };
  });
-
  return giveresponse(res, 200, true, "Data get success!", data);
 });

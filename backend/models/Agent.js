@@ -15,6 +15,7 @@ const agentSchema = new mongoose.Schema(
   coins_rate: { type: Number, default: 0 },
   stream_minits: { type: Number, default: 0 },
   stream_rate: { type: Number, default: 0 },
+  id: { type: String },
  },
  {
   timestamps: true,

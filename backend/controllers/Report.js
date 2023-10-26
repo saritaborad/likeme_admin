@@ -20,8 +20,8 @@ exports.fetchReports = asyncHandler(async (req, res, next) => {
 exports.report = asyncHandler(async (req, res, next) => {
  const { user_id, reason, description } = req.body;
  const user = await User.findOne({ _id: user_id, is_block: 0 });
- const report = new Report({ user_id, reason, description });
  if (!user) return giveresponse(res, 404, false, "User doesn't exist!");
+ const report = new Report({ user_id, reason, description });
  await report.save();
  return giveresponse(res, 200, true, "Reported successfully");
 });

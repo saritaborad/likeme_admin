@@ -48,6 +48,6 @@ exports.deleteGift = asyncHandler(async (req, res, next) => {
 });
 
 exports.giftList = asyncHandler(async (req, res, next) => {
- const result = await Gifts.find().sort({ id: -1 });
+ const result = await Gifts.find().sort({ _id: -1 });
  return giveresponse(res, 200, true, "gift list get successfully", result);
 });
