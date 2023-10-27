@@ -3,6 +3,7 @@ const Gifts = require("../models/Gift");
 const ApiFeatures = require("../utils/ApiFeatures");
 const path = require("path");
 const fs = require("fs");
+const { deleteFile } = require("../utils/commonFunc");
 
 exports.fetchAllgifts = asyncHandler(async (req, res, next) => {
  const apiFeature = new ApiFeatures(Gifts.find(), req.body?.options).search().sort().pagination();
@@ -20,29 +21,19 @@ exports.addGifts = asyncHandler(async (req, res, next) => {
 
 exports.editGift = asyncHandler(async (req, res, next) => {
  const { _id, diamond, images } = req.body;
-
  let updateData = { diamond };
-
  if (images || req.file?.path) {
   const unlinkData = await Gifts.findById(_id);
-
-  if (unlinkData.images) {
-   const imagePath = path.join(__dirname, "..", unlinkData.images);
-   if (fs.existsSync(imagePath)) {
-    fs.unlinkSync(imagePath);
-   }
-  }
+  if (unlinkData.images) deleteFile(unlinkData.images);
   updateData.images = images || req.file?.path;
  }
-
  const result = await Gifts.updateOne({ _id }, updateData);
-
  if (result) return giveresponse(res, 200, true, "Successfully updated");
 });
 
 exports.deleteGift = asyncHandler(async (req, res, next) => {
  const gift_data = await Gifts.findById({ _id: req.body._id });
- if (gift_data.images && fs.existsSync(path.join(__dirname, "..", gift_data.images))) fs.unlinkSync(path.join(__dirname, "..", gift_data.images));
+ deleteFile(gift_data.images);
  const result = await gift_data.deleteOne();
  if (result) return giveresponse(res, 200, true, "Successfully deleted");
 });

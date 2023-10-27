@@ -1,5 +1,12 @@
 const { ObjectId } = require("mongodb");
-const { giveresponse } = require("./res_help");
+const path = require("path");
+const fs = require("fs");
+const ffmpegPath = require("@ffmpeg-installer/ffmpeg").path,
+ ffprobePath = require("@ffprobe-installer/ffprobe").path,
+ ffmpeg = require("fluent-ffmpeg");
+
+ffmpeg.setFfprobePath(ffprobePath);
+ffmpeg.setFfmpegPath(ffmpegPath);
 
 function generateCode() {
  function generateRandomString(length) {
@@ -18,13 +25,9 @@ function generateCode() {
  return first;
 }
 
-function deleteFile(filename) {
- if (filename !== null) {
-  const filePath = path.join(__dirname, "public", filename);
-  if (fs.existsSync(filePath)) {
-   fs.unlinkSync(filePath);
-  }
- }
+function deleteFile(fileName) {
+ let filePath = path.join(__dirname + "/../" + fileName);
+ if (filePath !== null) if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
 }
 
 function isValidObjectId(value) {
@@ -32,4 +35,42 @@ function isValidObjectId(value) {
  return ObjectId.isValid(value) && pattern.test(value);
 }
 
-module.exports = { generateCode, deleteFile, isValidObjectId };
+const generateThumb = async (videoPath, thumbName) => {
+ await new Promise((resolve, reject) => {
+  ffmpeg(videoPath)
+   .seekInput(10)
+   .screenshots({
+    count: 1,
+    folder: path.join(__dirname + "/../" + "uploads/thumbnail"),
+    filename: thumbName,
+    size: "340x340",
+   })
+   .on("end", () => {
+    resolve();
+   })
+   .on("error", (err) => {
+    reject(err);
+   });
+ });
+};
+
+function compressVideo(inputBuffer) {
+ return new Promise((resolve, reject) => {
+  ffmpeg()
+   .input(inputBuffer)
+   .inputFormat("mp4")
+   .videoCodec("libx264")
+   .audioCodec("aac")
+   .toFormat("mp4")
+   .on("end", () => {
+    console.log("Video compression complete");
+    resolve(ffmpeg().toBuffer());
+   })
+   .on("error", (err) => {
+    console.error("Error compressing video:", err);
+    reject(err);
+   })
+   .pipe();
+ });
+}
+module.exports = { generateCode, deleteFile, isValidObjectId, generateThumb, compressVideo };

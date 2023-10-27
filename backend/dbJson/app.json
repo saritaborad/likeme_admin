@@ -1,3 +1,0 @@
-{
- "data": [{ "id": "1", "default_diamond": "20", "app_name": "Like Me", "type": "1", "min_thershold": "1000", "currency": "₹", "amount_per_diamond": "0.002", "agora_app_cert": "8e22395388f7464193f4cac4cf19a9e9", "agora_app_id": "f5b6fceca7004bdaa54aeef4e135e254", "user_message_charge": "10", "host_message_charge": "0", "host_call_charge": "0", "host_live_Percentage": "0", "chargeForLive": "0", "max_live_time": "30", "minimumMinuts": "1", "liveSwitch": "0", "min_diamonds_charge_for_going_live": "0", "watch_ad_diamond": "50", "is_dating": "0", "max_live_private_time": "0", "fake_host_vidoe_from": "0", "max_fake_live_hosts": "40", "match_call_second": "25", "match_call_coin": "10", "_7_day_bonus": "20", "final_day_bonus": "50" }]
-}

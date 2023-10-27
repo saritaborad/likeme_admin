@@ -8,7 +8,7 @@ const Video = require("../models/Video");
 const { ObjectId } = require("mongodb");
 const fs = require("fs");
 const path = require("path");
-const ffmpeg = require("fluent-ffmpeg");
+const { generateThumb, deleteFile } = require("../utils/commonFunc");
 
 exports.blockUnblockHost = asyncHandler(async (req, res) => {
  const { user_id, is_block } = req.body;
@@ -38,11 +38,11 @@ exports.addHostVideos = asyncHandler(async (req, res, next) => {
  const { video_link, is_one_to_one, _id } = req.body;
  if (!req.files || req.files.length === 0) return giveresponse(res, 400, false, "No videos provided.");
 
- const videos = req.files;
-
- for (const video of videos) {
-  const img = video.path?.split(".")[0] + ".jpg";
-  const it = new Video({ video_link, is_one_to_one, user_id: _id, video: video.path, thumbnail_image: img });
+ for (const video of req.files) {
+  const thumbnailPath = path.join("uploads/thumbnail/" + file.filename.split(".")[0] + ".jpg");
+  const thumbName = file.filename.split(".")[0] + ".jpg";
+  generateThumb(video.path, thumbName);
+  const it = new Video({ video_link, is_one_to_one, user_id: _id, video: video.path, thumbnail_image: thumbnailPath });
   await it.save();
  }
 
@@ -54,19 +54,17 @@ exports.deleteHostById = asyncHandler(async (req, res, next) => {
  const videos_all = await Video.find({ user_id: req.body._id });
 
  for (const image of images_all) {
-  const imagePath = path.join(__dirname, "..", image.image);
-  if (fs.existsSync(imagePath) && image.image !== null) fs.unlinkSync(imagePath);
+  deleteFile(image.image);
   await Image.findByIdAndDelete({ _id: image._id });
  }
 
  for (const video of videos_all) {
-  const videoPath = path.join(__dirname, "..", video.video);
-  if (fs.existsSync(videoPath) && video.video !== null) fs.unlinkSync(videoPath);
+  deleteFile(video.video);
+  deleteFile(video.thumbnail_image);
   await Video.findByIdAndDelete({ _id: video._id });
  }
 
  await User.findByIdAndDelete({ _id: req.body._id });
-
  return giveresponse(res, 200, true, "Host deleted successfully");
 });
 
@@ -76,7 +74,10 @@ exports.hostUpdate = asyncHandler(async (req, res, next) => {
 
  if (req.files) {
   for (const video of req.files.video) {
-   const it = new Video({ video: video.path, user_id: _id });
+   const thumbnailPath = path.join("uploads/thumbnail/" + file.filename.split(".")[0] + ".jpg");
+   const thumbName = file.filename.split(".")[0] + ".jpg";
+   generateThumb(video.path, thumbName);
+   const it = new Video({ video: video.path, user_id: _id, thumbnail_image: thumbnailPath });
    await it.save();
   }
 
@@ -169,7 +170,7 @@ exports.applyForHost = asyncHandler(async (req, res, next) => {
  if (user.is_host == 1) return giveresponse(res, 400, false, "User has already applied for host!");
 
  const intrestsArray = intrests.split(",").map((interest) => interest.trim());
- console.log(req.files);
+
  if (req.files && req.files.length > 0) {
   for (const file of req.files) {
    if (file.fieldname == "images") {
@@ -178,31 +179,11 @@ exports.applyForHost = asyncHandler(async (req, res, next) => {
    }
 
    if (file.fieldname == "video") {
-    const it = new Video();
     const videoPath = file.path;
-
-    const thumbnailPath = file.path.split(".")[0] + ".jpg";
-
-    // await new Promise((resolve, reject) => {
-    //  ffmpeg(videoPath)
-    //   .seekInput(10) // Specify the path to your ffmpeg binary
-    //   .screenshots({
-    //    count: 1,
-    //    folder: "uploads/",
-    //    filename: thumbnailPath,
-    //    size: "640x480",
-    //   })
-    //   .on("end", () => {
-    //    resolve();
-    //   })
-    //   .on("error", (err) => {
-    //    reject(err);
-    //   });
-    // });
-
-    it.thumbnail_image = thumbnailPath;
-    it.video = videoPath;
-    it.user_id = id;
+    const thumbnailPath = path.join("uploads/thumbnail/" + file.filename.split(".")[0] + ".jpg");
+    const thumbName = file.filename.split(".")[0] + ".jpg";
+    generateThumb(videoPath, thumbName);
+    const it = new Video({ user_id: id, video: videoPath, thumbnail_image: thumbnailPath });
     await it.save();
    }
   }
@@ -340,91 +321,47 @@ exports.hostProfileUpdate = asyncHandler(async (req, res, next) => {
  const { user_id, intrests, availabiltyHours, billingAddress, bio, about, age, email, country_id, fullName, diamond_per_min, image_id, video_id } = req.body;
 
  const user = await User.findOne({ _id: user_id });
-
  if (!user) return giveresponse(res, 404, false, "User doesn't exist!");
-
  const intrestsArray = intrests.split(",").map((item) => item.trim());
-
  const updateData = { availabiltyHours, billingAddress, bio, intrests: intrestsArray, about, age, email, country_id, fullName, diamond_per_min };
-
  await User.updateOne({ _id: user_id }, updateData);
 
  // Delete Images
  const imageIds = image_id.split(",").map((item) => item.trim());
 
  for (const id of imageIds) {
-  const image = await Images.findById(id);
-
-  if (image && fs.existsSync(`./uploads/${image.image}`)) {
-   fs.unlinkSync(`./uploads/${image.image}`);
-   await image.remove();
-  }
+  const image = await Image.findById({ _id: id });
+  deleteFile(image.image);
+  await Image.deleteOne({ _id: id });
  }
 
  // Delete Videos
  const videoIds = video_id.split(",").map((item) => item.trim());
 
  for (const id of videoIds) {
-  const video = await Video.findById(id);
-
-  if (video && fs.existsSync(`./uploads/${video.Video}`)) {
-   fs.unlinkSync(`./uploads/${video.Video}`);
-   await video.remove();
-  }
+  const video = await Video.findById({ _id: id });
+  deleteFile(video.video);
+  deleteFile(video.thumbnail_image);
+  await Video.deleteOne({ _id: id });
  }
 
- // Store Images
- if (req.files && req.files.length > 0) {
-  for (const img of req.files) {
-   const it = new Images();
-   it.image = img.filename;
-   it.user_id = user_id;
+ for (const file of req.files) {
+  if (file.fieldname == "images") {
+   const it = new Image({ image: file.path, user_id });
+   await it.save();
+  }
+
+  if (file.fieldname == "video") {
+   const thumbnailPath = path.join("uploads/thumbnail/" + file.filename.split(".")[0] + ".jpg");
+   const thumbName = file.filename.split(".")[0] + ".jpg";
+   generateThumb(file.path, thumbName);
+   const it = new Video({ user_id, video: file.path, thumbnail_image: thumbnailPath });
    await it.save();
   }
  }
 
- // Store Videos
- if (req.files && req.files.length > 0) {
-  for (const video of req.files) {
-   const it = new Video();
-   it.Video = video.filename;
-
-   // You may need to add code here to generate a thumbnail image from the video using ffmpeg
-   const videoPath = `./uploads/${video.filename}`;
-   const thumbnailPath = `./uploads/${video.filename}.jpg`;
-
-   try {
-    const process = new ffmpeg(videoPath);
-    process.then(
-     function (video) {
-      video.fnExtractFrameToJPG(thumbnailPath, function (error, files) {
-       if (!error) {
-        it.thumbnail_image = `${video.filename}.jpg`;
-       }
-      });
-     },
-     function (err) {
-      console.log("Error: " + err);
-     }
-    );
-   } catch (e) {
-    console.log(e.code);
-    console.log(e.msg);
-   }
-
-   it.user_id = user_id;
-   await it.save();
-  }
- }
-
- const updatedUser = await User.findById(user_id).populate("video").populate("images").populate("country_data");
- const intrestsResult = updatedUser.intrests.map((item) => item.trim());
-
- if (updatedUser) {
-  return giveresponse(req, 200, true, "Data updated", { ...updatedUser.toObject(), intrests: intrestsResult });
- } else {
-  return giveresponse(req, 400, false, "Data not fetched");
- }
+ const updatedUser = await User.findById({ _id: user_id }).populate("video").populate("images").populate("country_data");
+ if (updatedUser) return giveresponse(req, 200, true, "Data updated", updatedUser);
 });
 
 exports.fetchHostProfiles_one_to_one = asyncHandler(async (req, res, next) => {

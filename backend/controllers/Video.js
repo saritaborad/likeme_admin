@@ -2,20 +2,16 @@ const Video = require("../models/Video");
 const VideoReview = require("../models/VideoReview");
 const { giveresponse, asyncHandler } = require("../utils/res_help");
 const ApiFeatures = require("../utils/ApiFeatures");
-const fs = require("fs");
+const path = require("path");
+const { deleteFile } = require("../utils/commonFunc");
 
 exports.deleteVideoById = asyncHandler(async (req, res, next) => {
- const video = await Video.findById(req.body._id);
-
- if (video && video.video) {
-  const videoPath = video.video;
-  if (fs.existsSync(videoPath)) {
-   fs.unlinkSync(videoPath);
-  }
+ const video = await Video.findById({ _id: req.body._id });
+ if (video.video || video.thumbnail_image) {
+  deleteFile(video.video);
+  deleteFile(video.thumbnail_image);
  }
-
  await Video.findByIdAndDelete({ _id: req.body._id });
-
  return giveresponse(res, 200, true, "Successfully deleted video");
 });
 

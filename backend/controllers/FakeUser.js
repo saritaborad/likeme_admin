@@ -4,7 +4,7 @@ const Video = require("../models/Video");
 const Images = require("../models/Image");
 const User = require("../models/User");
 const ApiFeatures = require("../utils/ApiFeatures");
-const { generateCode } = require("../utils/commonFunc");
+const { generateCode, generateThumb } = require("../utils/commonFunc");
 
 exports.fakeUser = asyncHandler(async (req, res, next) => {
  const countries = await Country.find();
@@ -27,7 +27,10 @@ exports.addfakeUser = asyncHandler(async (req, res, next) => {
  // Save videos
  if (req.files["video"]) {
   for (const video of req.files["video"]) {
-   const it = new Video({ video: video.path, user_id: addfakeuser._id });
+   const thumbnailPath = path.join("uploads/thumbnail/" + file.filename.split(".")[0] + ".jpg");
+   const thumbName = file.filename.split(".")[0] + ".jpg";
+   generateThumb(video.path, thumbName);
+   const it = new Video({ video: video.path, user_id: addfakeuser._id, thumbnail_image: thumbnailPath });
    await it.save();
   }
  }

@@ -7,6 +7,7 @@ const ApiFeatures = require("../utils/ApiFeatures");
 const { asyncHandler, giveresponse } = require("../utils/res_help");
 const fs = require("fs");
 const { ObjectId } = require("mongodb");
+const { deleteFile } = require("../utils/commonFunc");
 
 exports.ImageById = asyncHandler(async (req, res, next) => {
  const result = await Image.find({ user_id: req.body._id });
@@ -15,19 +16,9 @@ exports.ImageById = asyncHandler(async (req, res, next) => {
 
 exports.deleteImageById = asyncHandler(async (req, res, next) => {
  const image = await Image.findById(req.body._id);
-
  if (!image) return giveresponse(res, 404, false, "Image not found");
-
- if (image.image !== null) {
-  const imagePath = path.join(__dirname, "..", image.image); // Adjust the path as needed
-
-  if (fs.existsSync(imagePath)) {
-   fs.unlinkSync(imagePath);
-  }
- }
-
+ if (image.image !== null) deleteFile(image.image);
  await Image.findByIdAndDelete({ _id: new ObjectId(req.body._id) });
-
  return giveresponse(res, 200, true, "Successfully deleted image");
 });
 

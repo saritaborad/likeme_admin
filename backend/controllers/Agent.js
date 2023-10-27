@@ -3,6 +3,7 @@ const ApiFeatures = require("../utils/ApiFeatures");
 const Agent = require("../models/Agent");
 const fs = require("fs");
 const path = require("path");
+const { deleteFile } = require("../utils/commonFunc");
 
 exports.fetchAllagent = asyncHandler(async (req, res, next) => {
  const apiFeature = new ApiFeatures(Agent.find().populate({ path: "country", select: "country_name _id" }), req.body?.options).search().sort().pagination();
@@ -21,17 +22,12 @@ exports.addAgent = asyncHandler(async (req, res) => {
 exports.editAgent = asyncHandler(async (req, res) => {
  const { name, email_id, password, phone_no, country, status, _id, images } = req.body;
  const agentsData = await Agent.findOne({ _id });
-
  if (!images) {
   await agentsData.updateOne({ name, email_id, password, phone_no, country, status });
  } else {
-  if (fs.existsSync(path.join(__dirname, "..", agentsData.images)) && agentsData.images !== null) {
-   fs.unlinkSync(path.join(__dirname, "..", agentsData.images));
-  }
-
+  deleteFile(agentsData.images);
   await agentsData.updateOne({ name, email_id, password, phone_no, country, status, images: images });
  }
-
  return giveresponse(res, 200, true, "Agent updated successfully");
 });
 
@@ -39,13 +35,8 @@ exports.deleteAgent = asyncHandler(async (req, res) => {
  const { _id } = req.body;
  const agent = await Agent.findOne({ _id });
  if (!agent) return giveresponse(res, 404, false, "Agent not found");
-
- const imagePath = path.join(__dirname, "..", agent.images);
-
- if (fs.existsSync(imagePath) && agent.images !== null) fs.unlinkSync(imagePath);
-
+ deleteFile(agent.images);
  const result = await Agent.deleteOne({ _id });
-
  if (result) return giveresponse(res, 200, true, "Successfully deleted");
 });
 

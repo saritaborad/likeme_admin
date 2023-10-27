@@ -11,16 +11,14 @@ const Report = require("../models/Report");
 const App = require("../models/App");
 const UserGainTransactionHistory = require("../models/UserGainTransactionHistory");
 const UserSpendTransactionHistory = require("../models/UserSpendTransactionHistory");
-const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const sendToken = require("../utils/jwtToken");
 const ApiFeatures = require("../utils/ApiFeatures");
 const { giveresponse, asyncHandler } = require("../utils/res_help");
 const Subscription = require("../models/Subscription");
 const { ObjectId } = require("mongodb");
 const HostLiveStreamTrack = require("../models/HostLiveStreamTrack");
-const fs = require("fs");
 const path = require("path");
+const { deleteFile } = require("../utils/commonFunc");
 
 exports.verifyToken = asyncHandler(async (req, res) => {
  const { authtoken } = req.body;
@@ -190,35 +188,20 @@ exports.delete_profile = asyncHandler(async (req, res) => {
  const images = await Images.find({ user_id });
 
  if (!user_data) return giveresponse(res, 404, false, "User not found");
-
- if (user_data.profileimages) {
-  const profileImagePath = path.join(__dirname + "/../" + user_data.profileimages);
-  if (fs.existsSync(profileImagePath)) {
-   fs.unlinkSync(profileImagePath);
-  }
- }
+ if (user_data.profileimages) deleteFile(user_data.profileimages);
 
  for (const image of images) {
-  if (image.image) {
-   const imagePath = path.join(__dirname + "/../" + image.image);
-
-   if (fs.existsSync(imagePath)) {
-    fs.unlinkSync(imagePath);
-   }
-  }
+  if (image.image) deleteFile(image.image);
  }
 
  for (const video of videos) {
-  if (video.video) {
-   const videoPath = path.join(__dirname + "/../" + video.video);
-   if (fs.existsSync(videoPath)) {
-    fs.unlinkSync(videoPath);
-   }
+  if (video.video || video.thumbnail_image) {
+   deleteFile(video.video);
+   deleteFile(video.thumbnail_image);
   }
  }
 
  await User.findOneAndDelete({ _id: user_id });
-
  return giveresponse(res, 200, true, "Profile deleted successfully");
 });
 
@@ -239,15 +222,12 @@ exports.userProfileUpdate = asyncHandler(async (req, res, next) => {
  if (email) user.email = email;
 
  if (req.file) {
-  const unlinkPath = path.join(__dirname, "/../", user?.profileimages || "");
-  if (fs.existsSync(unlinkPath) && user.profileimages !== null) fs.unlinkSync(unlinkPath);
+  deleteFile(user.profileimages);
   user.profileimages = req.file.path;
  }
-
  await user.save();
 
  const result = await User.findOne({ _id: user_id }).populate("video images country_data");
-
  if (result) return giveresponse(res, 200, true, "Data updated", result);
 });
 

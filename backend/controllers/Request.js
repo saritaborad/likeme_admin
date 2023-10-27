@@ -7,6 +7,7 @@ const { giveresponse, asyncHandler } = require("../utils/res_help");
 const ApiFeatures = require("../utils/ApiFeatures");
 const fs = require("fs");
 const path = require("path");
+const { deleteFile } = require("../utils/commonFunc");
 
 // exports.fetchHostImages = asyncHandler(async (req, res, next) => {
 //  const apiFeature = new ApiFeatures(Image.find({ user_id: req.body._id }), req.body).search().sort().pagination();
@@ -44,25 +45,17 @@ exports.RejectHost = asyncHandler(async (req, res, next) => {
  const videos_all = await Video.find({ user_id: req.body._id });
 
  for (const image of images_all) {
-  const imagePath = path.join(__dirname, "..", image.image);
-  if (fs.existsSync(imagePath) && image.image !== null) {
-   fs.unlinkSync(imagePath);
-  }
-
+  deleteFile(image.image);
   await Image.findByIdAndDelete({ _id: image._id });
  }
 
  for (const video of videos_all) {
-  const videoPath = path.join(__dirname, "..", video.video);
-  if (fs.existsSync(videoPath) && video.video !== null) {
-   fs.unlinkSync(videoPath);
-  }
-
+  deleteFile(video.video);
+  deleteFile(video.thumbnail_image);
   await Video.findByIdAndDelete({ _id: video._id });
  }
 
  const result = await User.updateOne({ _id: req.body._id }, { $set: { diamond_per_min: null, intrests: null, availabiltyHours: null, bio: null, about: null, age: null, is_host: 0, billingAddress: null } });
-
  if (result) return giveresponse(res, 200, true, "Host rejected successfully.");
 });
 

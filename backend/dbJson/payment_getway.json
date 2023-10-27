@@ -1,7 +1,0 @@
-{
- "data": [
-  { "id": "3", "payment_getway": "PhonePe" },
-  { "id": "4", "payment_getway": "GPay" },
-  { "id": "5", "payment_getway": "Paytm" }
- ]
-}

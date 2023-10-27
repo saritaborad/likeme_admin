@@ -372,7 +372,7 @@ exports.addUserIdToDB = asyncHandler(async (req, res) => {
       break;
      case "thumbnail_image":
       const thumbPath = item.thumbnail_image;
-      const newTPath = thumbPath && thumbPath != "NULL" ? "uploads/images/" + thumbPath?.substring(thumbPath.lastIndexOf("/") + 1) : null;
+      const newTPath = thumbPath && thumbPath != "NULL" ? "uploads/thumbnail/" + thumbPath?.substring(thumbPath.lastIndexOf("/") + 1) : null;
       const updatedTPath = newTPath?.replace(/\//g, "\\");
       dynamicDocument[key] = updatedTPath;
       break;
